@@ -63,45 +63,84 @@ def update_roster_ranks():
 
 # --- LOGIC: Detailed Stats (Ranked vs Scrims) ---
 def analyze_matches(matches):
-    """Calculates Wins, Kills, Deaths from a list of matches."""
+    """
+    Advanced analysis: Groups data by Agent to find patterns.
+    Returns: {
+        "wins": int, "total": int,
+        "kd": float,
+        "agents": {
+            "Jett": {"matches": 10, "wins": 6, "best_map": "Ascent"},
+            ...
+        }
+    }
+    """
     stats = {
         "wins": 0, "total": 0, 
-        "kills": 0, "deaths": 0, 
-        "best_map": "N/A"
+        "kills": 0, "deaths": 0,
+        "agents": {} # New: Stores stats per agent
     }
     
-    map_counts = {}
-
     for m in matches:
         stats['total'] += 1
         
-        # 1. K/D Stats
-        # Note: 'stats' might be missing in some error cases
+        # 1. Who did they play?
+        # Lifetime API puts agent in meta -> character -> name
+        agent = m['meta']['character']['name']
+        map_name = m['meta']['map']['name']
+        
+        # Initialize this agent if new
+        if agent not in stats['agents']:
+            stats['agents'][agent] = {
+                "matches": 0, "wins": 0, "kills": 0, "deaths": 0,
+                "maps": {} # Track map performance for this agent
+            }
+        
+        agent_stats = stats['agents'][agent]
+        agent_stats['matches'] += 1
+        agent_stats['maps'][map_name] = agent_stats['maps'].get(map_name, 0) + 1
+        
+        # 2. Combat Stats
         if 'stats' in m:
-            stats['kills'] += m['stats'].get('kills', 0)
-            stats['deaths'] += m['stats'].get('deaths', 0)
+            k = m['stats'].get('kills', 0)
+            d = m['stats'].get('deaths', 0)
+            stats['kills'] += k
+            stats['deaths'] += d
             
-            # 2. Did they win?
-            # We compare the scores. m['teams']['blue'] vs m['teams']['red']
-            my_team = m['stats']['team'].lower() # 'blue' or 'red'
-            blue_score = m['teams']['blue']
-            red_score = m['teams']['red']
-            
-            winner = "draw"
-            if blue_score > red_score: winner = "blue"
-            elif red_score > blue_score: winner = "red"
+            agent_stats['kills'] += k
+            agent_stats['deaths'] += d
+
+            # 3. Win Check
+            my_team = m['stats']['team'].lower()
+            blue = m['teams']['blue']
+            red = m['teams']['red']
+            winner = "blue" if blue > red else "red"
             
             if my_team == winner:
                 stats['wins'] += 1
+                agent_stats['wins'] += 1
 
-        # 3. Map Stats
-        map_name = m['meta']['map']['name']
-        map_counts[map_name] = map_counts.get(map_name, 0) + 1
+    # 4. Final Calculations (Best Map per Agent)
+    # We convert the raw map counts into a single "Best Map" string
+    for agent, data in stats['agents'].items():
+        if data['maps']:
+            data['best_map'] = max(data['maps'], key=data['maps'].get)
+        else:
+            data['best_map'] = "N/A"
+            
+        # Add a formatted KD for that agent
+        data['kd_ratio'] = round(data['kills'] / data['deaths'], 2) if data['deaths'] > 0 else data['kills']
+        
+        # Add Win Rate for that agent
+        data['win_rate'] = int((data['wins'] / data['matches']) * 100)
 
-    # Find Best Map
-    if map_counts:
-        stats['best_map'] = max(map_counts, key=map_counts.get)
-
+    # Convert agents dict to a sorted list (Most played first)
+    sorted_agents = sorted(
+        [{"name": k, **v} for k, v in stats['agents'].items()],
+        key=lambda x: x['matches'],
+        reverse=True
+    )
+    
+    stats['top_agents'] = sorted_agents
     return stats
 
 # --- ROUTES ---
@@ -177,3 +216,4 @@ def get_player_detail(name, tag):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
