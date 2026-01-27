@@ -10,9 +10,9 @@ API_KEY = os.environ.get("HENRIK_KEY")
 REGION = "eu"
 
 ROSTER = [
-    {"name": "Jilicuerda", "tag": "1734", "role": "Initiator", "fixed_agent": "Astra"},
+    {"name": "Jilicuerda", "tag": "1734", "role": "Initiator", "fixed_agent": "Breach"},
     {"name": "CriskXK", "tag": "PRESA", "role": "Duelist", "fixed_agent": "Jett"},
-    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo"},
+    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade"},
     {"name": "Cleezzy", "tag": "Reina", "role": "Smoker", "fixed_agent": "Viper"},
     {"name": "mi abuela mola", "tag": "2981", "role": "Sentinel", "fixed_agent": "Sova"}
 ]
@@ -188,3 +188,4 @@ def get_player_detail(name, tag):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
