@@ -1,74 +1,20 @@
-// 1. UPDATED API URL
-// We use a relative path now. This works automatically on localhost AND Render.
 const API_URL = "/api/team-history";
 
 async function fetchTeamData() {
+    const container = document.getElementById('roster-container');
+    container.innerHTML = "<p class='loading-text'>Loading Team Data...</p>";
+
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
         
-        // 1. Get the Roster and Matches from backend
-        const roster = data.roster;
-        const matches = data.matches;
-
-        // 2. Calculate stats for each player
-        const processedRoster = roster.map(player => {
-            const playerStats = calculatePlayerStats(player, matches);
-            return { ...player, ...playerStats };
-        });
-
-        // 3. Render the cards
-        renderCards(processedRoster);
+        // The Python backend now sends "roster" with the stats already calculated!
+        renderCards(data.roster);
 
     } catch (error) {
         console.error("Error fetching data:", error);
-        document.getElementById('roster-container').innerHTML = "<p>Error loading data.</p>";
+        container.innerHTML = "<p>Error loading data. Check console for details.</p>";
     }
-}
-
-function calculatePlayerStats(player, matches) {
-    let agentCounts = {};
-    let currentRank = "Unranked";
-    
-    // Loop through every match to find this player's stats
-    matches.forEach(match => {
-        // Find the player in this specific match
-        const pData = match.players.all_players.find(
-            p => p.name.toLowerCase() === player.name.toLowerCase() && 
-                 p.tag === player.tag
-        );
-
-        if (pData) {
-            // Count the Agent
-            const agentName = pData.character;
-            agentCounts[agentName] = (agentCounts[agentName] || 0) + 1;
-
-            // Grab their most recent Rank (Tier)
-            currentRank = pData.currenttier_patched; 
-        }
-    });
-
-    // Find the agent with the highest count
-    let mostPlayedAgent = "Unknown";
-    let maxCount = 0;
-    
-    for (const [agent, count] of Object.entries(agentCounts)) {
-        if (count > maxCount) {
-            maxCount = count;
-            mostPlayedAgent = agent;
-        }
-    }
-
-    // Fallbacks if they haven't played any games recently
-    if (mostPlayedAgent === "Unknown") {
-        if (player.role === "Duelist") mostPlayedAgent = "Jett";
-        else if (player.role === "Initiator") mostPlayedAgent = "Sova";
-        else if (player.role === "Smoker") mostPlayedAgent = "Omen";
-        else if (player.role === "Sentinel") mostPlayedAgent = "Killjoy";
-        else mostPlayedAgent = "Jett"; // Default fallback
-    }
-
-    return { mostPlayedAgent, currentRank };
 }
 
 function renderCards(players) {
@@ -76,21 +22,33 @@ function renderCards(players) {
     container.innerHTML = ""; // Clear loading text
 
     players.forEach(player => {
-        // 2. UPDATED IMAGE PATH
-        // We now point to the /static/ folder where Flask serves files
-        const agentImageFile = `${player.mostPlayedAgent}_Artwork-large.webp`;
+        // Use the calculated stats from Python
+        // Ensure we capitalize the first letter for the file name (e.g. "jett" -> "Jett")
+        let agentName = player.main_agent || "Unknown";
         
+        // Fix capitalization for image file (Jett_Artwork...)
+        if (agentName !== "Unknown") {
+            agentName = agentName.charAt(0).toUpperCase() + agentName.slice(1);
+        } else {
+            // Fallback if API failed
+            agentName = "Jett"; 
+        }
+
+        const agentImageFile = `${agentName}_Artwork-large.webp`;
+
         const cardHTML = `
             <div class="card">
                 <div class="card-image">
-                    <img src="/static/assets/agents/${agentImageFile}" alt="${player.mostPlayedAgent}">
+                    <img src="/static/assets/agents/${agentImageFile}" 
+                         alt="${agentName}"
+                         onerror="this.onerror=null; this.src='/static/assets/agents/Jett_Artwork-large.webp';"> 
                 </div>
                 <div class="card-info">
                     <h2>${player.name}</h2>
                     <span class="role">${player.role}</span>
                     <div class="stats">
-                        <span class="rank">${player.currentRank || "Unranked"}</span>
-                        <span class="agent-name">Main: ${player.mostPlayedAgent}</span>
+                        <span class="rank">${player.rank}</span>
+                        <span class="agent-name">Main: ${agentName}</span>
                     </div>
                 </div>
             </div>
@@ -100,5 +58,4 @@ function renderCards(players) {
     });
 }
 
-// Run the function when page loads
 fetchTeamData();
