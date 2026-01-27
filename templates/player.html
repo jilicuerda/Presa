@@ -3,158 +3,185 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Player Stats</title>
+    <title>Player Detailed Stats Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
-        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ec131e", "background-dark": "#180e0f", "surface-dark": "#221011", "surface-card": "#2d1517" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ec131e", "background-light": "#f8f6f6", "background-dark": "#180e0f", "surface-dark": "#221011", "surface-card": "#2d1517", "accent-gray": "#3a1e20" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" }, backgroundImage: { 'grid-pattern': "linear-gradient(to right, #2d1517 1px, transparent 1px), linear-gradient(to bottom, #2d1517 1px, transparent 1px)", } }, }, }
     </script>
-    <style> .tech-border { border: 1px solid #482325; position: relative; } </style>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #180e0f; }
+        ::-webkit-scrollbar-thumb { background: #482325; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ec131e; }
+        .glow-text { text-shadow: 0 0 10px rgba(236, 19, 30, 0.5); }
+        .tech-border { position: relative; }
+        .tech-border::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid #ec131e; border-left: 2px solid #ec131e; }
+        .tech-border::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid #ec131e; border-right: 2px solid #ec131e; }
+        .agent-portrait { mask-image: linear-gradient(to bottom, black 60%, transparent 100%); }
+        .radar-chart-polygon { fill: rgba(236, 19, 30, 0.2); stroke: #ec131e; stroke-width: 2; }
+    </style>
 </head>
-<body class="bg-background-dark text-white font-display min-h-screen flex flex-col">
-
-<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#482325] bg-background-dark/95 px-6 py-3">
-    <div class="flex items-center gap-4">
-        <a href="/" class="flex items-center gap-2 text-white hover:text-primary transition-colors">
-            <span class="material-symbols-outlined">arrow_back</span> Back to Roster
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-primary selection:text-white">
+<nav class="sticky top-0 z-50 flex items-center justify-between border-b border-[#482325] bg-background-dark/95 backdrop-blur-md px-6 lg:px-10 py-3">
+    <div class="flex items-center gap-6">
+        <a href="/" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
+            <span class="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+            <span class="text-sm font-bold uppercase tracking-wider">Back to Roster</span>
         </a>
+        <div class="h-6 w-px bg-[#482325]"></div>
+        <div class="flex items-center gap-3">
+            <div class="size-8 text-primary flex items-center justify-center">
+                <img src="/static/assets/presa.png" alt="Logo" class="h-8 w-8 object-contain">
+            </div>
+            <h2 class="text-white text-lg font-bold uppercase tracking-tighter">TEAM PRESA</h2>
+        </div>
     </div>
-    <img src="/static/assets/presa.png" alt="Team Presa" class="h-10 w-10 object-contain">
-</header>
+</nav>
 
-<main class="flex-1 p-6">
-    <div class="max-w-[1920px] mx-auto h-full flex flex-col lg:flex-row gap-6">
-        
-        <aside class="lg:w-[380px] bg-surface-dark rounded-xl border border-[#482325] p-6 relative overflow-hidden h-fit">
-            <div class="relative z-10">
-                <div class="mb-4">
-                    <h1 id="p-name" class="text-5xl lg:text-6xl font-bold text-white uppercase tracking-tighter leading-none mb-1">LOADING</h1>
-                    <p id="p-tag" class="text-gray-400 font-mono text-sm uppercase">#TAG</p>
+<main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
+<div class="max-w-[1600px] mx-auto space-y-6">
+    <header class="relative rounded-xl overflow-hidden border border-[#482325] bg-surface-dark group h-[300px]">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/90 to-transparent"></div>
+            <img id="p-bg-img" alt="Agent" class="absolute right-0 top-0 h-full w-auto object-cover object-top opacity-80 agent-portrait transition-transform duration-700 group-hover:scale-105" src=""/>
+        </div>
+        <div class="relative z-10 h-full flex flex-col justify-between p-8">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Active Player</span>
+                    <span id="p-tag" class="text-gray-400 text-xs font-mono">#TAG</span>
+                </div>
+                <h1 id="p-name" class="text-6xl lg:text-7xl font-bold text-white uppercase tracking-tighter leading-none mb-1">LOADING...</h1>
+                <div class="flex items-center gap-6 mt-4 text-sm font-bold uppercase tracking-widest text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-600">Main Agent</span>
+                        <span id="p-agent" class="text-white">...</span>
+                    </div>
+                    <div class="w-1 h-1 bg-gray-600 rounded-full"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-600">Region</span>
+                        <span class="text-white">EU</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-end gap-1 mt-8">
+                <button class="px-6 py-3 bg-primary text-white font-bold uppercase text-sm tracking-wider rounded-t-lg border-t border-x border-primary relative top-[1px]">Overview</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold uppercase tracking-tight flex items-center gap-2">
+                        <span class="w-1 h-5 bg-primary block"></span>
+                        Performance Stats
+                    </h3>
+                    <div class="flex gap-2 bg-surface-card p-1 rounded-lg border border-[#482325]">
+                        <button onclick="renderStats('ranked')" id="btn-ranked" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm">Ranked</button>
+                        <button onclick="renderStats('scrims')" id="btn-scrims" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Scrims</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
+                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">K/D Ratio</div>
+                        <div id="stat-kd" class="text-4xl font-bold text-white mb-2">0.00</div>
+                    </div>
+                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
+                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Win Rate</div>
+                        <div id="stat-wr" class="text-4xl font-bold text-primary mb-2">0%</div>
+                    </div>
+                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
+                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Matches</div>
+                        <div id="stat-matches" class="text-4xl font-bold text-white mb-2">0</div>
+                    </div>
+                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
+                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Best Map</div>
+                        <div id="stat-best-map" class="text-xl font-bold text-white mb-2 mt-2 truncate">...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-surface-dark border border-[#482325] rounded-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h4 class="text-white text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-gray-500 text-lg">map</span>
+                        Map Breakdown
+                    </h4>
+                </div>
+                <div id="map-list" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div class="text-gray-500 text-sm">Loading map data...</div>
+                </div>
+            </section>
+
+            <section>
+                <h4 class="text-white text-sm font-bold uppercase tracking-wider mb-3 pl-1">Top Agents</h4>
+                <div id="agent-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    </div>
+            </section>
+        </div>
+
+        <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+            <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 h-full flex flex-col tech-border">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">dataset</span>
+                        Vs Enemy Comps
+                    </h3>
+                    <div class="px-2 py-0.5 rounded bg-primary/20 text-primary text-[10px] font-bold uppercase border border-primary/20">VS META</div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4 mt-6 border-t border-white/10 pt-6">
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Main Agent</p>
-                        <span id="p-agent" class="text-xl font-bold">...</span>
+                <div class="flex-1 flex flex-col items-center justify-center relative min-h-[250px]">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <svg class="w-64 h-64" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" fill="none" r="45" stroke="#2d1517" stroke-width="1"></circle>
+                            <circle cx="50" cy="50" fill="none" r="30" stroke="#2d1517" stroke-width="1"></circle>
+                            <line stroke="#2d1517" stroke-width="1" x1="50" x2="50" y1="5" y2="95"></line>
+                            <line stroke="#2d1517" stroke-width="1" x1="5" x2="95" y1="50" y2="50"></line>
+                            <polygon class="radar-chart-polygon" points="50,15 80,40 70,80 30,80 20,40"></polygon>
+                        </svg>
                     </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Region</p>
-                        <span class="text-xl font-bold">EU</span>
-                    </div>
-                </div>
-            </div>
-            <div class="absolute inset-0 z-0 opacity-20">
-                <img id="p-bg-img" src="" class="w-full h-full object-cover">
-            </div>
-        </aside>
-
-        <section class="flex-1 flex flex-col gap-4">
-            
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-xl font-bold uppercase flex items-center gap-2">
-                    <span class="w-1 h-6 bg-primary block"></span> Performance
-                </h3>
-                <div class="flex gap-2">
-                    <button onclick="renderStats('ranked')" id="btn-ranked" class="px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded">Ranked</button>
-                    <button onclick="renderStats('scrims')" id="btn-scrims" class="px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded">Scrims</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 text-center">
-                    <h4 class="text-gray-400 text-sm font-bold uppercase mb-2">K/D Ratio</h4>
-                    <div id="stat-kd" class="text-5xl font-bold text-white">0.00</div>
-                </div>
-                <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 text-center">
-                    <h4 class="text-gray-400 text-sm font-bold uppercase mb-2">Win Rate</h4>
-                    <div id="stat-wr" class="text-5xl font-bold text-primary">0%</div>
-                </div>
-                <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 text-center">
-                    <h4 class="text-gray-400 text-sm font-bold uppercase mb-2">Best Map</h4>
-                    <div id="stat-map" class="text-3xl font-bold text-white">-</div>
-                </div>
-            </div>
-
-            <div class="flex flex-col lg:flex-row gap-4 mt-4">
-                <div class="flex-1 bg-surface-dark border border-[#482325] rounded-xl p-6 relative">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-xl">map</span>
-                            Map Win Rate
-                        </h3>
-                    </div>
-                    <div id="map-list" class="space-y-5 overflow-y-auto max-h-[400px] pr-2">
-                        <div class="text-gray-500 text-sm">Loading maps...</div>
+                    <div class="absolute w-full h-full">
+                        <span class="absolute top-0 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">AGGRO</span>
+                        <span class="absolute top-1/3 right-2 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">SENTINEL</span>
+                        <span class="absolute bottom-1/4 right-4 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">DOUBLE SMOKE</span>
+                        <span class="absolute bottom-1/4 left-4 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">INFO</span>
+                        <span class="absolute top-1/3 left-2 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">RUSH</span>
                     </div>
                 </div>
 
-                <div class="lg:w-[400px] bg-surface-dark border border-[#482325] rounded-xl p-6 relative">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-xl">dataset</span>
-                            Comp Matchup
-                        </h3>
-                        <div class="px-2 py-0.5 rounded bg-primary/20 text-primary text-[10px] font-bold uppercase border border-primary/20">Vs Meta</div>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="bg-background-dark p-3 rounded border border-white/5 group cursor-default">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-gray-300 uppercase">Double Initiator</span>
-                                <span class="text-primary font-mono font-bold text-sm">1.52 KD</span>
-                            </div>
-                            <div class="flex gap-1 mb-1 opacity-80">
-                                <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
-                                <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
-                                <div class="h-1 flex-1 bg-gray-700 rounded-sm"></div>
-                            </div>
-                            <div class="text-[10px] text-gray-500">Very effective against info heavy comps.</div>
+                <div class="space-y-3 mt-4">
+                    <div class="bg-background-dark p-3 rounded border border-white/5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">Double Initiator</span>
+                            <span class="text-primary font-mono font-bold text-sm">1.52 KD</span>
                         </div>
-                        <div class="bg-background-dark p-3 rounded border border-white/5 group cursor-default">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-gray-300 uppercase">Triple Duelist</span>
-                                <span class="text-white font-mono font-bold text-sm">1.10 KD</span>
-                            </div>
-                            <div class="flex gap-1 mb-1 opacity-80">
-                                <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
-                                <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
-                                <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
-                            </div>
-                            <div class="text-[10px] text-gray-500">Standard performance vs aggression.</div>
+                        <div class="flex gap-1 mb-1 opacity-80">
+                            <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
+                            <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
+                            <div class="h-1 flex-1 bg-gray-700 rounded-sm"></div>
                         </div>
-                        <div class="bg-background-dark p-3 rounded border border-white/5 group cursor-default">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-gray-300 uppercase">Double Controller</span>
-                                <span class="text-red-400 font-mono font-bold text-sm">0.85 KD</span>
-                            </div>
-                            <div class="flex gap-1 mb-1 opacity-80">
-                                <div class="h-1 flex-1 bg-purple-500 rounded-sm"></div>
-                                <div class="h-1 flex-1 bg-purple-500 rounded-sm"></div>
-                                <div class="h-1 flex-1 bg-gray-700 rounded-sm"></div>
-                            </div>
-                            <div class="text-[10px] text-gray-500">Struggles breaking vision denial.</div>
+                    </div>
+                    <div class="bg-background-dark p-3 rounded border border-white/5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-gray-300 uppercase">Triple Duelist</span>
+                            <span class="text-white font-mono font-bold text-sm">1.10 KD</span>
+                        </div>
+                        <div class="flex gap-1 mb-1 opacity-80">
+                            <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
+                            <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
+                            <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 mt-4 relative overflow-hidden">
-                <div class="flex items-center justify-between mb-6 relative z-10">
-                    <h3 class="text-xl font-bold uppercase flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary">group</span> Agent Mastery
-                    </h3>
-                    <span class="text-xs text-gray-500 uppercase font-mono">Based on selected mode</span>
-                </div>
-                <div id="agent-list" class="flex flex-col gap-3 relative z-10">
-                    <div class="text-gray-500 text-center py-4">Loading Data...</div>
-                </div>
-                <div class="absolute top-0 right-0 p-10 opacity-5">
-                    <span class="material-symbols-outlined text-9xl">fingerprint</span>
-                </div>
-            </div>
-
-        </section>
+        </div>
     </div>
+</div>
 </main>
 
 <script>
@@ -164,6 +191,16 @@
     const fixedAgent = params.get("agent"); 
     
     let globalData = null;
+
+    // Map Images (Use generic Unsplash images for now to match style)
+    const MAP_IMAGES = {
+        "Bind": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop",
+        "Haven": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop",
+        "Ascent": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=400&auto=format&fit=crop",
+        "Split": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop",
+        "Lotus": "https://images.unsplash.com/photo-1518544806352-a2221fa063da?q=80&w=400&auto=format&fit=crop",
+        "Pearl": "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=400&auto=format&fit=crop"
+    };
 
     async function loadPlayer() {
         if(!name || !tag) return;
@@ -187,108 +224,74 @@
     }
 
     function renderStats(mode) {
-        const activeClass = "px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded";
-        const inactiveClass = "px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded";
-        document.getElementById('btn-ranked').className = mode === 'ranked' ? activeClass : inactiveClass;
-        document.getElementById('btn-scrims').className = mode === 'scrims' ? activeClass : inactiveClass;
+        // Toggle Buttons
+        document.getElementById('btn-ranked').className = mode === 'ranked' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
+        document.getElementById('btn-scrims').className = mode === 'scrims' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
 
         if (!globalData) return;
         const stats = globalData[mode];
         
-        // 1. K/D
+        // 1. Basic Stats
         const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
         document.getElementById('stat-kd').innerText = kd;
-
-        // 2. Win Rate
         const wr = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
         document.getElementById('stat-wr').innerText = wr;
+        document.getElementById('stat-matches').innerText = stats.total;
+        document.getElementById('stat-best-map').innerText = stats.best_map || "N/A";
 
-        // 3. Best Map
-        document.getElementById('stat-map').innerText = stats.best_map || "N/A";
-
-        // 4. MAP WIN RATES (NEW)
+        // 2. Map Breakdown (DYNAMIC)
         const mapContainer = document.getElementById('map-list');
         mapContainer.innerHTML = "";
         
         if (stats.top_maps && stats.top_maps.length > 0) {
             stats.top_maps.forEach(map => {
-                // Color logic: Red for high, white for mid, gray for low
-                let barColor = "bg-gray-400";
-                let percentColor = "text-gray-400";
-                
-                if (map.win_rate >= 60) {
-                    barColor = "bg-primary";
-                    percentColor = "text-primary";
-                } else if (map.win_rate >= 50) {
-                    barColor = "bg-white";
-                    percentColor = "text-white";
-                }
-
-                const mapHTML = `
-                <div>
-                    <div class="flex justify-between text-xs font-bold uppercase mb-1">
-                        <span>${map.name}</span>
-                        <span class="${percentColor}">${map.win_rate}%</span>
-                    </div>
-                    <div class="w-full bg-[#180e0f] rounded-full h-2 overflow-hidden border border-white/5">
-                        <div class="${barColor} h-2 rounded-full" style="width: ${map.win_rate}%"></div>
-                    </div>
-                    <div class="text-[10px] text-gray-500 mt-1 text-right">${map.matches} Matches</div>
-                </div>`;
-                mapContainer.innerHTML += mapHTML;
-            });
-        } else {
-            mapContainer.innerHTML = `<div class="text-gray-500 text-xs text-center">No map data available.</div>`;
-        }
-
-        // 5. AGENT MASTERY
-        const list = document.getElementById('agent-list');
-        list.innerHTML = ""; 
-
-        if (stats.top_agents && stats.top_agents.length > 0) {
-            stats.top_agents.slice(0, 3).forEach(agent => {
-                let gunIcon = "Vandal";
-                if (["Jett", "Chamber"].includes(agent.name)) gunIcon = "Operator";
-                else if (["Viper", "Omen", "Astra", "Cypher"].includes(agent.name)) gunIcon = "Phantom";
-                else if (["Breach", "Judge"].includes(agent.name)) gunIcon = "Odin";
-
-                let safeImg = agent.name.replace("/", "");
-                safeImg = safeImg.charAt(0).toUpperCase() + safeImg.slice(1);
+                let barColor = map.win_rate >= 50 ? "bg-primary" : "bg-white";
+                let percentColor = map.win_rate >= 50 ? "text-primary" : "text-white";
+                let bgImage = MAP_IMAGES[map.name] || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop";
 
                 const html = `
-                <div class="flex items-center justify-between p-4 bg-background-dark/50 border border-white/5 rounded-lg hover:border-primary/30 transition-colors">
-                    <div class="flex items-center gap-4">
-                        <div class="size-12 rounded-full overflow-hidden border border-[#482325]">
-                            <img src="/static/assets/agents/${safeImg}_Artwork-large.webp" 
-                                 class="w-full h-full object-cover scale-125"
-                                 onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'">
+                <div class="flex items-center gap-4 group">
+                    <div class="w-16 h-10 bg-gray-800 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-widest bg-cover bg-center grayscale group-hover:grayscale-0 transition-all" style="background-image: url('${bgImage}')">
+                        <span class="bg-black/60 px-1 rounded backdrop-blur-sm">${map.name}</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-bold ${percentColor}">${map.win_rate}% Win</span>
+                            <span class="text-gray-400 font-mono">${map.kd} KD</span>
                         </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-white font-bold uppercase text-lg leading-none">${agent.name}</h4>
-                                <span class="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-bold">${agent.matches} Games</span>
-                            </div>
-                            <div class="text-gray-500 text-xs mt-1 font-mono uppercase">
-                                Best Map: <span class="text-white font-bold">${agent.best_map}</span>
-                            </div>
+                        <div class="h-2 w-full bg-[#180e0f] rounded-full overflow-hidden flex">
+                            <div class="${barColor} h-full" style="width: ${map.win_rate}%"></div>
+                            <div class="bg-gray-800 h-full" style="width: ${100 - map.win_rate}%"></div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-6 text-right">
-                        <div>
-                            <div class="text-[10px] text-gray-500 uppercase font-bold">Win Rate</div>
-                            <div class="text-xl font-bold ${agent.win_rate >= 50 ? 'text-green-400' : 'text-red-400'}">${agent.win_rate}%</div>
-                        </div>
-                        <div>
-                             <div class="text-[10px] text-gray-500 uppercase font-bold">Pref. Gun</div>
-                             <div class="text-sm font-bold text-white">${gunIcon}</div>
-                        </div>
-                    </div>
-                </div>
-                `;
-                list.innerHTML += html;
+                </div>`;
+                mapContainer.innerHTML += html;
             });
         } else {
-            list.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">No agent data found for ${mode} mode.</div>`;
+            mapContainer.innerHTML = `<div class="text-gray-500 text-xs">No map data found.</div>`;
+        }
+
+        // 3. Top Agents (DYNAMIC)
+        const agentContainer = document.getElementById('agent-list');
+        agentContainer.innerHTML = "";
+        
+        if (stats.top_agents && stats.top_agents.length > 0) {
+            stats.top_agents.slice(0, 3).forEach(agent => {
+                const html = `
+                <div class="bg-surface-dark border border-[#482325] p-4 rounded-xl flex items-center gap-4 hover:bg-surface-card transition-colors">
+                    <div class="size-12 rounded-full bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center font-bold text-xl text-primary">
+                        ${agent.name[0]}
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-lg leading-none">${agent.name}</h5>
+                        <div class="flex gap-3 mt-1 text-xs text-gray-400 font-mono">
+                            <span>${agent.matches} Games</span>
+                            <span class="${agent.win_rate >= 50 ? 'text-primary' : 'text-gray-500'}">${agent.win_rate}% Win</span>
+                        </div>
+                    </div>
+                </div>`;
+                agentContainer.innerHTML += html;
+            });
         }
     }
 
