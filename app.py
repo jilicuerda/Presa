@@ -42,7 +42,7 @@ def update_roster_ranks():
                 data = r.json().get('data', {}).get('current_data', {})
                 rank = data.get('currenttierpatched')
                 if rank: stats['rank'] = rank
-            time.sleep(1) 
+            time.sleep(0.5) 
         except Exception as e:
             print(f"❌ Error {player['name']}: {e}")
         updated_roster.append(stats)
@@ -50,7 +50,7 @@ def update_roster_ranks():
 
 def analyze_matches(matches):
     """
-    Groups data by Agent AND Maps to find patterns.
+    Groups data by Agent AND Maps.
     """
     stats = {
         "wins": 0, "total": 0, 
@@ -61,7 +61,7 @@ def analyze_matches(matches):
     }
     
     for m in matches:
-        # Safety Checks for missing data
+        # SAFETY CHECKS
         if 'meta' not in m or 'stats' not in m: continue
         if not m['meta'].get('character') or not m['meta']['character'].get('name'): continue
         if not m['meta'].get('map') or not m['meta']['map'].get('name'): continue
@@ -69,10 +69,9 @@ def analyze_matches(matches):
 
         stats['total'] += 1
         
-        # 1. Data Extraction
+        # 1. Data
         agent = m['meta']['character']['name']
         map_name = m['meta']['map']['name']
-        
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
         stats['kills'] += k
@@ -101,34 +100,22 @@ def analyze_matches(matches):
         stats['maps'][map_name]['kills'] += k
         stats['maps'][map_name]['deaths'] += d
 
-    # Final Calculations: Maps
+    # Final Calcs
     sorted_maps = []
     for m_name, m_data in stats['maps'].items():
         wr = int((m_data['wins'] / m_data['matches']) * 100) if m_data['matches'] > 0 else 0
         kd = round(m_data['kills'] / m_data['deaths'], 2) if m_data['deaths'] > 0 else m_data['kills']
-        sorted_maps.append({
-            "name": m_name,
-            "matches": m_data['matches'],
-            "win_rate": wr,
-            "kd": kd
-        })
-    # Sort maps by number of matches played
+        sorted_maps.append({"name": m_name, "matches": m_data['matches'], "win_rate": wr, "kd": kd})
+    
     stats['top_maps'] = sorted(sorted_maps, key=lambda x: x['matches'], reverse=True)
+    if stats['top_maps']: stats['best_map'] = stats['top_maps'][0]['name']
 
-    if stats['top_maps']:
-        stats['best_map'] = stats['top_maps'][0]['name']
-
-    # Final Calculations: Agents
     sorted_agents = []
     for a_name, a_data in stats['agents'].items():
         wr = int((a_data['wins'] / a_data['matches']) * 100) if a_data['matches'] > 0 else 0
-        sorted_agents.append({
-            "name": a_name,
-            "matches": a_data['matches'],
-            "win_rate": wr
-        })
-    stats['top_agents'] = sorted(sorted_agents, key=lambda x: x['matches'], reverse=True)
+        sorted_agents.append({"name": a_name, "matches": a_data['matches'], "win_rate": wr})
     
+    stats['top_agents'] = sorted(sorted_agents, key=lambda x: x['matches'], reverse=True)
     return stats
 
 @app.route('/')
@@ -153,14 +140,16 @@ def get_roster_history():
 def get_player_detail(name, tag):
     p_key = f"{name}#{tag}"
     current_time = time.time()
+    
+    # Check Cache (10 mins)
     if p_key in cache["player_details"] and (current_time - cache["player_details"][p_key]['time'] < 600):
         return jsonify(cache["player_details"][p_key]['data'])
 
     safe_name = urllib.parse.quote(name)
     safe_tag = urllib.parse.quote(tag)
     
-    # Fetch 50 Matches for deep stats
-    url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=50"
+    # Increased size to 60 to find more scrims
+    url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=60"
     r = requests.get(url, headers=get_headers())
     
     ranked_matches = []
@@ -168,20 +157,31 @@ def get_player_detail(name, tag):
     
     if r.status_code == 200:
         all_data = r.json().get('data', [])
+        print(f"🔍 DEBUG: Found {len(all_data)} matches for {name}")
+        
         for m in all_data:
-            mode = m['meta']['mode']
-            if mode == 'Competitive':
+            mode = m['meta']['mode'].lower() # Case insensitive
+            
+            # FILTER 1: Ranked
+            if mode == 'competitive':
                 ranked_matches.append(m)
-            elif mode == 'Custom Game':
+            
+            # FILTER 2: Scrims (Custom Game + >13 Rounds)
+            elif 'custom' in mode:
                 blue = m['teams']['blue']
                 red = m['teams']['red']
                 if (blue + red) >= 13: 
                     scrim_matches.append(m)
+                    
+        print(f"📊 DEBUG: {len(ranked_matches)} Ranked | {len(scrim_matches)} Scrims")
+    else:
+        print(f"❌ API Error {r.status_code}: {r.text}")
 
     data = {
         "ranked": analyze_matches(ranked_matches),
         "scrims": analyze_matches(scrim_matches)
     }
+    
     cache["player_details"][p_key] = {"time": current_time, "data": data}
     return jsonify(data)
 
