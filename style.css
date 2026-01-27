@@ -1,0 +1,88 @@
+body {
+    background-color: #0f1923; /* Valorant Dark Blue */
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.team-header h1 {
+    text-align: center;
+    color: #ff4655; /* Valorant Red */
+    font-size: 3rem;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+}
+
+.roster-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.card {
+    background: #1f2731;
+    border: 1px solid #333;
+    width: 250px;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: #ff4655;
+}
+
+/* Image container */
+.card-image {
+    height: 250px;
+    width: 100%;
+    background: #2a333f;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image covers the area nicely */
+    object-position: top center;
+}
+
+.card-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.card-info h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+}
+
+.role {
+    display: block;
+    color: #999;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    background: #0f1923;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.rank {
+    color: #ff4655;
+}

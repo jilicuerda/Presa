@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tech-Grid Roster Reveal</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec131e",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221011",
+                        "surface-dark": "#2d1517", 
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    animation: {
+                        'scroll': 'scroll 20s linear infinite',
+                    },
+                    keyframes: {
+                        scroll: {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for tech feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #221011;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #482325;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ec131e;
+        }
+        
+        /* Hide scrollbar for ticker */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden min-h-screen flex flex-col">
+<!-- Navbar -->
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-[#482325] bg-background-dark/95 backdrop-blur-sm px-6 lg:px-10 py-3">
+<div class="flex items-center gap-4 text-white">
+<div class="size-8 text-primary">
+<span class="material-symbols-outlined text-3xl">sports_esports</span>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em] uppercase">TEAM VALORANT</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+<div class="flex items-center gap-9">
+<a class="text-white/70 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">ROSTER</a>
+<a class="text-white/70 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">SCHEDULE</a>
+<a class="text-white/70 hover:text-white text-sm font-medium leading-normal transition-colors" href="#">STATS</a>
+</div>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary hover:bg-red-700 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] uppercase group">
+<span class="truncate mr-2">Join the Roster</span>
+<span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="md:hidden text-white">
+<span class="material-symbols-outlined">menu</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative">
+<!-- Header Section -->
+<div class="px-6 lg:px-40 pt-8 pb-4">
+<div class="flex flex-col md:flex-row justify-between items-end border-b border-[#482325] pb-4">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border border-primary/20">Live Reveal</span>
+<span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Season 24</span>
+</div>
+<h1 class="text-white text-4xl lg:text-5xl font-bold leading-none uppercase tracking-tighter">Active Roster</h1>
+</div>
+<div class="flex gap-2 text-[#ec131e] mt-4 md:mt-0">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="material-symbols-outlined opacity-50">view_list</span>
+</div>
+</div>
+</div>
+<!-- Tech Grid Roster -->
+<div class="flex-1 px-6 lg:px-10 pb-16 flex flex-col lg:flex-row gap-2 h-auto lg:h-[650px] w-full max-w-[1600px] mx-auto">
+<!-- Player 1: VIPERA -->
+<div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
+<!-- Background Image -->
+<div class="absolute inset-0 z-0">
+<img alt="Intense esports player portrait looking focused under red lighting" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" data-alt="Intense esports player portrait looking focused under red lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIWlri-Q5U773OK9PkkNNtuIL6DQiefhJ_dS9NoWBnnUcm1ZGHTMyf_IjKyddlolQAwQI9J235qLQPg49mWG4ThHVrjlrGcxInwHFcP276aluPRAgkHDr3VDEbsKA_Rh2_RVq1gZe7P2-kzvTvAR0cR7fFXzjzxoKyMiPBu-xP-3uEjSgs5Vb-Nw76l9iVWUzuU4BJ0Gl0alufCEuxEdkrptHy8FDxvtqSK3CqnqaJPOfKgQq5b4V1a_E2xJBQAud8PKW_OVbz5A7M"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
+</div>
+<!-- Collapsed Identifier (Bottom for Mobile, Vertical Side for Desktop) -->
+<div class="absolute bottom-0 left-0 w-full p-6 z-10 transition-all duration-500 lg:group-hover:opacity-0 lg:group-hover:translate-y-4">
+<div class="flex items-center gap-2 text-primary mb-1">
+<span class="material-symbols-outlined text-lg">swords</span>
+<span class="text-xs font-bold tracking-widest uppercase">Duelist</span>
+</div>
+<h2 class="text-4xl font-bold text-white uppercase tracking-tighter">Vipera</h2>
+</div>
+<!-- Expanded Content (Visible on Hover) -->
+<div class="relative z-20 flex flex-col h-full opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none lg:group-hover:pointer-events-auto p-6 lg:p-8">
+<!-- Top Info -->
+<div class="flex justify-between items-start mb-auto">
+<div class="flex flex-col">
+<h2 class="text-5xl font-bold text-white uppercase tracking-tighter mb-1">Vipera</h2>
+<span class="text-primary font-mono text-sm tracking-widest uppercase">Entry Fragger</span>
+</div>
+<div class="bg-primary size-12 rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">swords</span>
+</div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 gap-3 mb-6">
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">K/D Ratio</p>
+<p class="text-white text-2xl font-bold font-mono">1.42</p>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">Headshot %</p>
+<p class="text-white text-2xl font-bold font-mono text-primary">35%</p>
+</div>
+</div>
+<!-- Timeline/Info -->
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
+<div class="flex items-center gap-3 text-sm text-gray-300 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">flag</span>
+<span>Previous: <strong class="text-white">Cloud9</strong></span>
+</div>
+<div class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">trophy</span>
+<span>Masters MVP</span>
+</div>
+</div>
+<!-- Watch Clip Button -->
+<button class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
+<span class="material-symbols-outlined">play_circle</span>
+                        Watch Highlights
+                    </button>
+</div>
+</div>
+<!-- Player 2: NEXUS -->
+<div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
+<div class="absolute inset-0 z-0">
+<img alt="Gamer wearing headphones looking at screen with intensity" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" data-alt="Gamer wearing headphones looking at screen with intensity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeMerC_iaSy5aDdjlXnJgQXl-OlUNXgSSdgv1jvmlqk86bH-cJebMAgJ4zklNPHqxwh1qs0Occx7rElJ04E91DSlvynayFnUzRick9fF_BqBvy3PyG5tkjqyMaV6kuN1jobBsAoqyVjndIlJncXpaHgzNDi_V42-kC2R0YvIl6ulKHugVunrxjoYto-5XnEE2HF6ITiKY5j9Y5nVttp3lf3sQvHl4pD3YHYCBldf_9j-9b7SvHlhUedjZ0Hm_y3lTaViXpS0Loc-fJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-6 z-10 transition-all duration-500 lg:group-hover:opacity-0 lg:group-hover:translate-y-4">
+<div class="flex items-center gap-2 text-primary mb-1">
+<span class="material-symbols-outlined text-lg">smoke_free</span>
+<span class="text-xs font-bold tracking-widest uppercase">Controller</span>
+</div>
+<h2 class="text-4xl font-bold text-white uppercase tracking-tighter">Nexus</h2>
+</div>
+<div class="relative z-20 flex flex-col h-full opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none lg:group-hover:pointer-events-auto p-6 lg:p-8">
+<div class="flex justify-between items-start mb-auto">
+<div class="flex flex-col">
+<h2 class="text-5xl font-bold text-white uppercase tracking-tighter mb-1">Nexus</h2>
+<span class="text-primary font-mono text-sm tracking-widest uppercase">IGL / Brains</span>
+</div>
+<div class="bg-primary size-12 rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">smoke_free</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">Assists/Rnd</p>
+<p class="text-white text-2xl font-bold font-mono">0.85</p>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">KAST</p>
+<p class="text-white text-2xl font-bold font-mono text-primary">78%</p>
+</div>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
+<div class="flex items-center gap-3 text-sm text-gray-300 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">flag</span>
+<span>Previous: <strong class="text-white">Sentinels</strong></span>
+</div>
+<div class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">psychology</span>
+<span>Tactical Caller</span>
+</div>
+</div>
+<button class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
+<span class="material-symbols-outlined">play_circle</span>
+                        Watch Highlights
+                    </button>
+</div>
+</div>
+<!-- Player 3: VERTEX -->
+<div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
+<div class="absolute inset-0 z-0">
+<img alt="Side profile of a gamer with hoodie looking focused" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" data-alt="Side profile of a gamer with hoodie looking focused" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASyZe2RjV7yiNOP5mW-SIRmpCVawQ0zSlgqjXCfA-iuh3p995tpHy7PQxsSpepT5KNsXNuuKhbREgJ38wRE8Juer6Un086DLmfOaGJ8uslNjIIq5mTVUgfrer5Vmon2yHg_Sd0d9WsIHZzbkUXfaSM-ogng_k64E8wfz1iCg8R1s6lgjorsghu3bw0CABFf-bImUZz19TfPxtNquYxzN4Wer0shI4FlKQxQUQVP8GFUmD6ZHWdadD9Xf2pUBkOQlE67lamdYOeHP_H"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-6 z-10 transition-all duration-500 lg:group-hover:opacity-0 lg:group-hover:translate-y-4">
+<div class="flex items-center gap-2 text-primary mb-1">
+<span class="material-symbols-outlined text-lg">security</span>
+<span class="text-xs font-bold tracking-widest uppercase">Sentinel</span>
+</div>
+<h2 class="text-4xl font-bold text-white uppercase tracking-tighter">Vertex</h2>
+</div>
+<div class="relative z-20 flex flex-col h-full opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none lg:group-hover:pointer-events-auto p-6 lg:p-8">
+<div class="flex justify-between items-start mb-auto">
+<div class="flex flex-col">
+<h2 class="text-5xl font-bold text-white uppercase tracking-tighter mb-1">Vertex</h2>
+<span class="text-primary font-mono text-sm tracking-widest uppercase">The Wall</span>
+</div>
+<div class="bg-primary size-12 rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">security</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">Clutch %</p>
+<p class="text-white text-2xl font-bold font-mono">24%</p>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">HS %</p>
+<p class="text-white text-2xl font-bold font-mono text-primary">35%</p>
+</div>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
+<div class="flex items-center gap-3 text-sm text-gray-300 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">flag</span>
+<span>Previous: <strong class="text-white">FNATIC</strong></span>
+</div>
+<div class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">shield</span>
+<span>Site Anchor</span>
+</div>
+</div>
+<button class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
+<span class="material-symbols-outlined">play_circle</span>
+                        Watch Highlights
+                    </button>
+</div>
+</div>
+<!-- Player 4: ECHO -->
+<div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
+<div class="absolute inset-0 z-0">
+<img alt="Young esports player smiling slightly with headset around neck" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" data-alt="Young esports player smiling slightly with headset around neck" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9zsOMKku5Q-hGF9xgkZGIljFPs8Biw7LAia8N35-rY45DaKwxMfVBhbIb1rsOltno9flZPuWrAMZUriPXB-LHm3DRoQukcUA4lAvIbYSoERJt-u_1VXiottuyaXfV-WVDxXwfcw-SDvtiwh8U2ZW18KgilvjLBx-aNvL2r6BCen-16wapPSbPlxqD8Utm9I8nifiVVpRcpxhaZi26zDoblA_2C7KgWcQdJFrRyRgVPph279pXMRF6csIdLL3g4-GXLucC6JGKUEcJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-6 z-10 transition-all duration-500 lg:group-hover:opacity-0 lg:group-hover:translate-y-4">
+<div class="flex items-center gap-2 text-primary mb-1">
+<span class="material-symbols-outlined text-lg">radar</span>
+<span class="text-xs font-bold tracking-widest uppercase">Initiator</span>
+</div>
+<h2 class="text-4xl font-bold text-white uppercase tracking-tighter">Echo</h2>
+</div>
+<div class="relative z-20 flex flex-col h-full opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none lg:group-hover:pointer-events-auto p-6 lg:p-8">
+<div class="flex justify-between items-start mb-auto">
+<div class="flex flex-col">
+<h2 class="text-5xl font-bold text-white uppercase tracking-tighter mb-1">Echo</h2>
+<span class="text-primary font-mono text-sm tracking-widest uppercase">Intel Gatherer</span>
+</div>
+<div class="bg-primary size-12 rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">radar</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">ADR</p>
+<p class="text-white text-2xl font-bold font-mono">156</p>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">Flash Ast</p>
+<p class="text-white text-2xl font-bold font-mono text-primary">0.45</p>
+</div>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
+<div class="flex items-center gap-3 text-sm text-gray-300 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">flag</span>
+<span>Previous: <strong class="text-white">Paper Rex</strong></span>
+</div>
+<div class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">handshake</span>
+<span>Clutch Minister</span>
+</div>
+</div>
+<button class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
+<span class="material-symbols-outlined">play_circle</span>
+                        Watch Highlights
+                    </button>
+</div>
+</div>
+<!-- Player 5: SHIFT -->
+<div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
+<div class="absolute inset-0 z-0">
+<img alt="Gamer girl with pink hair looking confident" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" data-alt="Gamer girl with pink hair looking confident" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDS1dQtIMYsNbpIT5IIE1Mo7fYazgpzkHGYz9ldy8G5-L040OW9yMBfQKCDsqYSttYTaHHIWvBjNg84j8v_UpjgE4lJ7S37rSsYd01K8S3bEljSDbwUgJuxUEQrGAUlbB_wmfne7ipbHM-Ou5a0xsHeyZ-dobV6AK42-W7_IjMRcSEO5fJjW9vjh9J7mOtvid1QQtcdGDpzPazod-G77lqhUJRv-sD6PN_RB1UN4zoz-vBlY1eVYHj26996m4nszGyrrRuf6Y6l7aul"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 w-full p-6 z-10 transition-all duration-500 lg:group-hover:opacity-0 lg:group-hover:translate-y-4">
+<div class="flex items-center gap-2 text-primary mb-1">
+<span class="material-symbols-outlined text-lg">bolt</span>
+<span class="text-xs font-bold tracking-widest uppercase">Flex</span>
+</div>
+<h2 class="text-4xl font-bold text-white uppercase tracking-tighter">Shift</h2>
+</div>
+<div class="relative z-20 flex flex-col h-full opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none lg:group-hover:pointer-events-auto p-6 lg:p-8">
+<div class="flex justify-between items-start mb-auto">
+<div class="flex flex-col">
+<h2 class="text-5xl font-bold text-white uppercase tracking-tighter mb-1">Shift</h2>
+<span class="text-primary font-mono text-sm tracking-widest uppercase">The Rookie</span>
+</div>
+<div class="bg-primary size-12 rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">Rank</p>
+<p class="text-white text-2xl font-bold font-mono">#1</p>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
+<p class="text-gray-400 text-xs font-medium uppercase mb-1">FK/Round</p>
+<p class="text-white text-2xl font-bold font-mono text-primary">0.22</p>
+</div>
+</div>
+<div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
+<div class="flex items-center gap-3 text-sm text-gray-300 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">flag</span>
+<span>Previous: <strong class="text-white">Academy</strong></span>
+</div>
+<div class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">stars</span>
+<span>Radiant #1 Global</span>
+</div>
+</div>
+<button class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
+<span class="material-symbols-outlined">play_circle</span>
+                        Watch Highlights
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Social Ticker Footer -->
+<footer class="bg-primary/10 border-t border-[#482325] py-3 overflow-hidden">
+<div class="whitespace-nowrap flex animate-scroll gap-8">
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">favorite</span> @ValorantFan22: Can't wait for Vipera on Duelist! #TEAMVAL
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">rocket_launch</span> @EsportsDaily: This roster is absolutely stacked.
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">verified</span> @NexusIGL: We are coming for the trophy. #WinOrGoHome
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">favorite</span> @ViperaFan: 1.42 KD is insane...
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">bolt</span> @ShiftRookie: Dream come true to play with these legends.
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">favorite</span> @ValorantFan22: Can't wait for Vipera on Duelist! #TEAMVAL
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">rocket_launch</span> @EsportsDaily: This roster is absolutely stacked.
+            </span>
+<span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+<span class="text-primary material-symbols-outlined text-sm">verified</span> @NexusIGL: We are coming for the trophy. #WinOrGoHome
+            </span>
+</div>
+</footer>
+</body></html>
