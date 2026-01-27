@@ -55,21 +55,48 @@ def analyze_matches(matches):
         "agents": {}, "maps": {}, "best_map": "N/A"
     }
     
-    for m in matches:
-        if 'meta' not in m or 'stats' not in m: continue
-        if not m['meta'].get('character') or not m['meta']['character'].get('name'): continue
-        if not m['meta'].get('map') or not m['meta']['map'].get('name'): continue
-        if 'team' not in m['stats']: continue
+    skipped_count = 0
+    
+    for i, m in enumerate(matches):
+        if 'meta' not in m or 'stats' not in m: 
+            skipped_count += 1
+            continue
 
+        # --- ROBUST DATA EXTRACTION ---
+        # 1. Get Agent (Try Meta first, then Stats)
+        agent = None
+        if m.get('meta', {}).get('character', {}).get('name'):
+            agent = m['meta']['character']['name']
+        elif m.get('stats', {}).get('character', {}).get('name'):
+            agent = m['stats']['character']['name']
+            
+        if not agent:
+            # print(f"⚠️ Match {i} skipped: No Agent Name found")
+            skipped_count += 1
+            continue
+
+        # 2. Get Map
+        map_name = m.get('meta', {}).get('map', {}).get('name')
+        if not map_name:
+            skipped_count += 1
+            continue
+
+        # 3. Get Team (For Win/Loss)
+        my_team = m.get('stats', {}).get('team')
+        if not my_team:
+            skipped_count += 1
+            continue
+        my_team = my_team.lower()
+
+        # --- PROCESS STATS ---
         stats['total'] += 1
-        agent = m['meta']['character']['name']
-        map_name = m['meta']['map']['name']
+        
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
         stats['kills'] += k
         stats['deaths'] += d
 
-        my_team = m['stats']['team'].lower()
+        # Win Calculation
         blue = m['teams']['blue']
         red = m['teams']['red']
         winner = "blue" if blue > red else "red"
@@ -88,6 +115,9 @@ def analyze_matches(matches):
         if is_win: stats['maps'][map_name]['wins'] += 1
         stats['maps'][map_name]['kills'] += k
         stats['maps'][map_name]['deaths'] += d
+
+    if skipped_count > 0:
+        print(f"⚠️ Analysis Warning: Skipped {skipped_count} matches due to missing data.")
 
     # Final Calcs
     sorted_maps = []
@@ -129,14 +159,13 @@ def get_player_detail(name, tag):
     p_key = f"{name}#{tag}"
     current_time = time.time()
     
-    # Bypass cache for now to debug
+    # Bypass cache for debugging
     # if p_key in cache["player_details"] ...
 
     safe_name = urllib.parse.quote(name)
     safe_tag = urllib.parse.quote(tag)
     
-    # Fetch 85 matches to go further back in history
-    url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=85"
+    url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=60"
     r = requests.get(url, headers=get_headers())
     
     ranked_matches = []
@@ -144,27 +173,26 @@ def get_player_detail(name, tag):
     
     if r.status_code == 200:
         all_data = r.json().get('data', [])
-        print(f"🔍 DEBUG: Fetching {len(all_data)} matches for {name}...")
+        print(f"🔍 DEBUG: Found {len(all_data)} raw matches for {name}")
         
         for m in all_data:
-            # DEBUG: Print the raw mode from API
-            mode = m['meta']['mode'] 
-            # print(f"Found match: {mode}") # Uncomment to see every single match mode in logs
-
-            # Strict Filter: ONLY "Competitive"
-            if mode == 'Competitive':
+            if 'meta' not in m or 'mode' not in m['meta']: continue
+            mode = m['meta']['mode'].lower()
+            
+            # FILTER 1: Ranked (Strict + Unrated for now to ensure data shows up)
+            if mode in ['competitive', 'unrated', 'swiftplay']:
                 ranked_matches.append(m)
             
-            # Strict Filter: Custom + 13 Rounds
-            elif mode == 'Custom Game':
+            # FILTER 2: Scrims
+            elif 'custom' in mode:
                 blue = m['teams']['blue']
                 red = m['teams']['red']
                 if (blue + red) >= 13: 
                     scrim_matches.append(m)
                     
-        print(f"📊 RESULT: {len(ranked_matches)} Ranked | {len(scrim_matches)} Scrims")
+        print(f"📊 DEBUG: {len(ranked_matches)} Ranked/Unrated | {len(scrim_matches)} Scrims")
     else:
-        print(f"❌ API Error {r.status_code}")
+        print(f"❌ API Error {r.status_code}: {r.text}")
 
     data = {
         "ranked": analyze_matches(ranked_matches),
