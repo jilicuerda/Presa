@@ -50,76 +50,79 @@ def update_roster_ranks():
 
 def analyze_matches(matches):
     """
-    Groups data by Agent to find patterns.
+    Groups data by Agent AND Maps to find patterns.
     """
     stats = {
         "wins": 0, "total": 0, 
         "kills": 0, "deaths": 0,
         "agents": {}, 
+        "maps": {}, # New: Stores stats per map
         "best_map": "N/A"
     }
     
-    map_counts = {}
-
     for m in matches:
-        # SAFETY CHECK: Ensure all required fields exist before reading
-        if 'meta' not in m or 'stats' not in m: 
-            continue
+        if 'meta' not in m or 'stats' not in m: continue
         
-        # Check if character info exists (Fix for KeyError: 'character')
-        if not m['meta'].get('character') or not m['meta']['character'].get('name'):
-            continue
-            
-        # Check if map info exists
-        if not m['meta'].get('map') or not m['meta']['map'].get('name'):
-            continue
+        # SAFETY CHECKS
+        if not m['meta'].get('character') or not m['meta']['character'].get('name'): continue
+        if not m['meta'].get('map') or not m['meta']['map'].get('name'): continue
+        if 'team' not in m['stats']: continue
 
         stats['total'] += 1
         
-        # 1. Who did they play?
+        # 1. Basic Info
         agent = m['meta']['character']['name']
         map_name = m['meta']['map']['name']
-        
-        # Init Agent
-        if agent not in stats['agents']:
-            stats['agents'][agent] = {
-                "matches": 0, "wins": 0, "kills": 0, "deaths": 0,
-                "maps": {}
-            }
-        
-        agent_stats = stats['agents'][agent]
-        agent_stats['matches'] += 1
-        agent_stats['maps'][map_name] = agent_stats['maps'].get(map_name, 0) + 1
         
         # 2. Combat Stats
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
         stats['kills'] += k
         stats['deaths'] += d
-        agent_stats['kills'] += k
-        agent_stats['deaths'] += d
 
         # 3. Win Check
-        # Safely access 'team'
-        if 'team' not in m['stats']:
-            continue
-            
         my_team = m['stats']['team'].lower()
         blue = m['teams']['blue']
         red = m['teams']['red']
         winner = "blue" if blue > red else "red"
+        is_win = (my_team == winner)
         
-        if my_team == winner:
+        if is_win:
             stats['wins'] += 1
-            agent_stats['wins'] += 1
-            
-        # Global Map Count
-        map_counts[map_name] = map_counts.get(map_name, 0) + 1
 
-    # Final Calcs
-    if map_counts:
-        stats['best_map'] = max(map_counts, key=map_counts.get)
+        # 4. Agent Logic
+        if agent not in stats['agents']:
+            stats['agents'][agent] = {"matches": 0, "wins": 0, "kills": 0, "deaths": 0, "maps": {}}
+        
+        stats['agents'][agent]['matches'] += 1
+        if is_win: stats['agents'][agent]['wins'] += 1
+        stats['agents'][agent]['maps'][map_name] = stats['agents'][agent]['maps'].get(map_name, 0) + 1
+        stats['agents'][agent]['kills'] += k
+        stats['agents'][agent]['deaths'] += d
 
+        # 5. Map Logic (Global for this player)
+        if map_name not in stats['maps']:
+            stats['maps'][map_name] = {"matches": 0, "wins": 0}
+        stats['maps'][map_name]['matches'] += 1
+        if is_win: stats['maps'][map_name]['wins'] += 1
+
+    # Final Calculations
+    # Calculate Win Rates for Maps and Sort by "Most Played"
+    sorted_maps = []
+    for m_name, m_data in stats['maps'].items():
+        wr = int((m_data['wins'] / m_data['matches']) * 100)
+        sorted_maps.append({
+            "name": m_name,
+            "matches": m_data['matches'],
+            "win_rate": wr
+        })
+    # Sort maps by number of matches played (descending)
+    stats['top_maps'] = sorted(sorted_maps, key=lambda x: x['matches'], reverse=True)
+
+    if stats['top_maps']:
+        stats['best_map'] = stats['top_maps'][0]['name']
+
+    # Sort Agents
     for agent, data in stats['agents'].items():
         if data['maps']:
             data['best_map'] = max(data['maps'], key=data['maps'].get)
@@ -127,13 +130,12 @@ def analyze_matches(matches):
             data['best_map'] = "N/A"
         data['win_rate'] = int((data['wins'] / data['matches']) * 100)
 
-    # Convert to sorted list
-    sorted_agents = sorted(
+    stats['top_agents'] = sorted(
         [{"name": k, **v} for k, v in stats['agents'].items()],
         key=lambda x: x['matches'],
         reverse=True
     )
-    stats['top_agents'] = sorted_agents
+    
     return stats
 
 @app.route('/')
@@ -192,4 +194,3 @@ def get_player_detail(name, tag):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
