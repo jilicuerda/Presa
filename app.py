@@ -50,7 +50,7 @@ def update_roster_ranks():
 
 def analyze_matches(matches):
     """
-    Groups data by Agent AND Maps.
+    Groups data by Agent AND Maps. Includes SAFETY CHECKS.
     """
     stats = {
         "wins": 0, "total": 0, 
@@ -61,11 +61,14 @@ def analyze_matches(matches):
     }
     
     for m in matches:
-        # SAFETY CHECKS
+        # --- SAFETY SHIELD: SKIP BROKEN MATCHES ---
         if 'meta' not in m or 'stats' not in m: continue
-        if not m['meta'].get('character') or not m['meta']['character'].get('name'): continue
-        if not m['meta'].get('map') or not m['meta']['map'].get('name'): continue
+        if not m['meta'].get('character'): continue
+        if not m['meta']['character'].get('name'): continue
+        if not m['meta'].get('map'): continue
+        if not m['meta']['map'].get('name'): continue
         if 'team' not in m['stats']: continue
+        # ------------------------------------------
 
         stats['total'] += 1
         
@@ -157,7 +160,6 @@ def get_player_detail(name, tag):
     
     if r.status_code == 200:
         all_data = r.json().get('data', [])
-        print(f"🔍 DEBUG: Found {len(all_data)} matches for {name}")
         
         for m in all_data:
             mode = m['meta']['mode'].lower() # Case insensitive
@@ -172,10 +174,6 @@ def get_player_detail(name, tag):
                 red = m['teams']['red']
                 if (blue + red) >= 13: 
                     scrim_matches.append(m)
-                    
-        print(f"📊 DEBUG: {len(ranked_matches)} Ranked | {len(scrim_matches)} Scrims")
-    else:
-        print(f"❌ API Error {r.status_code}: {r.text}")
 
     data = {
         "ranked": analyze_matches(ranked_matches),
@@ -188,4 +186,3 @@ def get_player_detail(name, tag):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
