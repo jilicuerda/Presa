@@ -117,28 +117,72 @@
         }
     }
 
-    function renderStats(mode) {
-        // Toggle UI
+    fufunction renderStats(mode) {
+        // Toggle Buttons (Keep existing code)
         const activeClass = "px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded";
         const inactiveClass = "px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded";
-        
         document.getElementById('btn-ranked').className = mode === 'ranked' ? activeClass : inactiveClass;
         document.getElementById('btn-scrims').className = mode === 'scrims' ? activeClass : inactiveClass;
 
         if (!globalData) return;
 
-        const stats = globalData[mode]; // 'ranked' or 'scrims'
-        
-        // 1. K/D
+        const stats = globalData[mode];
+
+        // 1. Basic Stats (Keep existing code)
         const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
         document.getElementById('stat-kd').innerText = kd;
-
-        // 2. Win Rate
         const wr = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
         document.getElementById('stat-wr').innerText = wr;
+        
+        // --- NEW: RENDER AGENT LIST ---
+        const list = document.getElementById('agent-list');
+        list.innerHTML = ""; // Clear old list
 
-        // 3. Best Map
-        document.getElementById('stat-map').innerText = stats.best_map || "N/A";
+        if (stats.top_agents && stats.top_agents.length > 0) {
+            // Take top 3 agents
+            stats.top_agents.slice(0, 3).forEach(agent => {
+                
+                // Determine Gun preference based on Agent Name (Visual Logic)
+                let gunIcon = "Vandal"; // Default
+                if (["Jett", "Chamber"].includes(agent.name)) gunIcon = "Operator";
+                else if (["Viper", "Omen", "Astra", "Cypher"].includes(agent.name)) gunIcon = "Phantom";
+                else if (["Breach", "Judge"].includes(agent.name)) gunIcon = "Odin";
+
+                const html = `
+                <div class="flex items-center justify-between p-4 bg-background-dark/50 border border-white/5 rounded-lg hover:border-primary/30 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="size-12 rounded-full overflow-hidden border border-[#482325]">
+                            <img src="/static/assets/agents/${agent.name}_Artwork-large.webp" class="w-full h-full object-cover scale-125">
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-white font-bold uppercase text-lg leading-none">${agent.name}</h4>
+                                <span class="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-bold">${agent.matches} Games</span>
+                            </div>
+                            <div class="text-gray-500 text-xs mt-1 font-mono uppercase">
+                                Best Map: <span class="text-white font-bold">${agent.best_map}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-6 text-right">
+                        <div>
+                            <div class="text-[10px] text-gray-500 uppercase font-bold">Win Rate</div>
+                            <div class="text-xl font-bold ${agent.win_rate >= 50 ? 'text-green-400' : 'text-red-400'}">${agent.win_rate}%</div>
+                        </div>
+                        <div>
+                             <div class="text-[10px] text-gray-500 uppercase font-bold">Pref. Gun</div>
+                             <div class="text-sm font-bold text-white">${gunIcon}</div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                list.innerHTML += html;
+            });
+        } else {
+            list.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">No agent data found for ${mode} mode.</div>`;
+        }
     }
 
     loadPlayer();
