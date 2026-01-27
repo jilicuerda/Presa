@@ -55,14 +55,25 @@ def analyze_matches(matches):
     stats = {
         "wins": 0, "total": 0, 
         "kills": 0, "deaths": 0,
-        "agents": {}, # Stores stats per agent
+        "agents": {}, 
         "best_map": "N/A"
     }
     
     map_counts = {}
 
     for m in matches:
-        if 'meta' not in m or 'stats' not in m: continue
+        # SAFETY CHECK: Ensure all required fields exist before reading
+        if 'meta' not in m or 'stats' not in m: 
+            continue
+        
+        # Check if character info exists (Fix for KeyError: 'character')
+        if not m['meta'].get('character') or not m['meta']['character'].get('name'):
+            continue
+            
+        # Check if map info exists
+        if not m['meta'].get('map') or not m['meta']['map'].get('name'):
+            continue
+
         stats['total'] += 1
         
         # 1. Who did they play?
@@ -89,6 +100,10 @@ def analyze_matches(matches):
         agent_stats['deaths'] += d
 
         # 3. Win Check
+        # Safely access 'team'
+        if 'team' not in m['stats']:
+            continue
+            
         my_team = m['stats']['team'].lower()
         blue = m['teams']['blue']
         red = m['teams']['red']
@@ -177,3 +192,4 @@ def get_player_detail(name, tag):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
