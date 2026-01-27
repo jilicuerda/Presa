@@ -1,28 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Team Roster</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec131e",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221011",
+                        "surface-dark": "#2d1517", 
+                    },
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
+                    animation: { 'scroll': 'scroll 20s linear infinite' },
+                    keyframes: {
+                        scroll: {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #221011; }
+        ::-webkit-scrollbar-thumb { background: #482325; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ec131e; }
+    </style>
 </head>
-<body>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden min-h-screen flex flex-col">
 
-    <div class="team-header">
-        <h1>TEAM ROSTER</h1>
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-[#482325] bg-background-dark/95 backdrop-blur-sm px-6 lg:px-10 py-3">
+    <div class="flex items-center gap-4 text-white">
+        <div class="size-8 text-primary"><span class="material-symbols-outlined text-3xl">sports_esports</span></div>
+        <h2 class="text-white text-xl font-bold uppercase">TEAM PRESA</h2>
+    </div>
+    <div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+        <div class="flex items-center gap-9">
+            <a class="text-white/70 hover:text-white text-sm font-medium transition-colors" href="#">ROSTER</a>
+            <a class="text-white/70 hover:text-white text-sm font-medium transition-colors" href="#">STATS</a>
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 flex flex-col relative">
+    <div class="px-6 lg:px-40 pt-8 pb-4">
+        <div class="flex flex-col md:flex-row justify-between items-end border-b border-[#482325] pb-4">
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border border-primary/20">Live Stats</span>
+                    <span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Season 25</span>
+                </div>
+                <h1 class="text-white text-4xl lg:text-5xl font-bold leading-none uppercase tracking-tighter">Active Roster</h1>
+            </div>
+        </div>
     </div>
 
-    <div class="roster-container" id="roster-container">
-        <p class="loading-text">Loading Data...</p>
+    <div id="roster-grid" class="flex-1 px-6 lg:px-10 pb-16 flex flex-col lg:flex-row gap-2 h-auto lg:h-[650px] w-full max-w-[1600px] mx-auto">
+        <div class="w-full text-center mt-20 text-gray-500">Loading Data...</div>
     </div>
+</main>
 
-    <script src="/static/script.js"></script>
+<footer class="bg-primary/10 border-t border-[#482325] py-3 overflow-hidden">
+    <div class="whitespace-nowrap flex animate-scroll gap-8">
+        <span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+            <span class="text-primary material-symbols-outlined text-sm">bolt</span> TEAM PRESA ONLINE
+        </span>
+        <span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+            <span class="text-primary material-symbols-outlined text-sm">favorite</span> SUPPORT THE SQUAD
+        </span>
+        <span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
+            <span class="text-primary material-symbols-outlined text-sm">verified</span> ROAD TO RADIANT
+        </span>
+    </div>
+</footer>
+
+<script src="/static/script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
