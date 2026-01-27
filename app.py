@@ -9,7 +9,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # --- CONFIGURATION ---
 API_KEY = os.environ.get("HENRIK_KEY") 
-REGION = "na" # Change to 'eu', 'ap', or 'latam' if needed
+REGION = "eu" # Change to 'eu', 'ap', or 'latam' if needed
 
 # YOUR ROSTER
 ROSTER = [
@@ -126,3 +126,4 @@ def get_history():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
