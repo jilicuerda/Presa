@@ -20,15 +20,16 @@
             <span class="material-symbols-outlined">arrow_back</span> Back to Roster
         </a>
     </div>
+    <img src="/static/assets/presa.png" alt="Team Presa" class="h-10 w-10 object-contain">
 </header>
 
 <main class="flex-1 p-6">
     <div class="max-w-[1920px] mx-auto h-full flex flex-col lg:flex-row gap-6">
         
-        <aside class="lg:w-[380px] bg-surface-dark rounded-xl border border-[#482325] p-6 relative overflow-hidden">
+        <aside class="lg:w-[380px] bg-surface-dark rounded-xl border border-[#482325] p-6 relative overflow-hidden h-fit">
             <div class="relative z-10">
                 <div class="mb-4">
-                    <h1 id="p-name" class="text-6xl font-bold text-white uppercase tracking-tighter leading-none mb-1">LOADING</h1>
+                    <h1 id="p-name" class="text-5xl lg:text-6xl font-bold text-white uppercase tracking-tighter leading-none mb-1">LOADING</h1>
                     <p id="p-tag" class="text-gray-400 font-mono text-sm uppercase">#TAG</p>
                 </div>
                 
@@ -75,6 +76,68 @@
                 </div>
             </div>
 
+            <div class="flex flex-col lg:flex-row gap-4 mt-4">
+                <div class="flex-1 bg-surface-dark border border-[#482325] rounded-xl p-6 relative">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">map</span>
+                            Map Win Rate
+                        </h3>
+                    </div>
+                    <div id="map-list" class="space-y-5 overflow-y-auto max-h-[400px] pr-2">
+                        <div class="text-gray-500 text-sm">Loading maps...</div>
+                    </div>
+                </div>
+
+                <div class="lg:w-[400px] bg-surface-dark border border-[#482325] rounded-xl p-6 relative">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">dataset</span>
+                            Comp Matchup
+                        </h3>
+                        <div class="px-2 py-0.5 rounded bg-primary/20 text-primary text-[10px] font-bold uppercase border border-primary/20">Vs Meta</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-background-dark p-3 rounded border border-white/5 group cursor-default">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-300 uppercase">Double Initiator</span>
+                                <span class="text-primary font-mono font-bold text-sm">1.52 KD</span>
+                            </div>
+                            <div class="flex gap-1 mb-1 opacity-80">
+                                <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
+                                <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
+                                <div class="h-1 flex-1 bg-gray-700 rounded-sm"></div>
+                            </div>
+                            <div class="text-[10px] text-gray-500">Very effective against info heavy comps.</div>
+                        </div>
+                        <div class="bg-background-dark p-3 rounded border border-white/5 group cursor-default">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-300 uppercase">Triple Duelist</span>
+                                <span class="text-white font-mono font-bold text-sm">1.10 KD</span>
+                            </div>
+                            <div class="flex gap-1 mb-1 opacity-80">
+                                <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
+                                <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
+                                <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
+                            </div>
+                            <div class="text-[10px] text-gray-500">Standard performance vs aggression.</div>
+                        </div>
+                        <div class="bg-background-dark p-3 rounded border border-white/5 group cursor-default">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-300 uppercase">Double Controller</span>
+                                <span class="text-red-400 font-mono font-bold text-sm">0.85 KD</span>
+                            </div>
+                            <div class="flex gap-1 mb-1 opacity-80">
+                                <div class="h-1 flex-1 bg-purple-500 rounded-sm"></div>
+                                <div class="h-1 flex-1 bg-purple-500 rounded-sm"></div>
+                                <div class="h-1 flex-1 bg-gray-700 rounded-sm"></div>
+                            </div>
+                            <div class="text-[10px] text-gray-500">Struggles breaking vision denial.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 mt-4 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-6 relative z-10">
                     <h3 class="text-xl font-bold uppercase flex items-center gap-2">
@@ -82,11 +145,9 @@
                     </h3>
                     <span class="text-xs text-gray-500 uppercase font-mono">Based on selected mode</span>
                 </div>
-
                 <div id="agent-list" class="flex flex-col gap-3 relative z-10">
                     <div class="text-gray-500 text-center py-4">Loading Data...</div>
                 </div>
-
                 <div class="absolute top-0 right-0 p-10 opacity-5">
                     <span class="material-symbols-outlined text-9xl">fingerprint</span>
                 </div>
@@ -116,55 +177,81 @@
             document.getElementById('p-bg-img').src = `/static/assets/agents/${safeAgent}_Artwork-large.webp`;
         }
 
-        // Fetch Data
         try {
             const res = await fetch(`/api/player/${name}/${tag}`);
             globalData = await res.json();
-            renderStats('ranked'); // Default to Ranked
+            renderStats('ranked'); 
         } catch (e) {
             console.error("Fetch error:", e);
         }
     }
 
     function renderStats(mode) {
-        // Toggle Buttons
         const activeClass = "px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded";
         const inactiveClass = "px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded";
         document.getElementById('btn-ranked').className = mode === 'ranked' ? activeClass : inactiveClass;
         document.getElementById('btn-scrims').className = mode === 'scrims' ? activeClass : inactiveClass;
 
         if (!globalData) return;
-
         const stats = globalData[mode];
         
         // 1. K/D
         const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
         document.getElementById('stat-kd').innerText = kd;
 
-        // 2. Win Rate (Overall)
+        // 2. Win Rate
         const wr = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
         document.getElementById('stat-wr').innerText = wr;
 
-        // 3. Best Map (Uses the key calculated by Python if available)
-        // If your new app.py calculates 'best_map' for the agent, great. 
-        // If not, we fall back to "N/A"
+        // 3. Best Map
         document.getElementById('stat-map').innerText = stats.best_map || "N/A";
 
-        // --- NEW: RENDER AGENT LIST ---
+        // 4. MAP WIN RATES (NEW)
+        const mapContainer = document.getElementById('map-list');
+        mapContainer.innerHTML = "";
+        
+        if (stats.top_maps && stats.top_maps.length > 0) {
+            stats.top_maps.forEach(map => {
+                // Color logic: Red for high, white for mid, gray for low
+                let barColor = "bg-gray-400";
+                let percentColor = "text-gray-400";
+                
+                if (map.win_rate >= 60) {
+                    barColor = "bg-primary";
+                    percentColor = "text-primary";
+                } else if (map.win_rate >= 50) {
+                    barColor = "bg-white";
+                    percentColor = "text-white";
+                }
+
+                const mapHTML = `
+                <div>
+                    <div class="flex justify-between text-xs font-bold uppercase mb-1">
+                        <span>${map.name}</span>
+                        <span class="${percentColor}">${map.win_rate}%</span>
+                    </div>
+                    <div class="w-full bg-[#180e0f] rounded-full h-2 overflow-hidden border border-white/5">
+                        <div class="${barColor} h-2 rounded-full" style="width: ${map.win_rate}%"></div>
+                    </div>
+                    <div class="text-[10px] text-gray-500 mt-1 text-right">${map.matches} Matches</div>
+                </div>`;
+                mapContainer.innerHTML += mapHTML;
+            });
+        } else {
+            mapContainer.innerHTML = `<div class="text-gray-500 text-xs text-center">No map data available.</div>`;
+        }
+
+        // 5. AGENT MASTERY
         const list = document.getElementById('agent-list');
-        list.innerHTML = ""; // Clear old list
+        list.innerHTML = ""; 
 
         if (stats.top_agents && stats.top_agents.length > 0) {
-            // Take top 3 agents
             stats.top_agents.slice(0, 3).forEach(agent => {
-                
-                // Determine Gun preference based on Agent Name (Visual Logic)
-                let gunIcon = "Vandal"; // Default
+                let gunIcon = "Vandal";
                 if (["Jett", "Chamber"].includes(agent.name)) gunIcon = "Operator";
                 else if (["Viper", "Omen", "Astra", "Cypher"].includes(agent.name)) gunIcon = "Phantom";
                 else if (["Breach", "Judge"].includes(agent.name)) gunIcon = "Odin";
 
-                // Safe Image name
                 let safeImg = agent.name.replace("/", "");
                 safeImg = safeImg.charAt(0).toUpperCase() + safeImg.slice(1);
 
@@ -176,7 +263,6 @@
                                  class="w-full h-full object-cover scale-125"
                                  onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'">
                         </div>
-                        
                         <div>
                             <div class="flex items-center gap-2">
                                 <h4 class="text-white font-bold uppercase text-lg leading-none">${agent.name}</h4>
@@ -187,7 +273,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="flex items-center gap-6 text-right">
                         <div>
                             <div class="text-[10px] text-gray-500 uppercase font-bold">Win Rate</div>
