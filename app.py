@@ -48,78 +48,129 @@ def update_roster_ranks():
         updated_roster.append(stats)
     return updated_roster
 
+# ... (Imports and Config remain the same) ...
+
+# 1. NEW HELPER: Analyze Roles for the Radar Chart
+def analyze_roles(matches):
+    role_stats = {
+        "Duelist": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0},
+        "Controller": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0},
+        "Initiator": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0},
+        "Sentinel": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}
+    }
+    
+    # Map Agents to Roles (Extend this list if needed)
+    AGENT_ROLES = {
+        "Jett": "Duelist", "Raze": "Duelist", "Reyna": "Duelist", "Phoenix": "Duelist", "Yoru": "Duelist", "Neon": "Duelist", "Iso": "Duelist",
+        "Omen": "Controller", "Brimstone": "Controller", "Viper": "Controller", "Astra": "Controller", "Harbor": "Controller", "Clove": "Controller",
+        "Sova": "Initiator", "Breach": "Initiator", "Skye": "Initiator", "KAY/O": "Initiator", "Fade": "Initiator", "Gekko": "Initiator",
+        "Sage": "Sentinel", "Cypher": "Sentinel", "Killjoy": "Sentinel", "Chamber": "Sentinel", "Deadlock": "Sentinel", "Vyse": "Sentinel"
+    }
+
+    for m in matches:
+        if 'meta' not in m or 'stats' not in m: continue
+        
+        # Get Agent & Role
+        agent = m.get('meta', {}).get('character', {}).get('name')
+        if not agent: agent = m.get('stats', {}).get('character', {}).get('name')
+        
+        role = AGENT_ROLES.get(agent, "Flex")
+        if role not in role_stats: continue # Skip unknown roles
+
+        # Get Stats
+        k = m['stats'].get('kills', 0)
+        d = m['stats'].get('deaths', 0)
+        
+        # Win Check
+        my_team = m.get('stats', {}).get('team', '').lower()
+        blue = m['teams']['blue']
+        red = m['teams']['red']
+        winner = "blue" if blue > red else "red"
+        is_win = (my_team == winner)
+
+        role_stats[role]['matches'] += 1
+        role_stats[role]['kills'] += k
+        role_stats[role]['deaths'] += d
+        if is_win: role_stats[role]['wins'] += 1
+
+    # Calculate Scores (0-100) for the Radar Chart
+    radar = {
+        "Duelist": 0, "Controller": 0, "Initiator": 0, "Sentinel": 0, "Slayer": 0
+    }
+    
+    total_kd = 0
+    total_matches = 0
+
+    for role, data in role_stats.items():
+        if data['matches'] > 0:
+            # Score = Win Rate %
+            wr = int((data['wins'] / data['matches']) * 100)
+            radar[role] = wr
+            
+            # Accumulate for "Slayer" (Overall K/D normalized)
+            total_kd += (data['kills'] / data['deaths']) if data['deaths'] > 0 else data['kills']
+            total_matches += 1
+
+    # Slayer Score: Normalize Average K/D to 0-100 (0.5 KD = 0, 2.0 KD = 100)
+    if total_matches > 0:
+        avg_kd = total_kd / total_matches
+        slayer_score = min(max((avg_kd - 0.5) * 66, 0), 100) # Math to map 0.5->2.0 to 0->100
+        radar["Slayer"] = int(slayer_score)
+
+    return {"stats": role_stats, "radar": radar}
+
+# 2. UPDATE: Main Analysis Function
 def analyze_matches(matches):
     stats = {
-        "wins": 0, "total": 0, 
-        "kills": 0, "deaths": 0,
+        "wins": 0, "total": 0, "kills": 0, "deaths": 0,
         "agents": {}, "maps": {}, "best_map": "N/A"
     }
     
-    skipped_count = 0
-    
-    for i, m in enumerate(matches):
-        if 'meta' not in m or 'stats' not in m: 
-            skipped_count += 1
-            continue
-
-        # --- ROBUST DATA EXTRACTION ---
-        # 1. Get Agent (Try Meta first, then Stats)
-        agent = None
-        if m.get('meta', {}).get('character', {}).get('name'):
-            agent = m['meta']['character']['name']
-        elif m.get('stats', {}).get('character', {}).get('name'):
-            agent = m['stats']['character']['name']
-            
-        if not agent:
-            # print(f"⚠️ Match {i} skipped: No Agent Name found")
-            skipped_count += 1
-            continue
-
-        # 2. Get Map
+    for m in matches:
+        if 'meta' not in m or 'stats' not in m: continue
+        
+        # ... (Keep your existing data extraction logic here) ...
+        # (This part stays the same as the previous "Smart Finder" version)
+        # 1. Get Agent...
+        agent = m.get('meta', {}).get('character', {}).get('name') or m.get('stats', {}).get('character', {}).get('name')
+        if not agent: continue
+        
+        # 2. Get Map...
         map_name = m.get('meta', {}).get('map', {}).get('name')
-        if not map_name:
-            skipped_count += 1
-            continue
+        if not map_name: continue
 
-        # 3. Get Team (For Win/Loss)
+        # 3. Get Team...
         my_team = m.get('stats', {}).get('team')
-        if not my_team:
-            skipped_count += 1
-            continue
+        if not my_team: continue
         my_team = my_team.lower()
 
-        # --- PROCESS STATS ---
+        # Update Totals
         stats['total'] += 1
-        
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
         stats['kills'] += k
         stats['deaths'] += d
 
-        # Win Calculation
+        # Win
         blue = m['teams']['blue']
         red = m['teams']['red']
         winner = "blue" if blue > red else "red"
         is_win = (my_team == winner)
-        
         if is_win: stats['wins'] += 1
 
-        # Agent Stats
+        # Agent & Map Aggregation
         if agent not in stats['agents']: stats['agents'][agent] = {"matches": 0, "wins": 0}
         stats['agents'][agent]['matches'] += 1
         if is_win: stats['agents'][agent]['wins'] += 1
 
-        # Map Stats
         if map_name not in stats['maps']: stats['maps'][map_name] = {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}
         stats['maps'][map_name]['matches'] += 1
         if is_win: stats['maps'][map_name]['wins'] += 1
         stats['maps'][map_name]['kills'] += k
         stats['maps'][map_name]['deaths'] += d
 
-    if skipped_count > 0:
-        print(f"⚠️ Analysis Warning: Skipped {skipped_count} matches due to missing data.")
-
-    # Final Calcs
+    # ... (Keep existing sorting logic) ...
+    # Sort Maps
     sorted_maps = []
     for m_name, m_data in stats['maps'].items():
         wr = int((m_data['wins'] / m_data['matches']) * 100) if m_data['matches'] > 0 else 0
@@ -128,13 +179,52 @@ def analyze_matches(matches):
     stats['top_maps'] = sorted(sorted_maps, key=lambda x: x['matches'], reverse=True)
     if stats['top_maps']: stats['best_map'] = stats['top_maps'][0]['name']
 
+    # Sort Agents
     sorted_agents = []
     for a_name, a_data in stats['agents'].items():
         wr = int((a_data['wins'] / a_data['matches']) * 100) if a_data['matches'] > 0 else 0
         sorted_agents.append({"name": a_name, "matches": a_data['matches'], "win_rate": wr})
     stats['top_agents'] = sorted(sorted_agents, key=lambda x: x['matches'], reverse=True)
     
+    # NEW: Add Role Analysis
+    role_analysis = analyze_roles(matches)
+    stats['roles'] = role_analysis # Attach the new data
+    
     return stats
+
+# ... (Keep Routes mostly the same, but ensure analyze_matches is called) ...
+
+@app.route('/api/player/<name>/<tag>')
+def get_player_detail(name, tag):
+    p_key = f"{name}#{tag}"
+    # Cache logic...
+    
+    safe_name = urllib.parse.quote(name)
+    safe_tag = urllib.parse.quote(tag)
+    
+    url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=60"
+    r = requests.get(url, headers=get_headers())
+    
+    ranked_matches = []
+    scrim_matches = []
+    
+    if r.status_code == 200:
+        all_data = r.json().get('data', [])
+        for m in all_data:
+            if 'meta' not in m or 'mode' not in m['meta']: continue
+            mode = m['meta']['mode'].lower()
+            
+            if mode in ['competitive', 'unrated', 'swiftplay']:
+                ranked_matches.append(m)
+            elif 'custom' in mode:
+                scrim_matches.append(m)
+
+    data = {
+        "ranked": analyze_matches(ranked_matches),
+        "scrims": analyze_matches(scrim_matches)
+    }
+    return jsonify(data)
+# ... (Rest of file)
 
 @app.route('/')
 def home():
@@ -203,4 +293,5 @@ def get_player_detail(name, tag):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
 
