@@ -191,23 +191,23 @@
     
     let globalData = null;
 
-    // Map Images (Use generic Unsplash images for now to match style)
+    // ... (Keep MAP_IMAGES constant) ...
     const MAP_IMAGES = {
         "Bind": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop",
         "Haven": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop",
         "Ascent": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=400&auto=format&fit=crop",
         "Split": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop",
         "Lotus": "https://images.unsplash.com/photo-1518544806352-a2221fa063da?q=80&w=400&auto=format&fit=crop",
-        "Pearl": "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=400&auto=format&fit=crop"
+        "Pearl": "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=400&auto=format&fit=crop",
+        "Breeze": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400&auto=format&fit=crop",
+        "Sunset": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=400&auto=format&fit=crop"
     };
 
     async function loadPlayer() {
         if(!name || !tag) return;
-
         document.getElementById('p-name').innerText = name;
         document.getElementById('p-tag').innerText = "#" + tag;
         document.getElementById('p-agent').innerText = fixedAgent || "...";
-        
         if(fixedAgent) {
             const safeAgent = fixedAgent.replace("/", ""); 
             document.getElementById('p-bg-img').src = `/static/assets/agents/${safeAgent}_Artwork-large.webp`;
@@ -238,7 +238,7 @@
         document.getElementById('stat-matches').innerText = stats.total;
         document.getElementById('stat-best-map').innerText = stats.best_map || "N/A";
 
-        // 2. Map Breakdown (DYNAMIC)
+        // 2. Map Breakdown
         const mapContainer = document.getElementById('map-list');
         mapContainer.innerHTML = "";
         
@@ -270,10 +270,9 @@
             mapContainer.innerHTML = `<div class="text-gray-500 text-xs">No map data found.</div>`;
         }
 
-        // 3. Top Agents (DYNAMIC)
+        // 3. Top Agents
         const agentContainer = document.getElementById('agent-list');
         agentContainer.innerHTML = "";
-        
         if (stats.top_agents && stats.top_agents.length > 0) {
             stats.top_agents.slice(0, 3).forEach(agent => {
                 const html = `
@@ -291,6 +290,31 @@
                 </div>`;
                 agentContainer.innerHTML += html;
             });
+        }
+
+        // 4. RADAR CHART (Dynamic Points)
+        if (stats.roles && stats.roles.radar) {
+            const r = stats.roles.radar;
+            // Order: Duelist (Top), Sentinel (RightTop), Controller (RightBot), Initiator (LeftBot), Slayer (LeftTop)
+            // Center is 50,50. Max Radius ~40.
+            // Function to map 0-100 score to coordinate distance
+            const getCoord = (score, angle) => {
+                const rad = (angle * Math.PI) / 180;
+                const dist = (score / 100) * 35; // 35 is max radius
+                const x = 50 + dist * Math.cos(rad);
+                const y = 50 + dist * Math.sin(rad);
+                return `${x},${y}`;
+            };
+
+            // SVG Rotation is -90 deg in HTML, so 0 is UP.
+            const p1 = getCoord(r.Duelist, 270);    // Top
+            const p2 = getCoord(r.Sentinel, 342);   // Right Top
+            const p3 = getCoord(r.Controller, 54);  // Right Bot
+            const p4 = getCoord(r.Initiator, 126);  // Left Bot
+            const p5 = getCoord(r.Slayer, 198);     // Left Top
+
+            const polygon = document.querySelector('.radar-chart-polygon');
+            if(polygon) polygon.setAttribute("points", `${p1} ${p2} ${p3} ${p4} ${p5}`);
         }
     }
 
