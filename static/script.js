@@ -28,22 +28,19 @@ function renderCards(players) {
     container.innerHTML = ""; 
 
     players.forEach(player => {
-        let agentName = player.main_agent || "Unknown";
+        // Use the Fixed Agent from Python, or fallback to Jett
+        let agentName = player.main_agent || "Jett";
         
-        // --- FIX FOR KAY/O ---
-        // We remove the "/" so the code looks for "Kayo_Artwork" instead of "KAY/O_Artwork"
-        let safeAgentName = agentName.replace("/", ""); 
-        
-        // Capitalize (e.g. "astra" -> "Astra")
-        if (safeAgentName !== "Unknown") {
-            safeAgentName = safeAgentName.charAt(0).toUpperCase() + safeAgentName.slice(1);
-        } else {
-            safeAgentName = "Jett"; 
-        }
+        // Ensure proper capitalization (e.g. "Kayo" -> "Kayo")
+        let cleanName = agentName.replace("/", ""); 
+        let safeAgentName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
 
-        // Image path
         const agentImageFile = `${safeAgentName}_Artwork-large.webp`;
         const roleIcon = getRoleIcon(player.role);
+
+        // GENERATE LINK TO PLAYER DETAIL PAGE
+        // We encode the URI components to handle spaces and hash tags safely
+        const profileLink = `/player?name=${encodeURIComponent(player.name)}&tag=${encodeURIComponent(player.tag)}&agent=${encodeURIComponent(safeAgentName)}`;
 
         const cardHTML = `
         <div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
@@ -81,7 +78,7 @@ function renderCards(players) {
                     </div>
                     <div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-3 rounded">
                         <p class="text-gray-400 text-xs font-medium uppercase mb-1">Main Agent</p>
-                        <p class="text-white text-xl font-bold font-mono text-primary">${agentName}</p>
+                        <p class="text-white text-xl font-bold font-mono text-primary">${safeAgentName}</p>
                     </div>
                 </div>
                 
@@ -91,6 +88,11 @@ function renderCards(players) {
                         <span>Region: <strong class="text-white uppercase">EU</strong></span>
                     </div>
                 </div>
+
+                <a href="${profileLink}" class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    View Details
+                </a>
             </div>
         </div>
         `;
