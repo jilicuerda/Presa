@@ -1,40 +1,44 @@
 import os
 import time
 import requests
+import urllib.parse # Added this to handle spaces in names (e.g. Magic Tostada)
 from flask import Flask, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Allows your frontend website to talk to this backend
+CORS(app)
 
 # --- CONFIGURATION ---
-# We will set the API KEY in Render later (Environment Variable)
 API_KEY = os.environ.get("HENRIK_KEY") 
-REGION = "na"  # Change to eu, ap, kr, etc.
+REGION = "na" # <--- IMPORTANT: Change this to 'eu' if you are in Europe!
 
-# YOUR TEAM ROSTER
+# YOUR ACTUAL ROSTER
 ROSTER = [
-    {"name": "PlayerOne", "tag": "1234"},
-    {"name": "PlayerTwo", "tag": "NA1"},
-    {"name": "PlayerThree", "tag": "WIN"},
+    {"name": "Jilicuerda", "tag": "1734", "role": "Initiator"},
+    {"name": "CriskXK", "tag": "PRESA", "role": "Duelist"},
+    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL"},
+    {"name": "Cleezzy", "tag": "Reina", "role": "Smoker"},
+    {"name": "mi abuela mola", "tag": "2981", "role": "Sentinel"}
 ]
 
-# IN-MEMORY CACHE (Simple storage so we don't spam the API)
 cache = {
     "last_updated": 0,
     "data": []
 }
-CACHE_DURATION = 900  # Fetch new data every 15 minutes (900 seconds)
+CACHE_DURATION = 900 
 
 def fetch_team_matches():
-    """Fetches matches where 3+ roster members played together."""
     team_matches = []
     processed_ids = set()
     
     print("Refreshing data from Riot/Henrik...")
     
     for player in ROSTER:
-        url = f"https://api.henrikdev.xyz/valorant/v3/matches/{REGION}/{player['name']}/{player['tag']}"
+        # We encode the name to handle spaces (e.g. "Magic Tostada" -> "Magic%20Tostada")
+        safe_name = urllib.parse.quote(player['name'])
+        safe_tag = urllib.parse.quote(player['tag'])
+        
+        url = f"https://api.henrikdev.xyz/valorant/v3/matches/{REGION}/{safe_name}/{safe_tag}"
         headers = {"Authorization": API_KEY}
         
         try:
@@ -50,6 +54,8 @@ def fetch_team_matches():
                     # Check for 3+ teammates
                     all_players = [p['name'].lower() for p in match['players']['all_players']]
                     teammates_count = 0
+                    
+                    # We check against our roster list
                     for member in ROSTER:
                         if member['name'].lower() in all_players:
                             teammates_count += 1
@@ -58,7 +64,7 @@ def fetch_team_matches():
                         team_matches.append(match)
                         processed_ids.add(match_id)
             
-            time.sleep(1) # Be nice to the API
+            time.sleep(1) 
             
         except Exception as e:
             print(f"Error fetching {player['name']}: {e}")
@@ -73,15 +79,15 @@ def home():
 def get_history():
     current_time = time.time()
     
-    # If cache is old, fetch new data
     if current_time - cache["last_updated"] > CACHE_DURATION:
         new_data = fetch_team_matches()
-        if new_data: # Only update if we actually got data back
+        if new_data: 
             cache["data"] = new_data
             cache["last_updated"] = current_time
             
     return jsonify({
         "last_updated": cache["last_updated"],
+        "roster": ROSTER, # Sending the roster to the frontend helps display roles!
         "matches": cache["data"]
     })
 
