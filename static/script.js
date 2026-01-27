@@ -2,7 +2,6 @@ const API_URL = "/api/team-history";
 
 async function fetchTeamData() {
     const container = document.getElementById('roster-grid');
-    // Keep the loading text until data arrives
     
     try {
         const response = await fetch(API_URL);
@@ -14,38 +13,40 @@ async function fetchTeamData() {
     }
 }
 
-// Helper to get Icon based on Role
 function getRoleIcon(role) {
-    const r = role.toLowerCase();
+    const r = role ? role.toLowerCase() : "";
     if (r.includes("duelist")) return "swords";
     if (r.includes("sentinel")) return "security";
     if (r.includes("controller") || r.includes("smoker")) return "smoke_free";
     if (r.includes("initiator")) return "radar";
     if (r.includes("igl")) return "psychology";
-    return "sports_esports"; // Default
+    return "sports_esports";
 }
 
 function renderCards(players) {
     const container = document.getElementById('roster-grid');
-    container.innerHTML = ""; // Clear loading text
+    container.innerHTML = ""; 
 
     players.forEach(player => {
-        // 1. Handle Agent Name & Image
         let agentName = player.main_agent || "Unknown";
-        if (agentName !== "Unknown") {
-            agentName = agentName.charAt(0).toUpperCase() + agentName.slice(1);
-        } else {
-            agentName = "Jett"; // Fallback
-        }
         
-        // This points to your static assets folder
-        const agentImageFile = `${agentName}_Artwork-large.webp`;
+        // --- FIX FOR KAY/O ---
+        // We remove the "/" so the code looks for "Kayo_Artwork" instead of "KAY/O_Artwork"
+        let safeAgentName = agentName.replace("/", ""); 
+        
+        // Capitalize (e.g. "astra" -> "Astra")
+        if (safeAgentName !== "Unknown") {
+            safeAgentName = safeAgentName.charAt(0).toUpperCase() + safeAgentName.slice(1);
+        } else {
+            safeAgentName = "Jett"; 
+        }
+
+        // Image path
+        const agentImageFile = `${safeAgentName}_Artwork-large.webp`;
         const roleIcon = getRoleIcon(player.role);
 
-        // 2. Generate the HTML (The "Tech-Grid" Design)
         const cardHTML = `
         <div class="group relative flex-1 min-h-[400px] lg:min-h-0 lg:hover:flex-[2.5] transition-all duration-500 ease-in-out bg-surface-dark border border-[#482325] hover:border-primary rounded-lg overflow-hidden flex flex-col">
-            
             <div class="absolute inset-0 z-0">
                 <img alt="${agentName}" 
                      class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" 
@@ -63,7 +64,6 @@ function renderCards(players) {
             </div>
 
             <div class="relative z-20 flex flex-col h-full opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none lg:group-hover:pointer-events-auto p-6 lg:p-8">
-                
                 <div class="flex justify-between items-start mb-auto">
                     <div class="flex flex-col">
                         <h2 class="text-5xl font-bold text-white uppercase tracking-tighter mb-1">${player.name}</h2>
@@ -84,26 +84,17 @@ function renderCards(players) {
                         <p class="text-white text-xl font-bold font-mono text-primary">${agentName}</p>
                     </div>
                 </div>
-
-                <div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
+                
+                 <div class="bg-background-dark/80 backdrop-blur border border-[#482325] p-4 rounded mb-4">
                     <div class="flex items-center gap-3 text-sm text-gray-300">
                         <span class="material-symbols-outlined text-primary" style="font-size: 20px;">flag</span>
-                        <span>Region: <strong class="text-white uppercase">NA</strong></span>
+                        <span>Region: <strong class="text-white uppercase">EU</strong></span>
                     </div>
                 </div>
-
-                <a href="https://tracker.gg/valorant/profile/riot/${encodeURIComponent(player.name)}%23${encodeURIComponent(player.tag)}/overview" target="_blank" 
-                   class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-3 px-4 rounded flex items-center justify-center gap-2 uppercase text-sm tracking-wide transition-colors">
-                    <span class="material-symbols-outlined">bar_chart</span>
-                    View Tracker
-                </a>
             </div>
         </div>
         `;
-        
         container.innerHTML += cardHTML;
     });
 }
-
-// Initialize
 fetchTeamData();
