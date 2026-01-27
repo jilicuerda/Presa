@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Player Stats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ec131e", "background-dark": "#180e0f", "surface-dark": "#221011", "surface-card": "#2d1517" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
+    </script>
+    <style> .tech-border { border: 1px solid #482325; position: relative; } </style>
+</head>
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col">
+
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#482325] bg-background-dark/95 px-6 py-3">
+    <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2 text-white hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span> Back to Roster
+        </a>
+    </div>
+</header>
+
+<main class="flex-1 p-6">
+    <div class="max-w-[1920px] mx-auto h-full flex flex-col lg:flex-row gap-6">
+        
+        <aside class="lg:w-[380px] bg-surface-dark rounded-xl border border-[#482325] p-6 relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="mb-4">
+                    <h1 id="p-name" class="text-6xl font-bold text-white uppercase tracking-tighter leading-none mb-1">LOADING</h1>
+                    <p id="p-tag" class="text-gray-400 font-mono text-sm uppercase">#TAG</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-6 border-t border-white/10 pt-6">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Main Agent</p>
+                        <span id="p-agent" class="text-xl font-bold">...</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">Region</p>
+                        <span class="text-xl font-bold">EU</span>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute inset-0 z-0 opacity-20">
+                <img id="p-bg-img" src="" class="w-full h-full object-cover">
+            </div>
+        </aside>
+
+        <section class="flex-1 flex flex-col gap-4">
+            
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xl font-bold uppercase flex items-center gap-2">
+                    <span class="w-1 h-6 bg-primary block"></span> Performance
+                </h3>
+                <div class="flex gap-2">
+                    <button onclick="switchMode('ranked')" id="btn-ranked" class="px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded">Ranked</button>
+                    <button onclick="switchMode('scrims')" id="btn-scrims" class="px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded">Scrims</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 text-center">
+                    <h4 class="text-gray-400 text-sm font-bold uppercase mb-2">K/D Ratio</h4>
+                    <div id="stat-kd" class="text-5xl font-bold text-white">0.00</div>
+                </div>
+                <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 text-center">
+                    <h4 class="text-gray-400 text-sm font-bold uppercase mb-2">Win Rate</h4>
+                    <div id="stat-wr" class="text-5xl font-bold text-primary">0%</div>
+                </div>
+                <div class="bg-surface-dark border border-[#482325] rounded-xl p-6">
+                    <h4 class="text-gray-400 text-sm font-bold uppercase mb-2">Best Map</h4>
+                    <div id="stat-map" class="text-3xl font-bold text-white">Loading...</div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+</main>
+
+<script>
+    // Simple Inline JS to handle the data
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get("name");
+    const tag = params.get("tag");
+    const fixedAgent = params.get("agent"); // We pass the fixed agent from the previous page
+    
+    let globalData = null;
+
+    async function loadPlayer() {
+        document.getElementById('p-name').innerText = name;
+        document.getElementById('p-tag').innerText = "#" + tag;
+        document.getElementById('p-agent').innerText = fixedAgent;
+        
+        // Set Image
+        const safeAgent = fixedAgent.replace("/", ""); 
+        document.getElementById('p-bg-img').src = `/static/assets/agents/${safeAgent}_Artwork-large.webp`;
+
+        // Fetch Data
+        const res = await fetch(`/api/player/${name}/${tag}`);
+        globalData = await res.json();
+        
+        // Load Ranked by default
+        renderStats('ranked');
+    }
+
+    function renderStats(mode) {
+        // Toggle Buttons
+        document.getElementById('btn-ranked').className = mode === 'ranked' ? "px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded" : "px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded";
+        document.getElementById('btn-scrims').className = mode === 'scrims' ? "px-4 py-2 text-xs font-bold uppercase bg-primary text-white rounded" : "px-4 py-2 text-xs font-bold uppercase bg-transparent border border-[#482325] text-gray-400 rounded";
+
+        const stats = globalData[mode];
+        
+        // KD Calc
+        const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
+        document.getElementById('stat-kd').innerText = kd;
+
+        // WR Calc
+        // Note: Lifetime endpoint makes WR calculation tricky without precise w/l bools. 
+        // This is an estimation based on map stats.
+        let wins = 0;
+        let total = stats.total;
+        
+        // Find Best Map
+        let bestMap = "N/A";
+        let maxPlayed = 0;
+        for (const [mName, mStats] of Object.entries(stats.maps)) {
+            if (mStats.t > maxPlayed) {
+                maxPlayed = mStats.t;
+                bestMap = mName;
+            }
+        }
+        document.getElementById('stat-map').innerText = bestMap;
+        document.getElementById('stat-wr').innerText = total > 0 ? "N/A" : "0%"; // WR requires more precise API data
+    }
+
+    loadPlayer();
+</script>
+</body>
+</html>
