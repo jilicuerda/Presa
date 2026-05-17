@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Presa Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { 
+            darkMode: "class", 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        "primary": "#0348a2", 
+                        "accent": "#f7b003", 
+                        "background-dark": "#0a172a", 
+                        "surface-dark": "#0c1f38", 
+                        "surface-card": "#0f2747" 
+                    }, 
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] } 
+                } 
+            } 
+        }
+    </script>
+</head>
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col p-6 lg:p-10">
+
+    <header class="flex justify-between items-center mb-10 border-b border-[#0348a2]/30 pb-6">
+        <div class="flex items-center gap-4">
+            <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-12 w-12 object-contain">
+            <div>
+                <h1 class="text-3xl font-bold uppercase tracking-tighter">Command Center</h1>
+                <p class="text-accent text-sm font-mono uppercase tracking-widest">Admin Dashboard</p>
+            </div>
+        </div>
+        <a href="/" class="text-gray-400 hover:text-white flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined">logout</span> Exit
+        </a>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto w-full">
+        
+        <div class="bg-surface-dark border border-[#0348a2]/50 rounded-xl p-8 shadow-lg">
+            <h2 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-accent">
+                <span class="material-symbols-outlined">emoji_events</span> Create Tournament
+            </h2>
+            
+            <form id="form-tournament" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tournament Name</label>
+                    <input type="text" id="t-name" required placeholder="e.g. Premier Stage 8" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent transition-colors">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Team Division</label>
+                        <select id="t-division" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent transition-colors">
+                            <option value="main">Main Roster</option>
+                            <option value="academy">Academy Roster</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Placement (Optional)</label>
+                        <input type="text" id="t-placement" placeholder="e.g. 1st Place, Playoffs" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent transition-colors">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-primary hover:bg-accent hover:text-background-dark text-white font-bold uppercase tracking-widest py-3 rounded mt-4 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">add_circle</span> Save Tournament
+                </button>
+            </form>
+            <div id="t-status" class="mt-4 text-sm font-mono hidden"></div>
+        </div>
+
+        <div class="bg-surface-dark border border-[#0348a2]/50 rounded-xl p-8 shadow-lg opacity-50 pointer-events-none relative">
+            <div class="absolute inset-0 flex items-center justify-center z-10">
+                <div class="bg-background-dark border border-accent text-accent px-4 py-2 rounded font-bold uppercase tracking-widest shadow-xl">Under Construction</div>
+            </div>
+            <h2 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-white">
+                <span class="material-symbols-outlined">memory</span> Match Ingester
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Tournament</label>
+                    <select class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tracker.gg Link</label>
+                    <input type="text" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white">
+                </div>
+                <button class="w-full bg-gray-700 text-white font-bold uppercase tracking-widest py-3 rounded mt-4">Run Scraper</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto w-full mt-10">
+        <h3 class="text-lg font-bold uppercase tracking-wider mb-4 border-b border-[#0348a2]/30 pb-2">Database Records</h3>
+        <div class="bg-surface-dark rounded-xl overflow-hidden border border-[#0348a2]/30">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-[#0f2747] text-gray-400 uppercase tracking-wider font-mono text-xs">
+                    <tr>
+                        <th class="p-4">Tournament</th>
+                        <th class="p-4">Division</th>
+                        <th class="p-4">Placement</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#0348a2]/30">
+                    {% for t in tournaments %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="p-4 font-bold">{{ t.name }}</td>
+                        <td class="p-4 uppercase text-accent">{{ t.team_division }}</td>
+                        <td class="p-4">{{ t.placement or 'N/A' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="p-8 text-center text-gray-500 italic">No tournaments found in database.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('form-tournament').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('t-status');
+            status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+            status.innerText = "Saving to Database...";
+            status.classList.add('text-gray-400');
+
+            const payload = {
+                name: document.getElementById('t-name').value,
+                division: document.getElementById('t-division').value,
+                placement: document.getElementById('t-placement').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/add_tournament', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    status.innerText = "✅ Successfully saved!";
+                    status.classList.replace('text-gray-400', 'text-green-500');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    status.innerText = "❌ Error: " + data.error;
+                    status.classList.replace('text-gray-400', 'text-red-500');
+                }
+            } catch (err) {
+                status.innerText = "❌ Network Error.";
+                status.classList.replace('text-gray-400', 'text-red-500');
+            }
+        });
+    </script>
+</body>
+</html>
