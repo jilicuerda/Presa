@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Team Roster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ec131e", "background-dark": "#180e0f", "surface-dark": "#221011" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
+    </script>
+</head>
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col">
+
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#482325] bg-background-dark/95 backdrop-blur-md px-6 py-3">
+    <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="text-sm font-bold uppercase tracking-wider">Back Home</span>
+        </a>
+    </div>
+    <div class="flex items-center gap-3">
+        <img src="/static/assets/presa.png" alt="Logo" class="h-8 w-8 object-contain">
+        <h2 id="team-title" class="text-white text-lg font-bold uppercase tracking-tighter">LOADING ROSTER...</h2>
+    </div>
+</header>
+
+<main class="flex-1 p-6 lg:p-10 h-[calc(100vh-65px)] overflow-hidden">
+    <div id="roster-grid" class="flex flex-col lg:flex-row gap-4 h-full w-full max-w-[1920px] mx-auto">
+        <div class="text-gray-500 text-center w-full mt-20 flex flex-col items-center">
+            <span class="material-symbols-outlined text-6xl animate-spin mb-4">refresh</span>
+            <p>Syncing Riot API Data...</p>
+        </div>
+    </div>
+</main>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
