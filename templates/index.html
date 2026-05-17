@@ -8,7 +8,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ec131e", "background-dark": "#180e0f", "surface-dark": "#221011" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
+        tailwind.config = { 
+            darkMode: "class", 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        "primary": "#0348a2",       // Presa Blue
+                        "accent": "#f7b003",        // Presa Gold
+                        "background-dark": "#0a172a", // Deep navy background
+                        "surface-dark": "#0c1f38",    // Slightly lighter blue for cards
+                        "surface-card": "#0f2747"     // Hover states for cards
+                    }, 
+                    fontFamily: { 
+                        "display": ["Space Grotesk", "sans-serif"] 
+                    } 
+                } 
+            } 
+        }
     </script>
 </head>
 <body class="bg-background-dark text-white font-display min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
