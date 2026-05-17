@@ -8,21 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { 
-            darkMode: "class", 
-            theme: { 
-                extend: { 
-                    colors: { 
-                        "primary": "#0348a2", 
-                        "accent": "#f7b003", 
-                        "background-dark": "#0a172a", 
-                        "surface-dark": "#0c1f38", 
-                        "surface-card": "#0f2747" 
-                    }, 
-                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] } 
-                } 
-            } 
-        }
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#0348a2", "accent": "#f7b003", "background-dark": "#0a172a", "surface-dark": "#0c1f38", "surface-card": "#0f2747" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
     </script>
 </head>
 <body class="bg-background-dark text-white font-display min-h-screen flex flex-col p-6 lg:p-10">
@@ -41,32 +27,28 @@
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto w-full">
-        
         <div class="bg-surface-dark border border-[#0348a2]/50 rounded-xl p-8 shadow-lg">
             <h2 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-accent">
                 <span class="material-symbols-outlined">emoji_events</span> Create Tournament
             </h2>
-            
             <form id="form-tournament" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tournament Name</label>
-                    <input type="text" id="t-name" required placeholder="e.g. Premier Stage 8" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent transition-colors">
+                    <input type="text" id="t-name" required placeholder="e.g. Premier Stage 8" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Team Division</label>
-                        <select id="t-division" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent transition-colors">
+                        <select id="t-division" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
                             <option value="main">Main Roster</option>
                             <option value="academy">Academy Roster</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Placement (Optional)</label>
-                        <input type="text" id="t-placement" placeholder="e.g. 1st Place, Playoffs" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent transition-colors">
+                        <input type="text" id="t-placement" placeholder="e.g. 1st Place, Playoffs" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
                     </div>
                 </div>
-
                 <button type="submit" class="w-full bg-primary hover:bg-accent hover:text-background-dark text-white font-bold uppercase tracking-widest py-3 rounded mt-4 transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">add_circle</span> Save Tournament
                 </button>
@@ -74,24 +56,28 @@
             <div id="t-status" class="mt-4 text-sm font-mono hidden"></div>
         </div>
 
-        <div class="bg-surface-dark border border-[#0348a2]/50 rounded-xl p-8 shadow-lg opacity-50 pointer-events-none relative">
-            <div class="absolute inset-0 flex items-center justify-center z-10">
-                <div class="bg-background-dark border border-accent text-accent px-4 py-2 rounded font-bold uppercase tracking-widest shadow-xl">Under Construction</div>
-            </div>
+        <div class="bg-surface-dark border border-[#0348a2]/50 rounded-xl p-8 shadow-lg">
             <h2 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-white">
                 <span class="material-symbols-outlined">memory</span> Match Ingester
             </h2>
-            <div class="space-y-4">
+            <form id="form-ingest" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Tournament</label>
-                    <select class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white"></select>
+                    <select id="i-tourney" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
+                        {% for t in tournaments %}
+                            <option value="{{ t.id }}">{{ t.name }} ({{ t.team_division | upper }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tracker.gg Link</label>
-                    <input type="text" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tracker.gg Link or Match ID</label>
+                    <input type="text" id="i-link" required placeholder="https://tracker.gg/valorant/match/..." class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
                 </div>
-                <button class="w-full bg-gray-700 text-white font-bold uppercase tracking-widest py-3 rounded mt-4">Run Scraper</button>
-            </div>
+                <button type="submit" class="w-full bg-gray-700 hover:bg-white hover:text-black transition-colors text-white font-bold uppercase tracking-widest py-3 rounded mt-4 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">download</span> Run Scraper
+                </button>
+            </form>
+            <div id="i-status" class="mt-4 text-sm font-mono hidden"></div>
         </div>
     </div>
 
@@ -114,9 +100,7 @@
                         <td class="p-4">{{ t.placement or 'N/A' }}</td>
                     </tr>
                     {% else %}
-                    <tr>
-                        <td colspan="3" class="p-8 text-center text-gray-500 italic">No tournaments found in database.</td>
-                    </tr>
+                    <tr><td colspan="3" class="p-8 text-center text-gray-500 italic">No tournaments found in database.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -124,12 +108,12 @@
     </div>
 
     <script>
+        // Form 1: Create Tournament
         document.getElementById('form-tournament').addEventListener('submit', async (e) => {
             e.preventDefault();
             const status = document.getElementById('t-status');
-            status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+            status.className = "mt-4 text-sm font-mono text-gray-400";
             status.innerText = "Saving to Database...";
-            status.classList.add('text-gray-400');
 
             const payload = {
                 name: document.getElementById('t-name').value,
@@ -138,17 +122,47 @@
             };
 
             try {
-                const res = await fetch('/api/admin/add_tournament', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
+                const res = await fetch('/api/admin/add_tournament', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.success) {
                     status.innerText = "✅ Successfully saved!";
                     status.classList.replace('text-gray-400', 'text-green-500');
                     setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    status.innerText = "❌ Error: " + data.error;
+                    status.classList.replace('text-gray-400', 'text-red-500');
+                }
+            } catch (err) {
+                status.innerText = "❌ Network Error.";
+                status.classList.replace('text-gray-400', 'text-red-500');
+            }
+        });
+
+        // Form 2: Ingest Match
+        document.getElementById('form-ingest').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('i-status');
+            status.className = "mt-4 text-sm font-mono text-gray-400";
+            status.innerText = "Scanning Match Data (This takes a few seconds)...";
+
+            const payload = {
+                tournament_id: document.getElementById('i-tourney').value,
+                tracker_url: document.getElementById('i-link').value
+            };
+
+            if(!payload.tournament_id) {
+                status.innerText = "❌ Please create a tournament first.";
+                status.classList.replace('text-gray-400', 'text-red-500');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/ingest_match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.success) {
+                    status.innerText = "✅ Match stats saved to database!";
+                    status.classList.replace('text-gray-400', 'text-green-500');
+                    document.getElementById('i-link').value = ''; // clear input
                 } else {
                     status.innerText = "❌ Error: " + data.error;
                     status.classList.replace('text-gray-400', 'text-red-500');
