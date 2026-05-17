@@ -19,7 +19,7 @@ ROSTERS = {
         {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach"}
     ],
     "academy": [
-        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo"},
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade"},
         {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett"},
         {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen"},
