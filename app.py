@@ -9,21 +9,25 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 API_KEY = os.environ.get("HENRIK_KEY") 
 REGION = "eu"
 
-# --- MULTI-TEAM ROSTERS ---
+# --- MULTI-TEAM ROSTERS WITH SUBS & COACHES ---
 ROSTERS = {
     "main": [
-        {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra"},
-        {"name": "Obito", "tag": "ASCK", "role": "Sentinel", "fixed_agent": "Cypher"},
-        {"name": "Mont3", "tag": "LFT", "role": "Initiator", "fixed_agent": "Skye"},
-        {"name": "Oby", "tag": "F4W", "role": "Duelist", "fixed_agent": "Jett"},
-        {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach"}
+        {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra", "type": "player"},
+        {"name": "Obito", "tag": "ASCK", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
+        {"name": "Mont3", "tag": "LFT", "role": "Initiator", "fixed_agent": "Skye", "type": "player"},
+        {"name": "Oby", "tag": "F4W", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
+        {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
+        {"name": "CoRa", "tag": "FGR", "role": "Duelist", "fixed_agent": "Neon", "type": "sub"}
     ],
     "academy": [
-        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade"},
-        {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett"},
-        {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach"},
-        {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen"},
-        {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher"}
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo", "type": "player"},
+        {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
+        {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
+        {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
+        {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
+        {"name": "IsRasson", "tag": "SSJ", "role": "Sentinel", "fixed_agent": "Killjoy", "type": "sub"},
+        {"name": "CriskXK", "tag": "PRESA", "role": "Flex", "fixed_agent": "Waylay", "type": "sub"},
+        {"name": "zaka", "tag": "1734", "role": "Coach", "fixed_agent": "Kayo", "type": "coach"}
     ]
 }
 
@@ -184,7 +188,6 @@ def analyze_matches(matches):
 def home():
     return render_template('index.html')
 
-# NEW ROUTE: For the Roster Grid Page
 @app.route('/roster')
 def roster_page():
     return render_template('roster.html')
@@ -226,6 +229,8 @@ def get_player_detail(name, tag):
     
     if r.status_code == 200:
         all_data = r.json().get('data', [])
+        print(f"🔍 DEBUG: Found {len(all_data)} raw matches for {name}")
+        
         for m in all_data:
             if 'meta' not in m or 'mode' not in m['meta']: continue
             mode = m['meta']['mode'].lower()
