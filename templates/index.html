@@ -13,15 +13,13 @@
             theme: { 
                 extend: { 
                     colors: { 
-                        "primary": "#0348a2",       // Presa Blue
-                        "accent": "#f7b003",        // Presa Gold
-                        "background-dark": "#0a172a", // Deep navy background
-                        "surface-dark": "#0c1f38",    // Slightly lighter blue for cards
-                        "surface-card": "#0f2747"     // Hover states for cards
+                        "primary": "#0348a2", 
+                        "accent": "#f7b003", 
+                        "background-dark": "#0a172a", 
+                        "surface-dark": "#0c1f38", 
+                        "surface-card": "#0f2747" 
                     }, 
-                    fontFamily: { 
-                        "display": ["Space Grotesk", "sans-serif"] 
-                    } 
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] } 
                 } 
             } 
         }
@@ -32,15 +30,14 @@
     <div class="absolute inset-0 z-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-background-dark z-0"></div>
 
-    <div class="relative z-10 w-full max-w-5xl text-center">
-        <img src="/static/assets/presa.png" alt="Team Presa" class="mx-auto h-32 w-32 object-contain mb-8 drop-shadow-[0_0_15px_rgba(236,19,30,0.5)]">
+    <div class="relative z-10 w-full max-w-5xl text-center flex flex-col items-center">
+        <img src="/static/assets/LOGO_PRESA.png" alt="Team Presa" class="mx-auto h-32 w-32 object-contain mb-8 drop-shadow-[0_0_15px_rgba(3,72,162,0.5)]">
         
         <h1 class="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-4">TEAM PRESA</h1>
         <p class="text-gray-400 text-lg md:text-xl tracking-widest uppercase mb-16">Select Division</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <a href="/roster?team=main" class="group relative overflow-hidden rounded-2xl border border-[#482325] hover:border-primary transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-80">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+            <a href="/roster?team=main" class="group relative overflow-hidden rounded-2xl border border-[#0348a2]/50 hover:border-primary transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-80">
                 <div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors z-0"></div>
                 <span class="material-symbols-outlined text-6xl text-gray-500 group-hover:text-primary transition-colors mb-4 relative z-10">workspace_premium</span>
                 <h2 class="text-4xl font-bold text-white uppercase tracking-wider relative z-10">Main Roster</h2>
@@ -48,15 +45,18 @@
                 <div class="absolute bottom-0 w-full h-1 bg-primary transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
             </a>
 
-            <a href="/roster?team=academy" class="group relative overflow-hidden rounded-2xl border border-[#482325] hover:border-white transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-80">
-                <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0"></div>
-                <span class="material-symbols-outlined text-6xl text-gray-500 group-hover:text-white transition-colors mb-4 relative z-10">school</span>
+            <a href="/roster?team=academy" class="group relative overflow-hidden rounded-2xl border border-[#0348a2]/50 hover:border-accent transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-80">
+                <div class="absolute inset-0 bg-accent/0 group-hover:bg-accent/5 transition-colors z-0"></div>
+                <span class="material-symbols-outlined text-6xl text-gray-500 group-hover:text-accent transition-colors mb-4 relative z-10">school</span>
                 <h2 class="text-4xl font-bold text-white uppercase tracking-wider relative z-10">Academy</h2>
                 <p class="text-gray-500 mt-2 font-mono uppercase relative z-10 group-hover:text-white transition-colors">View Prospects</p>
-                <div class="absolute bottom-0 w-full h-1 bg-white transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                <div class="absolute bottom-0 w-full h-1 bg-accent transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
             </a>
-
         </div>
+
+        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="mt-16 flex items-center gap-2 text-gray-500 hover:text-[#5865F2] transition-colors font-bold uppercase tracking-widest text-sm bg-surface-dark/50 border border-white/5 px-6 py-3 rounded-full hover:border-[#5865F2]/50 hover:bg-surface-dark">
+            <span class="material-symbols-outlined">forum</span> Join the Community
+        </a>
     </div>
 </body>
 </html>
