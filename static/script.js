@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
         titleEl.innerText = teamID === 'main' ? 'PRESA MAIN' : 'PRESA ACADEMY';
     }
 
-    // Set dynamic Gankster link
     const ganksterBtn = document.getElementById('btn-gankster');
     if (ganksterBtn) {
         ganksterBtn.href = GANKSTER_LINKS[teamID] || "#";
@@ -113,7 +112,8 @@ function getRoleIcon(role) {
     return "sports_esports";
 }
 
-function generateCardHTML(player) {
+// Added delayIndex parameter to stagger the animations
+function generateCardHTML(player, delayIndex) {
     let agentName = player.main_agent || "Jett";
     let cleanName = agentName.replace("/", ""); 
     let safeAgentName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
@@ -122,8 +122,11 @@ function generateCardHTML(player) {
     const roleIcon = getRoleIcon(player.role);
     const profileLink = `/player?name=${encodeURIComponent(player.name)}&tag=${encodeURIComponent(player.tag)}&agent=${encodeURIComponent(safeAgentName)}`;
 
+    // Stagger delay: 100ms per card
+    const delay = delayIndex * 100;
+
     return `
-    <div class="group relative min-h-[400px] w-full transition-all duration-500 ease-in-out bg-surface-dark border border-[#0348a2]/50 hover:border-accent rounded-lg overflow-hidden flex flex-col">
+    <div class="group relative min-h-[400px] w-full transition-all duration-500 ease-in-out bg-surface-dark border border-[#0348a2]/50 hover:border-accent rounded-lg overflow-hidden flex flex-col opacity-0 animate-fade-in-up" style="animation-delay: ${delay}ms;">
         <div class="absolute inset-0 z-0">
             <img alt="${agentName}" 
                  class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500 filter grayscale group-hover:grayscale-0" 
@@ -179,35 +182,52 @@ function renderCards(players) {
     const substitutes = players.filter(p => p.type === 'sub');
     const coaches = players.filter(p => p.type === 'coach');
 
+    let delayCounter = 0; // Track the delay across all sections
+
     if (activeRoster.length > 0) {
         let section = `<div class="w-full">
-            <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3">
+            <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3 opacity-0 animate-fade-in-up" style="animation-delay: ${delayCounter * 100}ms;">
                 <span class="material-symbols-outlined text-primary">group</span> Starting Lineup
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-        activeRoster.forEach(p => { section += generateCardHTML(p); });
+        delayCounter++; // Increment after header
+        
+        activeRoster.forEach(p => { 
+            section += generateCardHTML(p, delayCounter); 
+            delayCounter++;
+        });
         section += `</div></div>`;
         container.innerHTML += section;
     }
 
     if (substitutes.length > 0) {
         let section = `<div class="w-full mt-8">
-            <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3">
+            <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3 opacity-0 animate-fade-in-up" style="animation-delay: ${delayCounter * 100}ms;">
                 <span class="material-symbols-outlined text-accent">swap_horiz</span> Substitutes
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-        substitutes.forEach(p => { section += generateCardHTML(p); });
+        delayCounter++; 
+        
+        substitutes.forEach(p => { 
+            section += generateCardHTML(p, delayCounter); 
+            delayCounter++;
+        });
         section += `</div></div>`;
         container.innerHTML += section;
     }
 
     if (coaches.length > 0) {
         let section = `<div class="w-full mt-8">
-            <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3">
+            <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3 opacity-0 animate-fade-in-up" style="animation-delay: ${delayCounter * 100}ms;">
                 <span class="material-symbols-outlined text-white">school</span> Coaching Staff
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-        coaches.forEach(p => { section += generateCardHTML(p); });
+        delayCounter++;
+        
+        coaches.forEach(p => { 
+            section += generateCardHTML(p, delayCounter); 
+            delayCounter++;
+        });
         section += `</div></div>`;
         container.innerHTML += section;
     }
