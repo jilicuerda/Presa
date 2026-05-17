@@ -3,87 +3,44 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Team Roster</title>
+    <title>Team Presa - Select Division</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#ec131e",
-                        "background-light": "#f8f6f6",
-                        "background-dark": "#221011",
-                        "surface-dark": "#2d1517", 
-                    },
-                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
-                    animation: { 'scroll': 'scroll 20s linear infinite' },
-                    keyframes: {
-                        scroll: {
-                            '0%': { transform: 'translateX(100%)' },
-                            '100%': { transform: 'translateX(-100%)' },
-                        }
-                    }
-                },
-            },
-        }
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#ec131e", "background-dark": "#180e0f", "surface-dark": "#221011" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] } } } }
     </script>
-    <style>
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #221011; }
-        ::-webkit-scrollbar-thumb { background: #482325; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ec131e; }
-    </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden min-h-screen flex flex-col">
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    
+    <div class="absolute inset-0 z-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-background-dark z-0"></div>
 
-<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-[#482325] bg-background-dark/95 backdrop-blur-sm px-6 lg:px-10 py-3">
-    <div class="flex items-center gap-4 text-white">
-        <div class="size-8 text-primary"><span class="material-symbols-outlined text-3xl">sports_esports</span></div>
-        <h2 class="text-white text-xl font-bold uppercase">TEAM PRESA</h2>
-    </div>
-    <div class="hidden md:flex flex-1 justify-end gap-8 items-center">
-        <div class="flex items-center gap-9">
-            <a class="text-white/70 hover:text-white text-sm font-medium transition-colors" href="#">ROSTER</a>
-            <a class="text-white/70 hover:text-white text-sm font-medium transition-colors" href="#">STATS</a>
+    <div class="relative z-10 w-full max-w-5xl text-center">
+        <img src="/static/assets/presa.png" alt="Team Presa" class="mx-auto h-32 w-32 object-contain mb-8 drop-shadow-[0_0_15px_rgba(236,19,30,0.5)]">
+        
+        <h1 class="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-4">TEAM PRESA</h1>
+        <p class="text-gray-400 text-lg md:text-xl tracking-widest uppercase mb-16">Select Division</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <a href="/roster?team=main" class="group relative overflow-hidden rounded-2xl border border-[#482325] hover:border-primary transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-80">
+                <div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors z-0"></div>
+                <span class="material-symbols-outlined text-6xl text-gray-500 group-hover:text-primary transition-colors mb-4 relative z-10">workspace_premium</span>
+                <h2 class="text-4xl font-bold text-white uppercase tracking-wider relative z-10">Main Roster</h2>
+                <p class="text-gray-500 mt-2 font-mono uppercase relative z-10 group-hover:text-white transition-colors">View Tier 1 Stats</p>
+                <div class="absolute bottom-0 w-full h-1 bg-primary transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
+            </a>
+
+            <a href="/roster?team=academy" class="group relative overflow-hidden rounded-2xl border border-[#482325] hover:border-white transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-80">
+                <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0"></div>
+                <span class="material-symbols-outlined text-6xl text-gray-500 group-hover:text-white transition-colors mb-4 relative z-10">school</span>
+                <h2 class="text-4xl font-bold text-white uppercase tracking-wider relative z-10">Academy</h2>
+                <p class="text-gray-500 mt-2 font-mono uppercase relative z-10 group-hover:text-white transition-colors">View Prospects</p>
+                <div class="absolute bottom-0 w-full h-1 bg-white transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
+            </a>
+
         </div>
     </div>
-</header>
-
-<main class="flex-1 flex flex-col relative">
-    <div class="px-6 lg:px-40 pt-8 pb-4">
-        <div class="flex flex-col md:flex-row justify-between items-end border-b border-[#482325] pb-4">
-            <div>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="bg-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border border-primary/20">Live Stats</span>
-                    <span class="text-gray-400 text-xs font-medium uppercase tracking-wider">Season 25</span>
-                </div>
-                <h1 class="text-white text-4xl lg:text-5xl font-bold leading-none uppercase tracking-tighter">Active Roster</h1>
-            </div>
-        </div>
-    </div>
-
-    <div id="roster-grid" class="flex-1 px-6 lg:px-10 pb-16 flex flex-col lg:flex-row gap-2 h-auto lg:h-[650px] w-full max-w-[1600px] mx-auto">
-        <div class="w-full text-center mt-20 text-gray-500">Loading Data...</div>
-    </div>
-</main>
-
-<footer class="bg-primary/10 border-t border-[#482325] py-3 overflow-hidden">
-    <div class="whitespace-nowrap flex animate-scroll gap-8">
-        <span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
-            <span class="text-primary material-symbols-outlined text-sm">bolt</span> TEAM PRESA ONLINE
-        </span>
-        <span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
-            <span class="text-primary material-symbols-outlined text-sm">favorite</span> SUPPORT THE SQUAD
-        </span>
-        <span class="text-white/80 font-mono text-sm uppercase flex items-center gap-2">
-            <span class="text-primary material-symbols-outlined text-sm">verified</span> ROAD TO RADIANT
-        </span>
-    </div>
-</footer>
-
-<script src="/static/script.js"></script>
 </body>
 </html>
