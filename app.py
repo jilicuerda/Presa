@@ -9,12 +9,13 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 API_KEY = os.environ.get("HENRIK_KEY") 
 REGION = "eu"
 
+# --- UPDATED ROSTER ---
 ROSTER = [
-    {"name": "Jilicuerda", "tag": "1734", "role": "Initiator", "fixed_agent": "Kayo"},
-    {"name": "CriskXK", "tag": "PRESA", "role": "Duelist", "fixed_agent": "Waylay"},
-    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade"},
-    {"name": "Cleezzy", "tag": "Reina", "role": "Sentinel", "fixed_agent": "Chamber"},
-    {"name": "Liu Zhigang", "tag": "#TAP", "role": "Smoker", "fixed_agent": "Astra"}
+    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo"},
+    {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett"},
+    {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach"},
+    {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen"},
+    {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher"}
 ]
 
 cache = {
@@ -61,7 +62,7 @@ def analyze_roles(matches):
     AGENT_ROLES = {
         "Jett": "Duelist", "Raze": "Duelist", "Reyna": "Duelist", "Phoenix": "Duelist", "Yoru": "Duelist", "Neon": "Duelist", "Iso": "Duelist",
         "Omen": "Controller", "Brimstone": "Controller", "Viper": "Controller", "Astra": "Controller", "Harbor": "Controller", "Clove": "Controller",
-        "Sova": "Initiator", "Breach": "Initiator", "Skye": "Initiator", "KAY/O": "Initiator", "Fade": "Initiator", "Gekko": "Initiator",
+        "Sova": "Initiator", "Breach": "Initiator", "Skye": "Initiator", "KAY/O": "Initiator", "Kayo": "Initiator", "Fade": "Initiator", "Gekko": "Initiator",
         "Sage": "Sentinel", "Cypher": "Sentinel", "Killjoy": "Sentinel", "Chamber": "Sentinel", "Deadlock": "Sentinel", "Vyse": "Sentinel"
     }
 
@@ -172,7 +173,7 @@ def analyze_matches(matches):
         sorted_agents.append({"name": a_name, "matches": a_data['matches'], "win_rate": wr})
     stats['top_agents'] = sorted(sorted_agents, key=lambda x: x['matches'], reverse=True)
     
-    # NEW: Attach Roles
+    # Attach Roles
     stats['roles'] = analyze_roles(matches)
     
     return stats
@@ -201,6 +202,9 @@ def get_roster_history():
 def get_player_detail(name, tag):
     p_key = f"{name}#{tag}"
     current_time = time.time()
+    
+    if p_key in cache["player_details"] and (current_time - cache["player_details"][p_key]['time'] < 600):
+        return jsonify(cache["player_details"][p_key]['data'])
     
     safe_name = urllib.parse.quote(name)
     safe_tag = urllib.parse.quote(tag)
@@ -235,9 +239,9 @@ def get_player_detail(name, tag):
         "ranked": analyze_matches(ranked_matches),
         "scrims": analyze_matches(scrim_matches)
     }
+    cache["player_details"][p_key] = {"time": current_time, "data": data}
     return jsonify(data)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
