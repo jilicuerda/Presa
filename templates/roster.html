@@ -8,30 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { 
-            darkMode: "class", 
-            theme: { 
-                extend: { 
-                    colors: { 
-                        "primary": "#0348a2", 
-                        "accent": "#f7b003", 
-                        "background-dark": "#0a172a", 
-                        "surface-dark": "#0c1f38", 
-                        "surface-card": "#0f2747" 
-                    }, 
-                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(30px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards'
-                    }
-                } 
-            } 
-        }
+        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary": "#0348a2", "accent": "#f7b003", "background-dark": "#0a172a", "surface-dark": "#0c1f38", "surface-card": "#0f2747" }, fontFamily: { "display": ["Space Grotesk", "sans-serif"] }, keyframes: { fadeInUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' }, } }, animation: { 'fade-in-up': 'fadeInUp 0.6s ease-out forwards' } } } }
     </script>
 </head>
 <body class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden">
@@ -43,35 +20,21 @@
             <span class="text-sm font-bold uppercase tracking-wider hidden md:block">Back Home</span>
         </a>
     </div>
-    
     <div class="flex items-center gap-3 absolute left-1/2 -translate-x-1/2">
         <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-8 w-8 object-contain">
         <h2 id="team-title" class="text-white text-lg md:text-xl font-bold uppercase tracking-tighter">LOADING ROSTER...</h2>
     </div>
-    
     <div class="flex items-center gap-4">
-        
-        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="hidden md:flex items-center gap-2 text-[#5865F2] hover:text-white transition-colors text-xs font-bold uppercase tracking-wider">
-            <span class="material-symbols-outlined text-base">forum</span>
-            Discord Server
-        </a>
-
-        <a id="btn-gankster" href="#" target="_blank" class="hidden md:flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider">
-            <span class="material-symbols-outlined text-base">sports_esports</span>
-            Gankster
-        </a>
-
+        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="hidden md:flex items-center gap-2 text-[#5865F2] hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"><span class="material-symbols-outlined text-base">forum</span>Discord Server</a>
+        <a id="btn-gankster" href="#" target="_blank" class="hidden md:flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"><span class="material-symbols-outlined text-base">sports_esports</span>Gankster</a>
         <div class="h-4 w-px bg-white/10 hidden md:block"></div>
-
-        <button onclick="toggleContactModal()" class="flex items-center gap-2 bg-[#0348a2]/20 border border-[#0348a2]/50 text-accent hover:bg-[#0348a2] hover:text-white px-3 md:px-4 py-1.5 md:py-2 rounded transition-all text-xs md:text-sm font-bold uppercase tracking-wide">
-            <span class="material-symbols-outlined text-base">support_agent</span>
-            <span class="hidden md:block">Contact Staff</span>
-            <span class="md:hidden">Contact</span>
-        </button>
+        <button onclick="toggleContactModal()" class="flex items-center gap-2 bg-[#0348a2]/20 border border-[#0348a2]/50 text-accent hover:bg-[#0348a2] hover:text-white px-3 md:px-4 py-1.5 md:py-2 rounded transition-all text-xs md:text-sm font-bold uppercase tracking-wide"><span class="material-symbols-outlined text-base">support_agent</span><span class="hidden md:block">Contact Staff</span><span class="md:hidden">Contact</span></button>
     </div>
 </header>
 
 <main class="flex-1 p-6 lg:p-10 w-full overflow-y-auto">
+    <div id="trophy-cabinet" class="w-full max-w-[1920px] mx-auto mb-12 hidden"></div>
+
     <div id="roster-grid" class="flex flex-col gap-12 w-full max-w-[1920px] mx-auto pb-12">
         <div class="text-gray-500 text-center w-full mt-20 flex flex-col items-center">
             <span class="material-symbols-outlined text-6xl animate-spin mb-4 text-primary">refresh</span>
@@ -82,19 +45,11 @@
 
 <div id="contact-modal" class="fixed inset-0 z-[100] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-surface-dark border border-[#0348a2] rounded-xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 shadow-[0_0_30px_rgba(3,72,162,0.3)]" id="contact-modal-content">
-        
         <div class="bg-[#0f2747] p-4 flex justify-between items-center border-b border-[#0348a2]/50">
-            <h3 class="text-xl font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                <span class="material-symbols-outlined text-accent">support_agent</span>
-                Management
-            </h3>
-            <button onclick="toggleContactModal()" class="text-gray-400 hover:text-white transition-colors">
-                <span class="material-symbols-outlined">close</span>
-            </button>
+            <h3 class="text-xl font-bold uppercase tracking-wider text-white flex items-center gap-2"><span class="material-symbols-outlined text-accent">support_agent</span>Management</h3>
+            <button onclick="toggleContactModal()" class="text-gray-400 hover:text-white transition-colors"><span class="material-symbols-outlined">close</span></button>
         </div>
-
-        <div id="contact-modal-body" class="p-6 space-y-4">
-            </div>
+        <div id="contact-modal-body" class="p-6 space-y-4"></div>
     </div>
 </div>
 
