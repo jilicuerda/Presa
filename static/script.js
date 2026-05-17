@@ -1,11 +1,31 @@
-const API_URL = "/api/team-history";
+// 1. Figure out which team we are looking at
+const params = new URLSearchParams(window.location.search);
+const teamID = params.get('team') || 'main'; // Default to main
+
+// 2. Point to the specific Team API
+const API_URL = `/api/team-history/${teamID}`;
+
+// 3. Update the Title on the page
+document.addEventListener("DOMContentLoaded", () => {
+    const titleEl = document.getElementById('team-title');
+    if (titleEl) {
+        titleEl.innerText = teamID === 'main' ? 'PRESA MAIN' : 'PRESA ACADEMY';
+    }
+});
 
 async function fetchTeamData() {
     const container = document.getElementById('roster-grid');
-    
+    if (!container) return; // Prevent errors if running on a different page
+
     try {
         const response = await fetch(API_URL);
         const data = await response.json();
+        
+        if(data.error) {
+            container.innerHTML = `<div class='text-red-500 text-center w-full mt-10'>Error: ${data.error}</div>`;
+            return;
+        }
+
         renderCards(data.roster);
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -28,18 +48,14 @@ function renderCards(players) {
     container.innerHTML = ""; 
 
     players.forEach(player => {
-        // Use the Fixed Agent from Python, or fallback to Jett
         let agentName = player.main_agent || "Jett";
         
-        // Ensure proper capitalization (e.g. "Kayo" -> "Kayo")
         let cleanName = agentName.replace("/", ""); 
         let safeAgentName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
 
         const agentImageFile = `${safeAgentName}_Artwork-large.webp`;
         const roleIcon = getRoleIcon(player.role);
 
-        // GENERATE LINK TO PLAYER DETAIL PAGE
-        // We encode the URI components to handle spaces and hash tags safely
         const profileLink = `/player?name=${encodeURIComponent(player.name)}&tag=${encodeURIComponent(player.tag)}&agent=${encodeURIComponent(safeAgentName)}`;
 
         const cardHTML = `
@@ -99,4 +115,8 @@ function renderCards(players) {
         container.innerHTML += cardHTML;
     });
 }
-fetchTeamData();
+
+// Only fetch if we are actually on the roster page
+if(document.getElementById('roster-grid')) {
+    fetchTeamData();
+}
