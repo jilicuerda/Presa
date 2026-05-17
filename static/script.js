@@ -1,21 +1,90 @@
-// 1. Figure out which team we are looking at
 const params = new URLSearchParams(window.location.search);
-const teamID = params.get('team') || 'main'; // Default to main
-
-// 2. Point to the specific Team API
+const teamID = params.get('team') || 'main'; 
 const API_URL = `/api/team-history/${teamID}`;
 
-// 3. Update the Title on the page
+// --- TEAM LINKS DATABASE ---
+const GANKSTER_LINKS = {
+    "main": "https://valorant.gankster.gg/teams/117773/presa",
+    "academy": "https://valorant.gankster.gg/teams/128676/presa-acy"
+};
+
+// --- CONTACT DATABASE ---
+const STAFF_CONTACTS = {
+    "main": [
+        { role: "General Manager", name: "Team Manager", discordId: "286632547285467137" }
+    ],
+    "academy": [
+        { role: "General Manager", name: "Team Manager", discordId: "286632547285467137" },
+        { role: "Academy Coach", name: "zaka", discordId: "371369284351557662" }
+    ]
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     const titleEl = document.getElementById('team-title');
     if (titleEl) {
         titleEl.innerText = teamID === 'main' ? 'PRESA MAIN' : 'PRESA ACADEMY';
     }
+
+    // Set dynamic Gankster link
+    const ganksterBtn = document.getElementById('btn-gankster');
+    if (ganksterBtn) {
+        ganksterBtn.href = GANKSTER_LINKS[teamID] || "#";
+    }
 });
 
+// --- CONTACT MODAL LOGIC ---
+let isModalOpen = false;
+
+function toggleContactModal() {
+    const modal = document.getElementById('contact-modal');
+    const content = document.getElementById('contact-modal-content');
+    const body = document.getElementById('contact-modal-body');
+    
+    if (!isModalOpen) {
+        const staff = STAFF_CONTACTS[teamID];
+        body.innerHTML = "";
+        
+        staff.forEach(person => {
+            body.innerHTML += `
+            <div class="bg-[#0f2747] p-4 rounded-lg border border-white/5 flex justify-between items-center group hover:border-[#0348a2]/50 transition-colors">
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">${person.role}</p>
+                    <p class="text-white font-bold text-lg leading-none">${person.name}</p>
+                </div>
+                <a href="https://discord.com/users/${person.discordId}" target="_blank" rel="noopener noreferrer" class="bg-[#5865F2] hover:bg-[#4752C4] text-white px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-colors">
+                    <span class="material-symbols-outlined text-base">chat</span>
+                    DM
+                </a>
+            </div>
+            `;
+        });
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+        }, 10);
+    } else {
+        modal.classList.add('opacity-0');
+        content.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+    isModalOpen = !isModalOpen;
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('contact-modal');
+    if (event.target === modal) {
+        toggleContactModal();
+    }
+}
+
+// --- EXISTING ROSTER LOGIC ---
 async function fetchTeamData() {
     const container = document.getElementById('roster-grid');
-    if (!container) return; // Prevent errors if running on a different page
+    if (!container) return; 
 
     try {
         const response = await fetch(API_URL);
@@ -106,52 +175,44 @@ function renderCards(players) {
     const container = document.getElementById('roster-grid');
     container.innerHTML = ""; 
 
-    // Group the players by their "type"
     const activeRoster = players.filter(p => p.type === 'player' || !p.type);
     const substitutes = players.filter(p => p.type === 'sub');
     const coaches = players.filter(p => p.type === 'coach');
 
-    // 1. Render Starting Lineup
     if (activeRoster.length > 0) {
         let section = `<div class="w-full">
             <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3">
                 <span class="material-symbols-outlined text-primary">group</span> Starting Lineup
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-        
         activeRoster.forEach(p => { section += generateCardHTML(p); });
         section += `</div></div>`;
         container.innerHTML += section;
     }
 
-    // 2. Render Substitutes
     if (substitutes.length > 0) {
-        let section = `<div class="w-full">
+        let section = `<div class="w-full mt-8">
             <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3">
                 <span class="material-symbols-outlined text-accent">swap_horiz</span> Substitutes
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-        
         substitutes.forEach(p => { section += generateCardHTML(p); });
         section += `</div></div>`;
         container.innerHTML += section;
     }
 
-    // 3. Render Coaches
     if (coaches.length > 0) {
-        let section = `<div class="w-full">
+        let section = `<div class="w-full mt-8">
             <h3 class="text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-3 border-b border-[#0348a2]/30 pb-3">
                 <span class="material-symbols-outlined text-white">school</span> Coaching Staff
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-        
         coaches.forEach(p => { section += generateCardHTML(p); });
         section += `</div></div>`;
         container.innerHTML += section;
     }
 }
 
-// Only fetch if we are actually on the roster page
 if(document.getElementById('roster-grid')) {
     fetchTeamData();
 }
