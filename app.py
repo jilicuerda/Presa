@@ -2,7 +2,6 @@ import os
 import time
 import requests
 import urllib.parse
-import re
 from functools import wraps
 from flask import Flask, jsonify, render_template, request, Response
 from supabase import create_client, Client
@@ -19,7 +18,9 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = None
 if SUPABASE_URL and SUPABASE_KEY:
     try:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        # Strip any trailing slashes or paths just in case
+        clean_url = SUPABASE_URL.split('/rest/v1')[0].rstrip('/')
+        supabase = create_client(clean_url, SUPABASE_KEY)
         print("✅ Supabase connection initialized.")
     except Exception as e:
         print(f"❌ Supabase init error: {e}")
@@ -43,7 +44,7 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# --- MULTI-TEAM ROSTERS WITH SUBS & COACHES ---
+# --- ROSTERS ---
 ROSTERS = {
     "main": [
         {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra", "type": "player"},
@@ -54,7 +55,7 @@ ROSTERS = {
         {"name": "CoRa", "tag": "FGR", "role": "Duelist", "fixed_agent": "Neon", "type": "sub"}
     ],
     "academy": [
-        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo", "type": "player"},
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade", "type": "player"},
         {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
@@ -92,128 +93,73 @@ def update_roster_ranks(team_id):
                 rank = data.get('currenttierpatched')
                 if rank: stats['rank'] = rank
             time.sleep(0.5) 
-        except Exception as e:
-            print(f"❌ Error {player['name']}: {e}")
+        except:
+            pass
         updated_roster.append(stats)
     return updated_roster
 
+# ... (Keep analyze_roles and analyze_matches exactly the same as before) ...
 def analyze_roles(matches):
-    role_stats = {
-        "Duelist": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0},
-        "Controller": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0},
-        "Initiator": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0},
-        "Sentinel": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}
-    }
-    
-    AGENT_ROLES = {
-        "Jett": "Duelist", "Raze": "Duelist", "Reyna": "Duelist", "Phoenix": "Duelist", "Yoru": "Duelist", "Neon": "Duelist", "Iso": "Duelist",
-        "Omen": "Controller", "Brimstone": "Controller", "Viper": "Controller", "Astra": "Controller", "Harbor": "Controller", "Clove": "Controller",
-        "Sova": "Initiator", "Breach": "Initiator", "Skye": "Initiator", "KAY/O": "Initiator", "Kayo": "Initiator", "Fade": "Initiator", "Gekko": "Initiator",
-        "Sage": "Sentinel", "Cypher": "Sentinel", "Killjoy": "Sentinel", "Chamber": "Sentinel", "Deadlock": "Sentinel", "Vyse": "Sentinel"
-    }
-
+    role_stats = {"Duelist": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}, "Controller": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}, "Initiator": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}, "Sentinel": {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}}
+    AGENT_ROLES = {"Jett": "Duelist", "Raze": "Duelist", "Reyna": "Duelist", "Phoenix": "Duelist", "Yoru": "Duelist", "Neon": "Duelist", "Iso": "Duelist", "Omen": "Controller", "Brimstone": "Controller", "Viper": "Controller", "Astra": "Controller", "Harbor": "Controller", "Clove": "Controller", "Sova": "Initiator", "Breach": "Initiator", "Skye": "Initiator", "KAY/O": "Initiator", "Kayo": "Initiator", "Fade": "Initiator", "Gekko": "Initiator", "Sage": "Sentinel", "Cypher": "Sentinel", "Killjoy": "Sentinel", "Chamber": "Sentinel", "Deadlock": "Sentinel", "Vyse": "Sentinel"}
     for m in matches:
         if 'meta' not in m or 'stats' not in m: continue
-        
-        agent = m.get('meta', {}).get('character', {}).get('name')
-        if not agent: agent = m.get('stats', {}).get('character', {}).get('name')
-        
+        agent = m.get('meta', {}).get('character', {}).get('name') or m.get('stats', {}).get('character', {}).get('name')
         role = AGENT_ROLES.get(agent, "Flex")
         if role not in role_stats: continue 
-
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
-        
         my_team = m.get('stats', {}).get('team', '').lower()
         blue = m['teams']['blue']
         red = m['teams']['red']
-        winner = "blue" if blue > red else "red"
-        is_win = (my_team == winner)
-
+        is_win = (my_team == ("blue" if blue > red else "red"))
         role_stats[role]['matches'] += 1
         role_stats[role]['kills'] += k
         role_stats[role]['deaths'] += d
         if is_win: role_stats[role]['wins'] += 1
-
     radar = { "Duelist": 0, "Controller": 0, "Initiator": 0, "Sentinel": 0, "Slayer": 0 }
-    total_kd = 0
-    total_matches = 0
-
+    total_kd = 0; total_matches = 0
     for role, data in role_stats.items():
         if data['matches'] > 0:
-            wr = int((data['wins'] / data['matches']) * 100)
-            radar[role] = wr
+            radar[role] = int((data['wins'] / data['matches']) * 100)
             total_kd += (data['kills'] / data['deaths']) if data['deaths'] > 0 else data['kills']
             total_matches += 1
-
-    if total_matches > 0:
-        avg_kd = total_kd / total_matches
-        slayer_score = min(max((avg_kd - 0.5) * 66, 0), 100) 
-        radar["Slayer"] = int(slayer_score)
-
+    if total_matches > 0: radar["Slayer"] = int(min(max(((total_kd / total_matches) - 0.5) * 66, 0), 100))
     return {"stats": role_stats, "radar": radar}
 
 def analyze_matches(matches):
-    stats = {
-        "wins": 0, "total": 0, "kills": 0, "deaths": 0,
-        "agents": {}, "maps": {}, "best_map": "N/A"
-    }
-    
+    stats = {"wins": 0, "total": 0, "kills": 0, "deaths": 0, "agents": {}, "maps": {}, "best_map": "N/A"}
     for m in matches:
         if 'meta' not in m or 'stats' not in m: continue
-        
-        agent = m.get('meta', {}).get('character', {}).get('name')
-        if not agent: agent = m.get('stats', {}).get('character', {}).get('name')
-        if not agent: continue
-        
+        agent = m.get('meta', {}).get('character', {}).get('name') or m.get('stats', {}).get('character', {}).get('name')
         map_name = m.get('meta', {}).get('map', {}).get('name')
-        if not map_name: continue
-
         my_team = m.get('stats', {}).get('team')
-        if not my_team: continue
+        if not agent or not map_name or not my_team: continue
         my_team = my_team.lower()
-
-        stats['total'] += 1
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
+        stats['total'] += 1
         stats['kills'] += k
         stats['deaths'] += d
-
-        blue = m['teams']['blue']
-        red = m['teams']['red']
-        winner = "blue" if blue > red else "red"
-        is_win = (my_team == winner)
+        is_win = (my_team == ("blue" if m['teams']['blue'] > m['teams']['red'] else "red"))
         if is_win: stats['wins'] += 1
-
         if agent not in stats['agents']: stats['agents'][agent] = {"matches": 0, "wins": 0}
         stats['agents'][agent]['matches'] += 1
         if is_win: stats['agents'][agent]['wins'] += 1
-
         if map_name not in stats['maps']: stats['maps'][map_name] = {"matches": 0, "wins": 0, "kills": 0, "deaths": 0}
         stats['maps'][map_name]['matches'] += 1
         if is_win: stats['maps'][map_name]['wins'] += 1
         stats['maps'][map_name]['kills'] += k
         stats['maps'][map_name]['deaths'] += d
-
-    sorted_maps = []
-    for m_name, m_data in stats['maps'].items():
-        wr = int((m_data['wins'] / m_data['matches']) * 100) if m_data['matches'] > 0 else 0
-        kd = round(m_data['kills'] / m_data['deaths'], 2) if m_data['deaths'] > 0 else m_data['kills']
-        sorted_maps.append({"name": m_name, "matches": m_data['matches'], "win_rate": wr, "kd": kd})
+    sorted_maps = [{"name": m, "matches": d['matches'], "win_rate": int((d['wins']/d['matches'])*100) if d['matches']>0 else 0, "kd": round(d['kills']/d['deaths'],2) if d['deaths']>0 else d['kills']} for m, d in stats['maps'].items()]
     stats['top_maps'] = sorted(sorted_maps, key=lambda x: x['matches'], reverse=True)
     if stats['top_maps']: stats['best_map'] = stats['top_maps'][0]['name']
-
-    sorted_agents = []
-    for a_name, a_data in stats['agents'].items():
-        wr = int((a_data['wins'] / a_data['matches']) * 100) if a_data['matches'] > 0 else 0
-        sorted_agents.append({"name": a_name, "matches": a_data['matches'], "win_rate": wr})
+    sorted_agents = [{"name": a, "matches": d['matches'], "win_rate": int((d['wins']/d['matches'])*100) if d['matches']>0 else 0} for a, d in stats['agents'].items()]
     stats['top_agents'] = sorted(sorted_agents, key=lambda x: x['matches'], reverse=True)
-    
     stats['roles'] = analyze_roles(matches)
     return stats
 
 # --- PUBLIC ROUTES ---
-
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -228,96 +174,134 @@ def player_page():
 
 @app.route('/api/team-history/<team_id>')
 def get_roster_history(team_id):
-    if team_id not in ROSTERS:
-        return jsonify({"error": "Invalid team"}), 400
-
+    if team_id not in ROSTERS: return jsonify({"error": "Invalid team"}), 400
     current_time = time.time()
     if not cache["roster_data"][team_id] or (current_time - cache["last_updated"][team_id] > 1800):
         new_data = update_roster_ranks(team_id)
         if new_data:
             cache["roster_data"][team_id] = new_data
             cache["last_updated"][team_id] = current_time
-            
     return jsonify({"roster": cache["roster_data"][team_id]})
+
+@app.route('/api/tournaments/<team_id>')
+def get_public_tournaments(team_id):
+    if not supabase: return jsonify([])
+    try:
+        res = supabase.table('tournaments').select('*').eq('team_division', team_id).order('created_at', desc=True).execute()
+        return jsonify(res.data)
+    except: return jsonify([])
 
 @app.route('/api/player/<name>/<tag>')
 def get_player_detail(name, tag):
     p_key = f"{name}#{tag}"
     current_time = time.time()
-    
     if p_key in cache["player_details"] and (current_time - cache["player_details"][p_key]['time'] < 600):
         return jsonify(cache["player_details"][p_key]['data'])
-    
-    safe_name = urllib.parse.quote(name)
-    safe_tag = urllib.parse.quote(tag)
-    
+    safe_name, safe_tag = urllib.parse.quote(name), urllib.parse.quote(tag)
     url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=60"
     r = requests.get(url, headers=get_headers())
-    
-    ranked_matches = []
-    scrim_matches = []
-    
+    ranked_matches, scrim_matches = [], []
     if r.status_code == 200:
-        all_data = r.json().get('data', [])
-        for m in all_data:
+        for m in r.json().get('data', []):
             if 'meta' not in m or 'mode' not in m['meta']: continue
             mode = m['meta']['mode'].lower()
-            
-            if mode in ['competitive', 'unrated', 'swiftplay']:
-                ranked_matches.append(m)
+            if mode in ['competitive', 'unrated', 'swiftplay']: ranked_matches.append(m)
             elif 'custom' in mode:
                 try:
-                    blue = m['teams']['blue']
-                    red = m['teams']['red']
-                    if (blue + red) >= 13: 
-                        scrim_matches.append(m)
+                    if (m['teams']['blue'] + m['teams']['red']) >= 13: scrim_matches.append(m)
                 except: pass
-
-    data = {
-        "ranked": analyze_matches(ranked_matches),
-        "scrims": analyze_matches(scrim_matches)
-    }
+    data = {"ranked": analyze_matches(ranked_matches), "scrims": analyze_matches(scrim_matches)}
     cache["player_details"][p_key] = {"time": current_time, "data": data}
     return jsonify(data)
 
-# --- ADMIN ROUTES (HIDDEN & SECURED) ---
-
+# --- ADMIN ROUTES (HIDDEN) ---
 @app.route('/Presa_log')
 @requires_auth
 def admin_panel():
     tournaments = []
     if supabase:
         try:
-            response = supabase.table('tournaments').select('*').order('created_at', desc=True).execute()
-            tournaments = response.data
-        except Exception as e:
-            print(f"Error fetching tournaments: {e}")
-            
+            res = supabase.table('tournaments').select('*').order('created_at', desc=True).execute()
+            tournaments = res.data
+        except: pass
     return render_template('admin.html', tournaments=tournaments)
 
 @app.route('/api/admin/add_tournament', methods=['POST'])
 @requires_auth
 def add_tournament():
-    if not supabase:
-        return jsonify({"error": "Database not connected"}), 500
-        
+    if not supabase: return jsonify({"error": "DB not connected"}), 500
     data = request.json
-    name = data.get("name")
-    division = data.get("division")
-    placement = data.get("placement")
-    
-    if not name or not division:
-        return jsonify({"error": "Missing required fields"}), 400
-        
     try:
-        response = supabase.table('tournaments').insert({
-            "name": name,
-            "team_division": division,
-            "placement": placement
+        res = supabase.table('tournaments').insert({"name": data.get("name"), "team_division": data.get("division"), "placement": data.get("placement")}).execute()
+        return jsonify({"success": True, "data": res.data})
+    except Exception as e: return jsonify({"error": str(e)}), 500
+
+@app.route('/api/admin/ingest_match', methods=['POST'])
+@requires_auth
+def ingest_match():
+    if not supabase: return jsonify({"error": "DB not connected"}), 500
+    data = request.json
+    tourney_id = data.get('tournament_id')
+    tracker_url = data.get('tracker_url', '')
+
+    # Extract Match ID from URL (or accept raw ID)
+    match_id = tracker_url.split('/')[-1].split('?')[0].strip()
+    if not match_id: return jsonify({"error": "Invalid Match ID"}), 400
+
+    # Call Henrik API
+    r = requests.get(f"https://api.henrikdev.xyz/valorant/v2/match/{match_id}", headers=get_headers())
+    if r.status_code != 200: return jsonify({"error": "Match not found in Riot API"}), 404
+    match_data = r.json().get('data')
+    
+    try:
+        # Get tournament info to know which team we are looking for
+        t_res = supabase.table('tournaments').select('team_division').eq('id', tourney_id).execute()
+        if not t_res.data: return jsonify({"error": "Tournament missing"}), 404
+        division = t_res.data[0]['team_division']
+
+        # Get Presa player tags for this division
+        presa_players = [(p['name'].lower(), p['tag'].lower()) for p in ROSTERS.get(division, [])]
+        
+        meta = match_data.get('metadata', {})
+        map_name = meta.get('map', 'Unknown')
+        teams = match_data.get('teams', {})
+        players = match_data.get('players', {}).get('all_players', [])
+
+        # Find which color Presa is playing on
+        presa_color = None
+        for p in players:
+            if (p['name'].lower(), p['tag'].lower()) in presa_players:
+                presa_color = p['team'].lower()
+                break
+        
+        if not presa_color:
+            return jsonify({"error": f"No {division.upper()} players found in this match."}), 400
+
+        enemy_color = 'red' if presa_color == 'blue' else 'blue'
+        our_score = teams.get(presa_color, {}).get('rounds_won', 0)
+        enemy_score = teams.get(enemy_color, {}).get('rounds_won', 0)
+        we_won = teams.get(presa_color, {}).get('has_won', False)
+
+        # Insert Match
+        match_insert = supabase.table('custom_matches').insert({
+            "tournament_id": tourney_id, "riot_match_id": match_id, "map_name": map_name,
+            "team_won": we_won, "team_score": our_score, "enemy_score": enemy_score
         }).execute()
-        return jsonify({"success": True, "data": response.data})
+        db_match_id = match_insert.data[0]['id']
+
+        # Insert Player Stats
+        stats = []
+        for p in players:
+            if (p['name'].lower(), p['tag'].lower()) in presa_players:
+                stats.append({
+                    "match_id": db_match_id, "player_name": p['name'], "agent": p['character'],
+                    "kills": p['stats']['kills'], "deaths": p['stats']['deaths'], "assists": p['stats']['assists']
+                })
+        if stats: supabase.table('player_match_stats').insert(stats).execute()
+
+        return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Match already ingested or DB Error"}), 400
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
