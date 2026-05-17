@@ -9,28 +9,40 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 API_KEY = os.environ.get("HENRIK_KEY") 
 REGION = "eu"
 
-# --- UPDATED ROSTER ---
-ROSTER = [
-    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade"},
-    {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett"},
-    {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach"},
-    {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen"},
-    {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher"}
-]
+# --- MULTI-TEAM ROSTERS ---
+ROSTERS = {
+    "main": [
+        {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra"},
+        {"name": "Obito", "tag": "ASCK", "role": "Sentinel", "fixed_agent": "Cypher"},
+        {"name": "Mont3", "tag": "LFT", "role": "Initiator", "fixed_agent": "Skye"},
+        {"name": "Oby", "tag": "F4W", "role": "Duelist", "fixed_agent": "Jett"},
+        {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach"}
+    ],
+    "academy": [
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo"},
+        {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett"},
+        {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach"},
+        {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen"},
+        {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher"}
+    ]
+}
 
 cache = {
-    "last_updated": 0,
-    "roster_data": [],
+    "last_updated": {"main": 0, "academy": 0},
+    "roster_data": {"main": [], "academy": []},
     "player_details": {} 
 }
 
 def get_headers():
     return {"Authorization": API_KEY}
 
-def update_roster_ranks():
-    print("--- 🔄 UPDATING ROSTER RANKS ---")
+def update_roster_ranks(team_id):
+    print(f"--- 🔄 UPDATING {team_id.upper()} RANKS ---")
     updated_roster = []
-    for player in ROSTER:
+    
+    if team_id not in ROSTERS: return []
+
+    for player in ROSTERS[team_id]:
         stats = player.copy()
         stats['main_agent'] = player['fixed_agent']
         stats['rank'] = "Unranked"
@@ -90,7 +102,6 @@ def analyze_roles(matches):
         if is_win: role_stats[role]['wins'] += 1
 
     radar = { "Duelist": 0, "Controller": 0, "Initiator": 0, "Sentinel": 0, "Slayer": 0 }
-    
     total_kd = 0
     total_matches = 0
 
@@ -103,7 +114,6 @@ def analyze_roles(matches):
 
     if total_matches > 0:
         avg_kd = total_kd / total_matches
-        # Map avg K/D (0.5 to 2.0) roughly to 0-100 score
         slayer_score = min(max((avg_kd - 0.5) * 66, 0), 100) 
         radar["Slayer"] = int(slayer_score)
 
@@ -118,35 +128,29 @@ def analyze_matches(matches):
     for m in matches:
         if 'meta' not in m or 'stats' not in m: continue
         
-        # 1. Get Agent
         agent = m.get('meta', {}).get('character', {}).get('name')
         if not agent: agent = m.get('stats', {}).get('character', {}).get('name')
         if not agent: continue
         
-        # 2. Get Map
         map_name = m.get('meta', {}).get('map', {}).get('name')
         if not map_name: continue
 
-        # 3. Get Team
         my_team = m.get('stats', {}).get('team')
         if not my_team: continue
         my_team = my_team.lower()
 
-        # Stats
         stats['total'] += 1
         k = m['stats'].get('kills', 0)
         d = m['stats'].get('deaths', 0)
         stats['kills'] += k
         stats['deaths'] += d
 
-        # Win
         blue = m['teams']['blue']
         red = m['teams']['red']
         winner = "blue" if blue > red else "red"
         is_win = (my_team == winner)
         if is_win: stats['wins'] += 1
 
-        # Aggregation
         if agent not in stats['agents']: stats['agents'][agent] = {"matches": 0, "wins": 0}
         stats['agents'][agent]['matches'] += 1
         if is_win: stats['agents'][agent]['wins'] += 1
@@ -157,7 +161,6 @@ def analyze_matches(matches):
         stats['maps'][map_name]['kills'] += k
         stats['maps'][map_name]['deaths'] += d
 
-    # Maps Sort
     sorted_maps = []
     for m_name, m_data in stats['maps'].items():
         wr = int((m_data['wins'] / m_data['matches']) * 100) if m_data['matches'] > 0 else 0
@@ -166,16 +169,13 @@ def analyze_matches(matches):
     stats['top_maps'] = sorted(sorted_maps, key=lambda x: x['matches'], reverse=True)
     if stats['top_maps']: stats['best_map'] = stats['top_maps'][0]['name']
 
-    # Agents Sort
     sorted_agents = []
     for a_name, a_data in stats['agents'].items():
         wr = int((a_data['wins'] / a_data['matches']) * 100) if a_data['matches'] > 0 else 0
         sorted_agents.append({"name": a_name, "matches": a_data['matches'], "win_rate": wr})
     stats['top_agents'] = sorted(sorted_agents, key=lambda x: x['matches'], reverse=True)
     
-    # Attach Roles
     stats['roles'] = analyze_roles(matches)
-    
     return stats
 
 # --- ROUTES ---
@@ -184,19 +184,28 @@ def analyze_matches(matches):
 def home():
     return render_template('index.html')
 
+# NEW ROUTE: For the Roster Grid Page
+@app.route('/roster')
+def roster_page():
+    return render_template('roster.html')
+
 @app.route('/player')
 def player_page():
     return render_template('player.html')
 
-@app.route('/api/team-history')
-def get_roster_history():
+@app.route('/api/team-history/<team_id>')
+def get_roster_history(team_id):
+    if team_id not in ROSTERS:
+        return jsonify({"error": "Invalid team"}), 400
+
     current_time = time.time()
-    if not cache["roster_data"] or (current_time - cache["last_updated"] > 1800):
-        new_data = update_roster_ranks()
+    if not cache["roster_data"][team_id] or (current_time - cache["last_updated"][team_id] > 1800):
+        new_data = update_roster_ranks(team_id)
         if new_data:
-            cache["roster_data"] = new_data
-            cache["last_updated"] = current_time
-    return jsonify({"roster": cache["roster_data"]})
+            cache["roster_data"][team_id] = new_data
+            cache["last_updated"][team_id] = current_time
+            
+    return jsonify({"roster": cache["roster_data"][team_id]})
 
 @app.route('/api/player/<name>/<tag>')
 def get_player_detail(name, tag):
@@ -217,8 +226,6 @@ def get_player_detail(name, tag):
     
     if r.status_code == 200:
         all_data = r.json().get('data', [])
-        print(f"🔍 DEBUG: Found {len(all_data)} raw matches for {name}")
-        
         for m in all_data:
             if 'meta' not in m or 'mode' not in m['meta']: continue
             mode = m['meta']['mode'].lower()
@@ -226,14 +233,12 @@ def get_player_detail(name, tag):
             if mode in ['competitive', 'unrated', 'swiftplay']:
                 ranked_matches.append(m)
             elif 'custom' in mode:
-                # Custom Filter: At least 13 rounds played total
                 try:
                     blue = m['teams']['blue']
                     red = m['teams']['red']
                     if (blue + red) >= 13: 
                         scrim_matches.append(m)
-                except:
-                    pass # Skip if teams data is broken
+                except: pass
 
     data = {
         "ranked": analyze_matches(ranked_matches),
