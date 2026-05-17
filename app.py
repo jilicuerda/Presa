@@ -11,7 +11,7 @@ REGION = "eu"
 
 # --- UPDATED ROSTER ---
 ROSTER = [
-    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo"},
+    {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Sova"},
     {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett"},
     {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach"},
     {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen"},
