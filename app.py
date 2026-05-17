@@ -2,12 +2,46 @@ import os
 import time
 import requests
 import urllib.parse
-from flask import Flask, jsonify, render_template, request
+import re
+from functools import wraps
+from flask import Flask, jsonify, render_template, request, Response
+from supabase import create_client, Client
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 API_KEY = os.environ.get("HENRIK_KEY") 
 REGION = "eu"
+
+# --- SUPABASE SETUP ---
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+supabase: Client = None
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("✅ Supabase connection initialized.")
+    except Exception as e:
+        print(f"❌ Supabase init error: {e}")
+
+# --- ADMIN AUTHENTICATION ---
+def check_auth(username, password):
+    return username == 'admin' and password == 'presa'
+
+def authenticate():
+    return Response(
+        'Access Denied. Please log in with proper credentials.', 401,
+        {'WWW-Authenticate': 'Basic realm="Presa Command Center"'}
+    )
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 # --- MULTI-TEAM ROSTERS WITH SUBS & COACHES ---
 ROSTERS = {
@@ -41,9 +75,7 @@ def get_headers():
     return {"Authorization": API_KEY}
 
 def update_roster_ranks(team_id):
-    print(f"--- 🔄 UPDATING {team_id.upper()} RANKS ---")
     updated_roster = []
-    
     if team_id not in ROSTERS: return []
 
     for player in ROSTERS[team_id]:
@@ -64,8 +96,6 @@ def update_roster_ranks(team_id):
             print(f"❌ Error {player['name']}: {e}")
         updated_roster.append(stats)
     return updated_roster
-
-# --- ANALYSIS HELPERS ---
 
 def analyze_roles(matches):
     role_stats = {
@@ -182,7 +212,7 @@ def analyze_matches(matches):
     stats['roles'] = analyze_roles(matches)
     return stats
 
-# --- ROUTES ---
+# --- PUBLIC ROUTES ---
 
 @app.route('/')
 def home():
@@ -229,8 +259,6 @@ def get_player_detail(name, tag):
     
     if r.status_code == 200:
         all_data = r.json().get('data', [])
-        print(f"🔍 DEBUG: Found {len(all_data)} raw matches for {name}")
-        
         for m in all_data:
             if 'meta' not in m or 'mode' not in m['meta']: continue
             mode = m['meta']['mode'].lower()
@@ -251,6 +279,45 @@ def get_player_detail(name, tag):
     }
     cache["player_details"][p_key] = {"time": current_time, "data": data}
     return jsonify(data)
+
+# --- ADMIN ROUTES (HIDDEN & SECURED) ---
+
+@app.route('/Presa_log')
+@requires_auth
+def admin_panel():
+    tournaments = []
+    if supabase:
+        try:
+            response = supabase.table('tournaments').select('*').order('created_at', desc=True).execute()
+            tournaments = response.data
+        except Exception as e:
+            print(f"Error fetching tournaments: {e}")
+            
+    return render_template('admin.html', tournaments=tournaments)
+
+@app.route('/api/admin/add_tournament', methods=['POST'])
+@requires_auth
+def add_tournament():
+    if not supabase:
+        return jsonify({"error": "Database not connected"}), 500
+        
+    data = request.json
+    name = data.get("name")
+    division = data.get("division")
+    placement = data.get("placement")
+    
+    if not name or not division:
+        return jsonify({"error": "Missing required fields"}), 400
+        
+    try:
+        response = supabase.table('tournaments').insert({
+            "name": name,
+            "team_division": division,
+            "placement": placement
+        }).execute()
+        return jsonify({"success": True, "data": response.data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
