@@ -40,12 +40,8 @@
             height: 450px;
             transition: all 0.4s ease;
         }
-        #roster-grid:hover > div {
-            width: 15%; 
-        }
-        #roster-grid > div:hover {
-            width: 45% !important; 
-        }
+        #roster-grid:hover > div { width: 10%; }
+        #roster-grid > div:hover { width: 45% !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-navy-text font-display min-h-screen flex flex-col overflow-x-hidden relative">
@@ -77,17 +73,6 @@
         <div class="mb-12 border-b border-slate-200 pb-6 flex flex-col md:flex-row justify-between items-end gap-4">
             <div>
                 <h1 id="page-title" class="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-navy-dark">LOADING...</h1>
-                <p class="text-slate-500 font-mono tracking-widest uppercase text-sm mt-2">Active Roster & Event History</p>
-            </div>
-            <div class="flex gap-4">
-                <div class="text-right">
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Region</p>
-                    <p class="text-lg font-bold text-navy-dark">EMEA</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Status</p>
-                    <p class="text-lg font-bold text-primary flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE</p>
-                </div>
             </div>
         </div>
 
@@ -112,14 +97,9 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const teamId = urlParams.get('team') || 'main';
-        
         document.getElementById('page-title').innerText = `PRESA ${teamId.toUpperCase()}`;
-        
-        if(teamId === 'main') {
-            document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
-        } else if (teamId === 'academy') {
-            document.getElementById('nav-academy').classList.add('text-primary', 'border-b-2', 'border-primary');
-        }
+        if(teamId === 'main') document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
+        else if (teamId === 'academy') document.getElementById('nav-academy').classList.add('text-primary', 'border-b-2', 'border-primary');
 
         function getRoleIcon(role) {
             const r = role.toLowerCase();
@@ -133,40 +113,14 @@
 
         async function loadData() {
             try {
-                const tourneyRes = await fetch(`/api/tournaments/${teamId}`);
+                const [tourneyRes, rosterRes] = await Promise.all([fetch(`/api/tournaments/${teamId}`), fetch(`/api/team-history/${teamId}`)]);
                 const tournaments = await tourneyRes.json();
-                const cabinet = document.getElementById('trophy-cabinet');
-                
-                if (tournaments.length === 0) {
-                    cabinet.innerHTML = `<div class="text-slate-500 bg-white border border-slate-200 px-6 py-4 rounded-lg w-full">No official tournament records found for this division.</div>`;
-                } else {
-                    cabinet.innerHTML = "";
-                    tournaments.forEach(t => {
-                        let isWin = t.placement.toLowerCase().includes('1st') || t.placement.toLowerCase().includes('champion');
-                        let borderClass = isWin ? 'border-accent shadow-md' : 'border-slate-200 shadow-sm hover:shadow-md';
-                        let iconHtml = `<span class="material-symbols-outlined text-5xl text-slate-300 mb-3 group-hover:scale-110 transition-transform">workspace_premium</span>`;
-                        
-                        if (t.logo_url) {
-                            iconHtml = `<img src="${t.logo_url}" alt="Event Logo" class="h-16 w-16 object-contain mb-3 group-hover:scale-110 transition-transform">`;
-                        }
-
-                        cabinet.innerHTML += `
-                        <div class="min-w-[280px] bg-white border ${borderClass} rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group snap-start transition-all cursor-default">
-                            ${isWin ? '<div class="absolute inset-0 bg-accent opacity-5"></div>' : ''}
-                            <div class="relative z-10 flex flex-col items-center">
-                                ${iconHtml}
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">${t.match_type === 'scrim' ? 'Showmatch' : 'Tournament'}</span>
-                                <h4 class="text-lg font-bold text-navy-dark uppercase tracking-tight text-center mb-1 leading-tight">${t.name}</h4>
-                                <span class="text-primary font-extrabold text-xl uppercase">${t.placement}</span>
-                            </div>
-                        </div>`;
-                    });
-                }
-            } catch (e) { console.error("Error loading trophies", e); }
-
-            try {
-                const rosterRes = await fetch(`/api/team-history/${teamId}`);
                 const data = await rosterRes.json();
+
+                // Sort data: Players -> Subs -> Coaches
+                const order = { 'player': 1, 'sub': 2, 'coach': 3 };
+                data.roster.sort((a, b) => order[a.type] - order[b.type]);
+
                 const grid = document.getElementById('roster-grid');
                 grid.innerHTML = "";
 
@@ -189,15 +143,14 @@
                             <span class="${roleColor} text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-sm">${p.type}</span>
                         </div>
 
-                        <div class="relative z-20 flex flex-col h-full p-6 mt-auto min-w-[200px]">
+                        <div class="relative z-20 flex flex-col h-full p-4 mt-auto min-w-[200px]">
                             <div class="flex items-center gap-2 text-primary text-xs font-bold uppercase mb-1">
                                 <span class="material-symbols-outlined text-sm">${icon}</span>${p.role}
                             </div>
-                            <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
+                            <h4 class="text-2xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
                             <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
-                            
                             <div class="mt-auto">
-                                <div class="bg-white/80 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors shadow-sm">
+                                <div class="bg-white/90 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors shadow-sm">
                                     <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
                                     <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
                                 </div>
@@ -205,11 +158,8 @@
                         </div>
                     </div>`;
                 });
-            } catch (e) {
-                document.getElementById('roster-grid').innerHTML = `<div class="text-red-500 col-span-full">Failed to load roster.</div>`;
-            }
+            } catch (e) { console.error(e); }
         }
-
         document.addEventListener("DOMContentLoaded", loadData);
     </script>
 </body>
