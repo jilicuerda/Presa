@@ -267,7 +267,8 @@ def add_tournament():
             "name": data.get("name"), 
             "team_division": data.get("division"), 
             "placement": data.get("placement"),
-            "match_type": data.get("type", "tournament")
+            "match_type": data.get("type", "tournament"),
+            "logo_url": data.get("logo_url", "") # NEW FIELD
         }).execute()
         return jsonify({"success": True, "data": res.data})
     except Exception as e: return jsonify({"error": str(e)}), 500
