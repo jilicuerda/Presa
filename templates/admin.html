@@ -29,12 +29,21 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto w-full">
         <div class="bg-surface-dark border border-[#0348a2]/50 rounded-xl p-8 shadow-lg">
             <h2 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-accent">
-                <span class="material-symbols-outlined">emoji_events</span> Create Tournament
+                <span class="material-symbols-outlined">emoji_events</span> Create Entry
             </h2>
             <form id="form-tournament" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tournament Name</label>
-                    <input type="text" id="t-name" required placeholder="e.g. Premier Stage 8" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Event Name</label>
+                        <input type="text" id="t-name" required placeholder="e.g. Premier Stage 8" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Event Type</label>
+                        <select id="t-type" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
+                            <option value="tournament">Tournament / Official</option>
+                            <option value="scrim">Scrim</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -50,7 +59,7 @@
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-accent hover:text-background-dark text-white font-bold uppercase tracking-widest py-3 rounded mt-4 transition-all flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">add_circle</span> Save Tournament
+                    <span class="material-symbols-outlined">add_circle</span> Save Event
                 </button>
             </form>
             <div id="t-status" class="mt-4 text-sm font-mono hidden"></div>
@@ -62,10 +71,10 @@
             </h2>
             <form id="form-ingest" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Tournament</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Select Event to Assign Match To</label>
                     <select id="i-tourney" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
                         {% for t in tournaments %}
-                            <option value="{{ t.id }}">{{ t.name }} ({{ t.team_division | upper }})</option>
+                            <option value="{{ t.id }}">[{{ t.match_type | upper }}] {{ t.name }} ({{ t.team_division | upper }})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -81,13 +90,14 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto w-full mt-10">
+    <div class="max-w-7xl mx-auto w-full mt-10 pb-10">
         <h3 class="text-lg font-bold uppercase tracking-wider mb-4 border-b border-[#0348a2]/30 pb-2">Database Records</h3>
         <div class="bg-surface-dark rounded-xl overflow-hidden border border-[#0348a2]/30">
             <table class="w-full text-left text-sm">
                 <thead class="bg-[#0f2747] text-gray-400 uppercase tracking-wider font-mono text-xs">
                     <tr>
-                        <th class="p-4">Tournament</th>
+                        <th class="p-4">Event Name</th>
+                        <th class="p-4">Type</th>
                         <th class="p-4">Division</th>
                         <th class="p-4">Placement</th>
                     </tr>
@@ -96,11 +106,12 @@
                     {% for t in tournaments %}
                     <tr class="hover:bg-white/5 transition-colors">
                         <td class="p-4 font-bold">{{ t.name }}</td>
+                        <td class="p-4 text-gray-400 uppercase text-xs tracking-widest">{{ t.match_type }}</td>
                         <td class="p-4 uppercase text-accent">{{ t.team_division }}</td>
                         <td class="p-4">{{ t.placement or 'N/A' }}</td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="3" class="p-8 text-center text-gray-500 italic">No tournaments found in database.</td></tr>
+                    <tr><td colspan="4" class="p-8 text-center text-gray-500 italic">No events found in database.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -108,19 +119,17 @@
     </div>
 
     <script>
-        // Form 1: Create Tournament
         document.getElementById('form-tournament').addEventListener('submit', async (e) => {
             e.preventDefault();
             const status = document.getElementById('t-status');
             status.className = "mt-4 text-sm font-mono text-gray-400";
             status.innerText = "Saving to Database...";
-
             const payload = {
                 name: document.getElementById('t-name').value,
                 division: document.getElementById('t-division').value,
-                placement: document.getElementById('t-placement').value
+                placement: document.getElementById('t-placement').value,
+                type: document.getElementById('t-type').value
             };
-
             try {
                 const res = await fetch('/api/admin/add_tournament', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
@@ -138,31 +147,27 @@
             }
         });
 
-        // Form 2: Ingest Match
         document.getElementById('form-ingest').addEventListener('submit', async (e) => {
             e.preventDefault();
             const status = document.getElementById('i-status');
             status.className = "mt-4 text-sm font-mono text-gray-400";
             status.innerText = "Scanning Match Data (This takes a few seconds)...";
-
             const payload = {
                 tournament_id: document.getElementById('i-tourney').value,
                 tracker_url: document.getElementById('i-link').value
             };
-
             if(!payload.tournament_id) {
-                status.innerText = "❌ Please create a tournament first.";
+                status.innerText = "❌ Please create an event first.";
                 status.classList.replace('text-gray-400', 'text-red-500');
                 return;
             }
-
             try {
                 const res = await fetch('/api/admin/ingest_match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.success) {
                     status.innerText = "✅ Match stats saved to database!";
                     status.classList.replace('text-gray-400', 'text-green-500');
-                    document.getElementById('i-link').value = ''; // clear input
+                    document.getElementById('i-link').value = ''; 
                 } else {
                     status.innerText = "❌ Error: " + data.error;
                     status.classList.replace('text-gray-400', 'text-red-500');
