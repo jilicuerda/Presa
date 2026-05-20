@@ -210,7 +210,7 @@
 </main>
 
 <script>
-    // --- MAP IMAGES DATABASE ---
+    // 1. MAP IMAGES DATABASE (Local Files)
     const MAP_IMAGES = {
         "Ascent": "/static/maps/valorant-ascent-map.webp",
         "Split": "/static/maps/valorant-split-map.webp",
@@ -226,13 +226,41 @@
         "Default": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop"
     };
 
+    // 2. GLOBAL MEMORY
+    let globalData = null;
+
+    // 3. THE ENGINE (Runs automatically when you open the page)
+    document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name');
+        const tag = params.get('tag');
+
+        if (!name || !tag) {
+            console.error("Missing name or tag in URL");
+            return;
+        }
+
+        try {
+            // Ask your Python server for the stats
+            const response = await fetch(`/api/player/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`);
+            globalData = await response.json();
+            
+            // Once the data arrives, draw the 'ranked' tab by default
+            renderStats('ranked');
+
+        } catch (error) {
+            console.error("Error fetching player stats:", error);
+        }
+    });
+
+    // 4. THE RENDERER (Draws the stats when a tab is clicked)
     function renderStats(mode) {
-        // Toggle Buttons
+        // Toggle Buttons visually
         document.getElementById('btn-ranked').className = mode === 'ranked' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
         document.getElementById('btn-scrims').className = mode === 'scrims' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
         document.getElementById('btn-tournaments').className = mode === 'tournaments' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
 
-        if (!globalData) return;
+        if (!globalData || !globalData[mode]) return;
         const stats = globalData[mode];
         
         // Basic Stats
@@ -251,8 +279,6 @@
             stats.top_maps.forEach(map => {
                 let barColor = map.win_rate >= 50 ? "bg-primary" : "bg-white";
                 let percentColor = map.win_rate >= 50 ? "text-primary" : "text-white";
-                
-                // NEW: Use the local map image or fallback to default
                 let bgImage = MAP_IMAGES[map.name] || MAP_IMAGES["Default"];
 
                 const html = `
