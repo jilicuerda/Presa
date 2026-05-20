@@ -210,43 +210,21 @@
 </main>
 
 <script>
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get("name");
-    const tag = params.get("tag");
-    const fixedAgent = params.get("agent"); 
-    
-    let globalData = null;
-
-    // ... (Keep MAP_IMAGES constant) ...
+    // --- MAP IMAGES DATABASE ---
     const MAP_IMAGES = {
-        "Bind": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=400&auto=format&fit=crop",
-        "Haven": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop",
-        "Ascent": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=400&auto=format&fit=crop",
-        "Split": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop",
-        "Lotus": "https://images.unsplash.com/photo-1518544806352-a2221fa063da?q=80&w=400&auto=format&fit=crop",
-        "Pearl": "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?q=80&w=400&auto=format&fit=crop",
-        "Breeze": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400&auto=format&fit=crop",
-        "Sunset": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=400&auto=format&fit=crop"
+        "Ascent": "/static/maps/valorant-ascent-map.webp",
+        "Split": "/static/maps/valorant-split-map.webp",
+        "Bind": "/static/maps/valorant-bind-map.webp",
+        "Haven": "/static/maps/valorant-haven-map.webp",
+        "Icebox": "/static/maps/valorant-icebox-map.webp",
+        "Breeze": "/static/maps/valorant-breeze-map.webp",
+        "Fracture": "/static/maps/valorant-fracture-map.webp",
+        "Pearl": "/static/maps/valorant-pearl-map.webp",
+        "Lotus": "/static/maps/valorant-lotus-map.webp",
+        "Sunset": "/static/maps/sunset-valorant-map.webp",
+        "Abyss": "/static/maps/abyss-valorant-map.webp",
+        "Default": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop"
     };
-
-    async function loadPlayer() {
-        if(!name || !tag) return;
-        document.getElementById('p-name').innerText = name;
-        document.getElementById('p-tag').innerText = "#" + tag;
-        document.getElementById('p-agent').innerText = fixedAgent || "...";
-        if(fixedAgent) {
-            const safeAgent = fixedAgent.replace("/", ""); 
-            document.getElementById('p-bg-img').src = `/static/assets/agents/${safeAgent}_Artwork-large.webp`;
-        }
-
-        try {
-            const res = await fetch(`/api/player/${name}/${tag}`);
-            globalData = await res.json();
-            renderStats('ranked'); 
-        } catch (e) {
-            console.error("Fetch error:", e);
-        }
-    }
 
     function renderStats(mode) {
         // Toggle Buttons
@@ -273,7 +251,9 @@
             stats.top_maps.forEach(map => {
                 let barColor = map.win_rate >= 50 ? "bg-primary" : "bg-white";
                 let percentColor = map.win_rate >= 50 ? "text-primary" : "text-white";
-                let bgImage = MAP_IMAGES[map.name] || "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop";
+                
+                // NEW: Use the local map image or fallback to default
+                let bgImage = MAP_IMAGES[map.name] || MAP_IMAGES["Default"];
 
                 const html = `
                 <div class="flex items-center gap-4 group">
@@ -339,8 +319,6 @@
             if(polygon) polygon.setAttribute("points", `${p1} ${p2} ${p3} ${p4} ${p5}`);
         }
     }
-
-    loadPlayer();
 </script>
 </body>
 </html>
