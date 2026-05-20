@@ -30,19 +30,13 @@
         }
     </script>
     <style>
+        .role-section { margin-bottom: 3rem; }
         .roster-grid {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
             justify-content: flex-start;
-            align-items: flex-start;
             gap: 1rem;
-            transition: all 0.4s ease;
-        }
-        /* Accordion Effect - Only trigger on larger screens */
-        @media (min-width: 1024px) {
-            .roster-grid:hover > div { width: 15% !important; }
-            .roster-grid > div:hover { width: 35% !important; }
         }
     </style>
 </head>
@@ -96,16 +90,6 @@
         if(teamId === 'main') document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
         else if (teamId === 'academy') document.getElementById('nav-academy').classList.add('text-primary', 'border-b-2', 'border-primary');
 
-        function getRoleIcon(role) {
-            const r = role.toLowerCase();
-            if (r.includes("duelist")) return "swords";
-            if (r.includes("sentinel")) return "security";
-            if (r.includes("controller") || r.includes("smoker")) return "smoke_free";
-            if (r.includes("initiator")) return "radar";
-            if (r.includes("igl")) return "psychology";
-            return "sports_esports";
-        }
-
         async function loadData() {
             try {
                 const [tRes, rRes] = await Promise.all([fetch(`/api/tournaments/${teamId}`), fetch(`/api/team-history/${teamId}`)]);
@@ -116,11 +100,16 @@
                 const cabinet = document.getElementById('trophy-cabinet');
                 cabinet.innerHTML = tournaments.length ? "" : '<div class="text-slate-500 italic">No tournament records.</div>';
                 tournaments.forEach(t => {
-                    let isWin = t.placement.toLowerCase().includes('1st') || t.placement.toLowerCase().includes('champion');
+                    // Logic to render Logo if exists, else icon
+                    let logoHtml = t.logo_url && t.logo_url.length > 5 
+                        ? `<img src="${t.logo_url}" class="h-16 w-16 object-contain mb-2">` 
+                        : `<span class="material-symbols-outlined text-4xl text-slate-300 mb-2">emoji_events</span>`;
+
                     cabinet.innerHTML += `
-                    <div class="min-w-[200px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center">
-                        <h4 class="text-sm font-bold text-navy-dark uppercase text-center">${t.name}</h4>
-                        <span class="text-primary font-bold text-lg">${t.placement}</span>
+                    <div class="min-w-[200px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                        ${logoHtml}
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase text-center">${t.name}</h4>
+                        <span class="text-primary font-bold text-sm uppercase">${t.placement}</span>
                     </div>`;
                 });
 
@@ -135,7 +124,7 @@
 
                     const section = document.createElement('div');
                     section.className = 'role-section';
-                    section.innerHTML = `<h3 class="text-sm font-bold uppercase tracking-wider mb-4 text-slate-400">${groupName}</h3>`;
+                    section.innerHTML = `<h3 class="text-xs font-bold uppercase text-slate-400 mb-6 tracking-widest">${groupName}</h3>`;
                     
                     const grid = document.createElement('div');
                     grid.className = 'roster-grid';
@@ -143,17 +132,17 @@
                     members.forEach(p => {
                         let safeAgent = p.main_agent.charAt(0).toUpperCase() + p.main_agent.slice(1).toLowerCase();
                         grid.innerHTML += `
-                        <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[400px] flex flex-col group shrink-0" 
-                             style="width: 18.5%"
+                        <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 cursor-pointer h-[400px] flex flex-col group" 
+                             style="width: calc(20% - 1rem)"
                              onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                             
                             <div class="absolute inset-0 z-0 bg-slate-100">
-                                <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500">
+                                <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                                 <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
                             </div>
 
-                            <div class="relative z-20 flex flex-col h-full p-4 mt-auto">
-                                <h4 class="text-2xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1">${p.name}</h4>
+                            <div class="relative z-20 flex flex-col h-full p-6 mt-auto">
+                                <h4 class="text-2xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
                                 <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
                                 
                                 <div class="mt-auto">
