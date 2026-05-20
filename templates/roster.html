@@ -236,7 +236,8 @@
                         }
                     });
 
-                    vid.src = `/static/clips/${clipName}.mp4`;
+                    // Encode the filename to replace spaces with %20 safely
+                    vid.src = `/static/clips/${encodeURIComponent(clipName)}.mp4`;
                 });
 
             } catch (e) { console.error(e); }
