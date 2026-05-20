@@ -31,6 +31,7 @@
     </script>
     <style>
         .role-section { margin-bottom: 3rem; }
+        
         .roster-grid {
             display: flex;
             flex-direction: row;
@@ -39,18 +40,22 @@
             gap: 1rem;
         }
 
-        /* Video Reveal Styles */
+        /* 1. The Accordion Hover Effect (Width changes) */
+        @media (min-width: 1024px) {
+            .roster-grid:hover > .roster-card { width: 12% !important; }
+            .roster-grid > .roster-card:hover { width: 45% !important; }
+        }
+
+        /* 2. The Intro Card (Static state layout) */
         .intro-card {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10;
             background: white;
             transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
-            display: flex;
-            flex-direction: column;
         }
 
-        /* ONLY slide up if the JS successfully loaded a clip */
+        /* 3. The Slide-Up Effect (ONLY triggers if video is found) */
         .roster-card.clip-ready:hover .intro-card {
             transform: translateY(-100%);
         }
@@ -122,7 +127,7 @@
                 const tournaments = await tRes.json();
                 const data = await rRes.json();
 
-                // Trophy Cabinet
+                // Trophy Cabinet Generation
                 const cabinet = document.getElementById('trophy-cabinet');
                 cabinet.innerHTML = tournaments.length ? "" : '<div class="text-slate-500 italic">No tournament records.</div>';
                 tournaments.forEach(t => {
@@ -135,7 +140,7 @@
                     </div>`;
                 });
 
-                // Roster Groups
+                // Roster Groups Generation
                 const container = document.getElementById('roster-container');
                 const groups = { player: [], sub: [], coach: [] };
                 data.roster.forEach(p => { if (groups[p.type]) groups[p.type].push(p); });
@@ -156,41 +161,43 @@
                         let encodedName = encodeURIComponent(p.name);
                         
                         grid.innerHTML += `
-                        <div class="roster-card relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer h-[400px] shrink-0" 
+                        <div class="roster-card relative rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[420px] shrink-0 group bg-slate-900" 
                              style="width: calc(20% - 0.8rem)"
                              data-clip="${encodedName}"
                              onclick="window.location.href='/player?name=${encodedName}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                             
-                            <div class="intro-card">
-                                <div class="relative h-2/3 overflow-hidden bg-slate-100">
-                                    <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-80">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent"></div>
+                            <div class="intro-card flex flex-col">
+                                <div class="absolute inset-0 z-0 bg-slate-100">
+                                    <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
                                 </div>
-                                
+
                                 <div class="absolute top-4 right-4 z-20">
                                     <span class="${roleColor} text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-sm">${p.type}</span>
                                 </div>
 
-                                <div class="p-4 flex-1 flex flex-col justify-end bg-white">
-                                    <div class="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest mb-1">
-                                        <span class="material-symbols-outlined text-sm">${getRoleIcon(p.role)}</span> ${p.role}
+                                <div class="relative z-20 flex flex-col h-full p-6 mt-auto min-w-[200px]">
+                                    <div class="flex items-center gap-2 text-primary text-xs font-bold uppercase mb-1">
+                                        <span class="material-symbols-outlined text-sm">${getRoleIcon(p.role)}</span>${p.role}
                                     </div>
-                                    <h4 class="text-2xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-0.5">${p.name}</h4>
-                                    <span class="text-slate-500 text-xs font-mono tracking-widest uppercase">#${p.tag}</span>
-                                </div>
-                                
-                                <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center mt-auto">
-                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
-                                    <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
+                                    <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
+                                    <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="bg-white/90 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors shadow-sm">
+                                            <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
+                                            <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>`;
+                            </div>`;
                     });
                     section.appendChild(grid);
                     container.appendChild(section);
                 }
 
-                // After drawing the cards, silently check for videos in the background
+                // 2. Secretly search for videos in the background
                 document.querySelectorAll('.roster-card').forEach(card => {
                     const clipName = card.getAttribute('data-clip');
                     if (!clipName) return;
@@ -201,15 +208,13 @@
                     vid.playsInline = true;
                     vid.className = "absolute inset-0 w-full h-full object-cover z-0";
                     
-                    // Only unlock the hover effect if the video actually loads data successfully
+                    // If video successfully loads, unlock the slide animation
                     vid.onloadeddata = () => {
                         card.classList.add('clip-ready');
                         card.insertBefore(vid, card.firstChild);
                     };
                     
-                    // Silently ignore errors (avoids crashing UI)
-                    vid.onerror = () => {};
-                    
+                    vid.onerror = () => {}; // Silently fail if file does not exist
                     vid.src = `/static/clips/${clipName}.mp4`;
                 });
 
@@ -218,7 +223,7 @@
 
         document.addEventListener("DOMContentLoaded", loadData);
 
-        // Play video when mouse enters a "clip-ready" card
+        // 3. Play video when mouse enters a card that successfully loaded a clip
         document.getElementById('roster-container').addEventListener('mouseover', (e) => {
             const card = e.target.closest('.roster-card.clip-ready');
             if (card) {
@@ -227,7 +232,7 @@
             }
         });
 
-        // Pause video when mouse leaves
+        // 4. Pause video when mouse leaves
         document.getElementById('roster-container').addEventListener('mouseout', (e) => {
             const card = e.target.closest('.roster-card.clip-ready');
             if (card && !card.contains(e.relatedTarget)) {
