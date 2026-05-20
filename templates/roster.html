@@ -38,20 +38,20 @@
             justify-content: flex-start;
             gap: 1rem;
         }
-        
-        /* Video Reveal Component Styles */
+
+        /* Video Reveal Styles */
         .intro-card {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10;
             background: white;
-            transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+            transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
             display: flex;
             flex-direction: column;
         }
 
-        /* ONLY slide up if the clip successfully loaded */
-        .roster-card.clip-active:hover .intro-card {
+        /* ONLY slide up if the JS successfully loaded a clip */
+        .roster-card.clip-ready:hover .intro-card {
             transform: translateY(-100%);
         }
     </style>
@@ -156,14 +156,11 @@
                         let encodedName = encodeURIComponent(p.name);
                         
                         grid.innerHTML += `
-                        <div class="roster-card relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 cursor-pointer h-[420px] flex flex-col shrink-0" 
+                        <div class="roster-card relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer h-[400px] shrink-0" 
                              style="width: calc(20% - 0.8rem)"
+                             data-clip="${encodedName}"
                              onclick="window.location.href='/player?name=${encodedName}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                             
-                            <video class="absolute inset-0 w-full h-full object-cover z-0" muted loop playsinline preload="metadata" oncanplay="this.closest('.roster-card').classList.add('clip-active')">
-                                <source src="/static/clips/${encodedName}.mp4" type="video/mp4">
-                            </video>
-
                             <div class="intro-card">
                                 <div class="relative h-2/3 overflow-hidden bg-slate-100">
                                     <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-80">
@@ -192,33 +189,52 @@
                     section.appendChild(grid);
                     container.appendChild(section);
                 }
+
+                // After drawing the cards, silently check for videos in the background
+                document.querySelectorAll('.roster-card').forEach(card => {
+                    const clipName = card.getAttribute('data-clip');
+                    if (!clipName) return;
+
+                    const vid = document.createElement('video');
+                    vid.muted = true;
+                    vid.loop = true;
+                    vid.playsInline = true;
+                    vid.className = "absolute inset-0 w-full h-full object-cover z-0";
+                    
+                    // Only unlock the hover effect if the video actually loads data successfully
+                    vid.onloadeddata = () => {
+                        card.classList.add('clip-ready');
+                        card.insertBefore(vid, card.firstChild);
+                    };
+                    
+                    // Silently ignore errors (avoids crashing UI)
+                    vid.onerror = () => {};
+                    
+                    vid.src = `/static/clips/${clipName}.mp4`;
+                });
+
             } catch (e) { console.error(e); }
         }
+
         document.addEventListener("DOMContentLoaded", loadData);
 
-        // Global Event Listeners to handle playing the videos on hover
-        const container = document.getElementById('roster-container');
-        
-        container.addEventListener('mouseover', (e) => {
-            const card = e.target.closest('.roster-card.clip-active');
-            if (card && !card.dataset.playing) {
-                card.dataset.playing = 'true';
+        // Play video when mouse enters a "clip-ready" card
+        document.getElementById('roster-container').addEventListener('mouseover', (e) => {
+            const card = e.target.closest('.roster-card.clip-ready');
+            if (card) {
                 const vid = card.querySelector('video');
                 if (vid) vid.play().catch(()=>{});
             }
         });
 
-        container.addEventListener('mouseout', (e) => {
-            const card = e.target.closest('.roster-card.clip-active');
-            if (card) {
-                // Ensure the mouse actually left the entire card boundaries
-                if (!card.contains(e.relatedTarget)) {
-                    card.dataset.playing = '';
-                    const vid = card.querySelector('video');
-                    if (vid) {
-                        vid.pause();
-                        vid.currentTime = 0;
-                    }
+        // Pause video when mouse leaves
+        document.getElementById('roster-container').addEventListener('mouseout', (e) => {
+            const card = e.target.closest('.roster-card.clip-ready');
+            if (card && !card.contains(e.relatedTarget)) {
+                const vid = card.querySelector('video');
+                if (vid) {
+                    vid.pause();
+                    vid.currentTime = 0;
                 }
             }
         });
