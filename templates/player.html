@@ -105,9 +105,10 @@
                         <span class="w-1 h-5 bg-primary block"></span>
                         Performance Stats
                     </h3>
-                    <div class="flex gap-2 bg-surface-card p-1 rounded-lg border border-[#482325]">
-                        <button onclick="renderStats('ranked')" id="btn-ranked" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm">Ranked</button>
-                        <button onclick="renderStats('scrims')" id="btn-scrims" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Scrims</button>
+                    <div class="flex gap-4 border-b border-[#0348a2]/30 pb-4 mb-6">
+                        <button id="btn-ranked" onclick="renderStats('ranked')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm">Ranked</button>
+                        <button id="btn-scrims" onclick="renderStats('scrims')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Scrims</button>
+                        <button id="btn-tournaments" onclick="renderStats('tournaments')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Tourneys</button>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
