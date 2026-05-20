@@ -36,17 +36,28 @@
 
     <div class="absolute inset-0 z-0 opacity-[0.03] bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center fixed pointer-events-none"></div>
 
-    <header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 py-4 shadow-sm">
-        <div class="flex items-center gap-4">
-            <a href="javascript:history.back()" class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors">
-                <span class="material-symbols-outlined">arrow_back</span>
-                <span class="text-sm font-bold uppercase tracking-wider hidden md:block">Back to Roster</span>
+    <header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 py-4 shadow-sm w-full">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+                <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-8 w-8 object-contain">
+                <h2 class="text-navy-dark text-lg font-extrabold uppercase tracking-tighter hidden sm:block">TEAM PRESA</h2>
+            </div>
+            <a href="javascript:history.back()" class="flex items-center gap-1 text-slate-500 hover:text-primary transition-colors text-xs font-bold uppercase tracking-wider border-l border-slate-200 pl-6">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> Back
             </a>
         </div>
-        <div class="flex items-center gap-3 absolute left-1/2 -translate-x-1/2">
-            <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-8 w-8 object-contain">
-            <h2 class="text-navy-dark text-lg md:text-xl font-extrabold uppercase tracking-tighter">TEAM PRESA</h2>
-        </div>
+        
+        <nav class="hidden xl:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-500 absolute left-1/2 -translate-x-1/2">
+            <a href="/" class="hover:text-primary transition-colors pb-1">Home</a>
+            <a href="/roster?team=main" class="hover:text-primary transition-colors pb-1">Main Roster</a>
+            <a href="/roster?team=academy" class="hover:text-primary transition-colors pb-1">Academy</a>
+            <a href="#" class="hover:text-primary transition-colors pb-1">Partners</a>
+            <a href="#" class="hover:text-primary transition-colors pb-1">Shop</a>
+        </nav>
+
+        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="bg-accent hover:bg-yellow-500 text-white px-5 py-2 rounded shadow-sm font-bold uppercase tracking-wider text-xs transition-colors flex items-center gap-2">
+            Join Community
+        </a>
     </header>
 
     <main class="flex-1 p-6 lg:p-10 w-full max-w-[1920px] mx-auto overflow-y-auto relative z-10">
@@ -220,13 +231,11 @@
             if (!globalData || !globalData[mode]) return;
             const stats = globalData[mode];
 
-            // Basic Stats
             document.getElementById('stat-kd').innerText = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
             document.getElementById('stat-wr').innerText = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
             document.getElementById('stat-matches').innerText = stats.total;
             document.getElementById('stat-best-map').innerText = stats.best_map || "N/A";
 
-            // Map Breakdown
             const mapContainer = document.getElementById('map-list');
             mapContainer.innerHTML = "";
             
@@ -256,7 +265,6 @@
                 mapContainer.innerHTML = `<div class="text-slate-500 text-sm italic py-4">No map data found for this category yet.</div>`;
             }
 
-            // Top Agents
             const agentContainer = document.getElementById('agent-list');
             agentContainer.innerHTML = "";
             if (stats.top_agents && stats.top_agents.length > 0) {
@@ -279,7 +287,6 @@
                 agentContainer.innerHTML = `<div class="text-slate-500 text-sm italic col-span-3">No agent data found.</div>`;
             }
 
-            // Radar Chart
             if (stats.roles && stats.roles.radar) {
                 const r = stats.roles.radar;
                 const getCoord = (score, angle) => {
