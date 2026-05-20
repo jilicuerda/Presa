@@ -32,42 +32,31 @@
     <style>
         .role-section { margin-bottom: 3rem; }
         
-        /* Bulletproof Flexbox Accordion */
         .roster-grid {
             display: flex;
             flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
             gap: 1rem;
-            height: 420px;
-            width: 100%;
-        }
-        
-        .roster-card {
-            flex: 1 1 0;
-            min-width: 0; /* Ensures smooth shrinking */
-            transition: flex 0.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* When hovering over the GRID, shrink all cards slightly */
-        .roster-grid:hover .roster-card {
-            flex: 0.5 1 0;
+        /* 1. The Accordion Hover Effect (Expands the active card, shrinks neighbors) */
+        @media (min-width: 1024px) {
+            .roster-grid:hover > .roster-card { width: 12% !important; }
+            .roster-grid > .roster-card:hover { width: 45% !important; }
         }
 
-        /* When hovering over a SPECIFIC card, grow it */
-        .roster-grid .roster-card:hover {
-            flex: 3 1 0 !important;
-        }
-
-        /* The Static Visual Layer */
+        /* 2. The Intro Card (The static visual layer) */
         .intro-card {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10;
             background: white;
-            transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
+            transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
         }
 
-        /* ONLY trigger the slide-up if JavaScript added the 'has-clip' class */
-        .roster-card.has-clip:hover .intro-card {
+        /* 3. The Video Slide-Up Effect (ONLY triggers if the clip is verified and ready) */
+        .roster-card.clip-ready:hover .intro-card {
             transform: translateY(-100%);
         }
     </style>
@@ -138,7 +127,7 @@
                 const tournaments = await tRes.json();
                 const data = await rRes.json();
 
-                // 1. Trophy Cabinet
+                // Trophy Cabinet Generation
                 const cabinet = document.getElementById('trophy-cabinet');
                 cabinet.innerHTML = tournaments.length ? "" : '<div class="text-slate-500 italic">No tournament records.</div>';
                 tournaments.forEach(t => {
@@ -151,7 +140,7 @@
                     </div>`;
                 });
 
-                // 2. Roster Groups
+                // Roster Groups Generation
                 const container = document.getElementById('roster-container');
                 const groups = { player: [], sub: [], coach: [] };
                 data.roster.forEach(p => { if (groups[p.type]) groups[p.type].push(p); });
@@ -172,7 +161,8 @@
                         let encodedName = encodeURIComponent(p.name);
                         
                         grid.innerHTML += `
-                        <div class="roster-card relative rounded-xl overflow-hidden border border-slate-200 shadow-sm cursor-pointer group bg-slate-900" 
+                        <div class="roster-card relative rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[420px] shrink-0 group bg-slate-900" 
+                             style="width: calc(20% - 0.8rem)"
                              data-clip="${encodedName}"
                              onclick="window.location.href='/player?name=${encodedName}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                             
@@ -186,12 +176,12 @@
                                     <span class="${roleColor} text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-sm">${p.type}</span>
                                 </div>
 
-                                <div class="relative z-20 flex flex-col h-full p-6 mt-auto min-w-[200px] bg-white">
+                                <div class="relative z-20 flex flex-col h-full p-5 mt-auto min-w-[200px] bg-white">
                                     <div class="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest mb-1">
                                         <span class="material-symbols-outlined text-sm">${getRoleIcon(p.role)}</span>${p.role}
                                     </div>
-                                    <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors truncate">${p.name}</h4>
-                                    <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
+                                    <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
+                                    <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-3">#${p.tag}</span>
                                     
                                     <div class="mt-auto">
                                         <div class="bg-slate-50 border border-slate-200 p-2.5 rounded flex justify-between items-center transition-colors shadow-sm">
@@ -201,13 +191,14 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>`;
                     });
                     section.appendChild(grid);
                     container.appendChild(section);
                 }
 
-                // 3. Attach videos intelligently
+                // Attach videos silently in the background
                 document.querySelectorAll('.roster-card').forEach(card => {
                     const clipName = card.getAttribute('data-clip');
                     if (!clipName) return;
@@ -218,29 +209,34 @@
                     vid.playsInline = true;
                     vid.className = "absolute inset-0 w-full h-full object-cover z-0";
                     
-                    // Trigger when the video file is confirmed to exist and is ready to play
-                    vid.oncanplay = () => {
-                        if (!card.classList.contains('has-clip')) {
-                            card.classList.add('has-clip');
-                            card.insertBefore(vid, card.firstChild);
-                        }
-                    };
-                    
-                    vid.src = `/static/clips/${clipName}.mp4`;
+                    // Immediately attach to the DOM so the browser starts downloading it
+                    card.insertBefore(vid, card.firstChild);
 
-                    // Playback listeners
+                    // When the browser confirms it can play the video, unlock the slide animation
+                    vid.addEventListener('canplay', () => {
+                        card.classList.add('clip-ready');
+                    });
+
+                    // If the video doesn't exist, quietly remove it to keep the DOM clean
+                    vid.addEventListener('error', () => {
+                        vid.remove();
+                    });
+
+                    // Direct playback listeners for maximum reliability
                     card.addEventListener('mouseenter', () => {
-                        if (card.classList.contains('has-clip')) {
+                        if (card.classList.contains('clip-ready')) {
                             vid.play().catch(()=>{});
                         }
                     });
                     
                     card.addEventListener('mouseleave', () => {
-                        if (card.classList.contains('has-clip')) {
+                        if (card.classList.contains('clip-ready')) {
                             vid.pause();
                             vid.currentTime = 0;
                         }
                     });
+
+                    vid.src = `/static/clips/${clipName}.mp4`;
                 });
 
             } catch (e) { console.error(e); }
