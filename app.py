@@ -49,7 +49,7 @@ ROSTERS = {
     "academy": [
         {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade", "type": "player"},
         {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
-        {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
+        {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Reyna", "type": "player"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
         {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
         {"name": "IsRasson", "tag": "SSJ", "role": "Sentinel", "fixed_agent": "Killjoy", "type": "sub"},
