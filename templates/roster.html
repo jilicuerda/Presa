@@ -35,9 +35,15 @@
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
-            justify-content: flex-start;
+            justify-content: center;
+            align-items: flex-start;
             gap: 1rem;
+            height: 450px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        /* Accordion Hover Effect */
+        .roster-grid:hover > .roster-card { width: 10% !important; }
+        .roster-grid > .roster-card:hover { width: 45% !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-navy-text font-display min-h-screen flex flex-col overflow-x-hidden relative">
@@ -100,20 +106,16 @@
                 const cabinet = document.getElementById('trophy-cabinet');
                 cabinet.innerHTML = tournaments.length ? "" : '<div class="text-slate-500 italic">No tournament records.</div>';
                 tournaments.forEach(t => {
-                    // Logic to render Logo if exists, else icon
-                    let logoHtml = t.logo_url && t.logo_url.length > 5 
-                        ? `<img src="${t.logo_url}" class="h-16 w-16 object-contain mb-2">` 
-                        : `<span class="material-symbols-outlined text-4xl text-slate-300 mb-2">emoji_events</span>`;
-
+                    let logo = (t.logo_url && t.logo_url.length > 5) ? `<img src="${t.logo_url}" class="h-12 w-12 object-contain mb-2">` : `<span class="material-symbols-outlined text-3xl text-slate-300 mb-2">emoji_events</span>`;
                     cabinet.innerHTML += `
-                    <div class="min-w-[200px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center shadow-sm">
-                        ${logoHtml}
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase text-center">${t.name}</h4>
+                    <div class="min-w-[160px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                        ${logo}
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase text-center truncate w-full">${t.name}</h4>
                         <span class="text-primary font-bold text-sm uppercase">${t.placement}</span>
                     </div>`;
                 });
 
-                // Group Roster by type
+                // Roster Groups
                 const container = document.getElementById('roster-container');
                 const groups = { player: [], sub: [], coach: [] };
                 data.roster.forEach(p => { if (groups[p.type]) groups[p.type].push(p); });
@@ -121,7 +123,6 @@
                 container.innerHTML = "";
                 for (const [groupName, members] of Object.entries(groups)) {
                     if (members.length === 0) continue;
-
                     const section = document.createElement('div');
                     section.className = 'role-section';
                     section.innerHTML = `<h3 class="text-xs font-bold uppercase text-slate-400 mb-6 tracking-widest">${groupName}</h3>`;
@@ -132,12 +133,12 @@
                     members.forEach(p => {
                         let safeAgent = p.main_agent.charAt(0).toUpperCase() + p.main_agent.slice(1).toLowerCase();
                         grid.innerHTML += `
-                        <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 cursor-pointer h-[400px] flex flex-col group" 
-                             style="width: calc(20% - 1rem)"
+                        <div class="roster-card relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[400px] flex flex-col group shrink-0" 
+                             style="width: 18%"
                              onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                             
                             <div class="absolute inset-0 z-0 bg-slate-100">
-                                <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                                <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500">
                                 <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
                             </div>
 
