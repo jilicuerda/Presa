@@ -68,6 +68,23 @@ cache = {
 
 def get_headers(): return {"Authorization": API_KEY}
 
+# --- NEW: SMART API FETCHER ---
+def fetch_with_retry(url):
+    """Hits the Riot API, but if it hits a Rate Limit (429), it waits and tries again."""
+    for attempt in range(3):
+        try:
+            r = requests.get(url, headers=get_headers(), timeout=10)
+            if r.status_code == 200:
+                return r.json()
+            elif r.status_code == 429: # Riot says "Too Fast!"
+                time.sleep(2) # Pause for 2 seconds to let the limit reset
+                continue
+            else:
+                return None # 404 Not Found, etc.
+        except Exception as e:
+            time.sleep(1)
+    return None
+
 def update_roster_ranks(team_id):
     updated_roster = []
     if team_id not in ROSTERS: return []
@@ -75,38 +92,38 @@ def update_roster_ranks(team_id):
         stats = player.copy()
         stats['main_agent'] = player['fixed_agent']
         stats['rank'] = "Unranked"
-        try:
-            safe_name, safe_tag = urllib.parse.quote(player['name']), urllib.parse.quote(player['tag'])
-            url = f"https://api.henrikdev.xyz/valorant/v2/mmr/{REGION}/{safe_name}/{safe_tag}"
-            r = requests.get(url, headers=get_headers())
-            if r.status_code == 200:
-                rank = r.json().get('data', {}).get('current_data', {}).get('currenttierpatched')
-                if rank: stats['rank'] = rank
-            time.sleep(0.6) # Delay to prevent API ban
-        except: pass
+        
+        safe_name, safe_tag = urllib.parse.quote(player['name']), urllib.parse.quote(player['tag'])
+        url = f"https://api.henrikdev.xyz/valorant/v2/mmr/{REGION}/{safe_name}/{safe_tag}"
+        
+        data_json = fetch_with_retry(url)
+        if data_json:
+            rank = data_json.get('data', {}).get('current_data', {}).get('currenttierpatched')
+            if rank: stats['rank'] = rank
+            
+        time.sleep(0.5) 
         updated_roster.append(stats)
     return updated_roster
 
 def check_player_climb(name, tag):
-    try:
-        safe_name = urllib.parse.quote(name)
-        safe_tag = urllib.parse.quote(tag)
-        url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/{REGION}/{safe_name}/{safe_tag}"
-        r = requests.get(url, headers=get_headers())
-        if r.status_code == 200:
-            data = r.json().get('data', [])
-            if len(data) >= 2:
-                current_tier = data[0].get('currenttier')
-                lookback = min(5, len(data)) - 1
-                old_tier = data[lookback].get('currenttier')
-                
-                if current_tier and old_tier and current_tier > old_tier:
-                    return {
-                        "climbed": True,
-                        "current_rank": data[0].get('currenttierpatched'),
-                        "old_rank": data[lookback].get('currenttierpatched')
-                    }
-    except: pass
+    safe_name = urllib.parse.quote(name)
+    safe_tag = urllib.parse.quote(tag)
+    url = f"https://api.henrikdev.xyz/valorant/v1/mmr-history/{REGION}/{safe_name}/{safe_tag}"
+    
+    data_json = fetch_with_retry(url)
+    if data_json:
+        data = data_json.get('data', [])
+        if len(data) >= 2:
+            current_tier = data[0].get('currenttier')
+            lookback = min(5, len(data)) - 1
+            old_tier = data[lookback].get('currenttier')
+            
+            if current_tier and old_tier and current_tier > old_tier:
+                return {
+                    "climbed": True,
+                    "current_rank": data[0].get('currenttierpatched'),
+                    "old_rank": data[lookback].get('currenttierpatched')
+                }
     return {"climbed": False}
 
 def analyze_roles(matches, is_db=False):
@@ -263,19 +280,17 @@ def get_player_detail(name, tag):
     safe_name, safe_tag = urllib.parse.quote(name), urllib.parse.quote(tag)
     url = f"https://api.henrikdev.xyz/valorant/v1/lifetime/matches/{REGION}/{safe_name}/{safe_tag}?size=40"
     ranked_matches = []
-    try:
-        r = requests.get(url, headers=get_headers())
-        if r.status_code == 200:
-            for m in r.json().get('data', []):
-                mode = m.get('meta', {}).get('mode', '').lower()
-                if mode in ['competitive', 'unrated', 'swiftplay']: ranked_matches.append(m)
-    except: pass
+    
+    data_json = fetch_with_retry(url)
+    if data_json:
+        for m in data_json.get('data', []):
+            mode = m.get('meta', {}).get('mode', '').lower()
+            if mode in ['competitive', 'unrated', 'swiftplay']: ranked_matches.append(m)
 
     scrim_matches = []
     tourney_matches = []
     if supabase:
         try:
-            # FIX: We now use .ilike() instead of .eq() so 'zaka' matches 'Zaka', 'ZAKA', etc.
             p_stats_res = supabase.table('player_match_stats').select('*').ilike('player_name', name).execute()
             if p_stats_res.data:
                 match_ids = [s['match_id'] for s in p_stats_res.data]
@@ -329,18 +344,19 @@ def ingest_match():
     tracker_url = data.get('tracker_url', '')
     match_id = tracker_url.split('/')[-1].split('?')[0].strip()
     if not match_id: return jsonify({"error": "Invalid Match ID"}), 400
-    r = requests.get(f"https://api.henrikdev.xyz/valorant/v2/match/{match_id}", headers=get_headers())
-    if r.status_code != 200: return jsonify({"error": "Match not found"}), 404
-    match_data = r.json().get('data')
+    
+    url = f"https://api.henrikdev.xyz/valorant/v2/match/{match_id}"
+    data_json = fetch_with_retry(url)
+    if not data_json: return jsonify({"error": "Match not found or API busy"}), 404
+    match_data = data_json.get('data')
+    
     try:
         t_res = supabase.table('tournaments').select('team_division').eq('id', tourney_id).execute()
         if not t_res.data: return jsonify({"error": "Tournament missing"}), 404
         
-        # Build map with original ROSTER casing
         presa_players_map = {}
         for roster_list in ROSTERS.values():
             for p in roster_list:
-                # Key is lowercase, Value is the original correct case
                 presa_players_map[(p['name'].lower(), p['tag'].lower())] = p['name']
                 
         meta = match_data.get('metadata', {})
@@ -348,7 +364,6 @@ def ingest_match():
         teams = match_data.get('teams', {})
         players = match_data.get('players', {}).get('all_players', [])
         
-        # Check team color
         presa_color = None
         for p in players:
             key = (p['name'].lower(), p['tag'].lower())
@@ -367,7 +382,6 @@ def ingest_match():
         for p in players:
             key = (p['name'].lower(), p['tag'].lower())
             if key in presa_players_map:
-                # FIX: Save to DB using the exact name from your ROSTERS list
                 correct_roster_name = presa_players_map[key]
                 stats.append({"match_id": db_match_id, "player_name": correct_roster_name, "agent": p['character'], "kills": p['stats']['kills'], "deaths": p['stats']['deaths'], "assists": p['stats']['assists']})
         if stats: supabase.table('player_match_stats').insert(stats).execute()
