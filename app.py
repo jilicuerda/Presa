@@ -82,7 +82,7 @@ def update_roster_ranks(team_id):
             if r.status_code == 200:
                 rank = r.json().get('data', {}).get('current_data', {}).get('currenttierpatched')
                 if rank: stats['rank'] = rank
-            time.sleep(0.2) 
+            time.sleep(0.6) # Increased delay to prevent Henrik API rate-limiting
         except: pass
         updated_roster.append(stats)
     return updated_roster
