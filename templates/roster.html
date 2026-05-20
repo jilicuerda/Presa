@@ -32,15 +32,19 @@
     <style>
         /* Accordion Hover Effect */
         #roster-grid {
-            transition: all 0.4s ease;
             display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             justify-content: center;
+            align-items: flex-start;
+            height: 450px;
+            transition: all 0.4s ease;
         }
         #roster-grid:hover > div {
             width: 15%; 
         }
         #roster-grid > div:hover {
-            width: 40% !important; 
+            width: 45% !important; 
         }
     </style>
 </head>
@@ -100,7 +104,7 @@
             <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-navy-dark">
                 <span class="material-symbols-outlined text-primary">groups</span> Active Personnel
             </h3>
-            <div id="roster-grid" class="flex flex-wrap gap-4">
+            <div id="roster-grid">
                 </div>
         </div>
     </main>
@@ -172,7 +176,8 @@
                     let roleColor = p.type === 'sub' ? 'bg-slate-200 text-slate-600' : (p.type === 'coach' ? 'bg-navy-dark text-white' : 'bg-primary text-white');
 
                     grid.innerHTML += `
-                    <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[450px] flex flex-col group w-[20%]" 
+                    <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[450px] flex flex-col group shrink-0" 
+                         style="width: ${100/data.roster.length}%"
                          onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                         
                         <div class="absolute inset-0 z-0 bg-slate-100">
@@ -184,19 +189,15 @@
                             <span class="${roleColor} text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-sm">${p.type}</span>
                         </div>
 
-                        <div class="relative z-20 flex flex-col h-full p-6 mt-auto">
+                        <div class="relative z-20 flex flex-col h-full p-6 mt-auto min-w-[200px]">
                             <div class="flex items-center gap-2 text-primary text-xs font-bold uppercase mb-1">
                                 <span class="material-symbols-outlined text-sm">${icon}</span>${p.role}
                             </div>
                             <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
                             <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
                             
-                            <div class="mt-auto group-hover:opacity-100 opacity-0 transition-opacity duration-500">
-                                <div class="bg-slate-50 border border-slate-200 p-3 rounded mb-3">
-                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Recent Clips</p>
-                                    <p class="text-xs text-slate-400 italic">Coming soon...</p>
-                                </div>
-                                <div class="bg-slate-50 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors">
+                            <div class="mt-auto">
+                                <div class="bg-white/80 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors shadow-sm">
                                     <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
                                     <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
                                 </div>
