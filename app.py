@@ -52,7 +52,7 @@ ROSTERS = {
         {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Yoru", "type": "player"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
         {"name": "FNC MrFreezer", "tag": "ily", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
-        {"name": "IsRasson", "tag": "SSJ", "role": "Sentinel", "fixed_agent": "Killjoy", "type": "sub"},
+        {"name": "IsRasson", "tag": "SSJ", "role": "Sentinel", "fixed_agent": "Sova", "type": "sub"},
         {"name": "CriskXK", "tag": "PRESA", "role": "Flex", "fixed_agent": "Waylay", "type": "sub"},
         {"name": "zaka", "tag": "1734", "role": "Coach", "fixed_agent": "Kayo", "type": "coach"}
     ]
