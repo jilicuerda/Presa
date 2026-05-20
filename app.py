@@ -82,7 +82,7 @@ def update_roster_ranks(team_id):
             if r.status_code == 200:
                 rank = r.json().get('data', {}).get('current_data', {}).get('currenttierpatched')
                 if rank: stats['rank'] = rank
-            time.sleep(0.6) # Increased delay to prevent Henrik API rate-limiting
+            time.sleep(0.6) # Delay to prevent API ban
         except: pass
         updated_roster.append(stats)
     return updated_roster
@@ -275,7 +275,8 @@ def get_player_detail(name, tag):
     tourney_matches = []
     if supabase:
         try:
-            p_stats_res = supabase.table('player_match_stats').select('*').eq('player_name', name).execute()
+            # FIX: We now use .ilike() instead of .eq() so 'zaka' matches 'Zaka', 'ZAKA', etc.
+            p_stats_res = supabase.table('player_match_stats').select('*').ilike('player_name', name).execute()
             if p_stats_res.data:
                 match_ids = [s['match_id'] for s in p_stats_res.data]
                 c_matches_res = supabase.table('custom_matches').select('id, tournament_id, map_name, team_won').in_('id', match_ids).execute()
@@ -290,7 +291,8 @@ def get_player_detail(name, tag):
                         combined = {"agent": stat['agent'], "kills": stat['kills'], "deaths": stat['deaths'], "map_name": match_info['map_name'], "team_won": match_info['team_won']}
                         if t_types.get(match_info['tournament_id'], 'tournament') == 'scrim': scrim_matches.append(combined)
                         else: tourney_matches.append(combined)
-        except: pass
+        except Exception as e: 
+            print(f"Error fetching DB stats: {e}")
 
     data = {"ranked": analyze_matches(ranked_matches, is_db=False), "scrims": analyze_matches(scrim_matches, is_db=True), "tournaments": analyze_matches(tourney_matches, is_db=True)}
     cache["player_details"][p_key] = {"time": current_time, "data": data}
@@ -334,21 +336,23 @@ def ingest_match():
         t_res = supabase.table('tournaments').select('team_division').eq('id', tourney_id).execute()
         if not t_res.data: return jsonify({"error": "Tournament missing"}), 404
         
-        # NEW FIX: Build a massive list of EVERY player in the entire organization
-        presa_players = []
+        # Build map with original ROSTER casing
+        presa_players_map = {}
         for roster_list in ROSTERS.values():
             for p in roster_list:
-                presa_players.append((p['name'].lower(), p['tag'].lower()))
+                # Key is lowercase, Value is the original correct case
+                presa_players_map[(p['name'].lower(), p['tag'].lower())] = p['name']
                 
         meta = match_data.get('metadata', {})
         map_name = meta.get('map', 'Unknown')
         teams = match_data.get('teams', {})
         players = match_data.get('players', {}).get('all_players', [])
         
-        # Find which color the organization played on
+        # Check team color
         presa_color = None
         for p in players:
-            if (p['name'].lower(), p['tag'].lower()) in presa_players:
+            key = (p['name'].lower(), p['tag'].lower())
+            if key in presa_players_map:
                 presa_color = p['team'].lower()
                 break
                 
@@ -359,11 +363,13 @@ def ingest_match():
         match_insert = supabase.table('custom_matches').insert({"tournament_id": tourney_id, "riot_match_id": match_id, "map_name": map_name, "team_won": teams.get(presa_color, {}).get('has_won', False), "team_score": our_score, "enemy_score": enemy_score}).execute()
         db_match_id = match_insert.data[0]['id']
         
-        # Save stats for ANY organization player in the lobby
         stats = []
         for p in players:
-            if (p['name'].lower(), p['tag'].lower()) in presa_players:
-                stats.append({"match_id": db_match_id, "player_name": p['name'], "agent": p['character'], "kills": p['stats']['kills'], "deaths": p['stats']['deaths'], "assists": p['stats']['assists']})
+            key = (p['name'].lower(), p['tag'].lower())
+            if key in presa_players_map:
+                # FIX: Save to DB using the exact name from your ROSTERS list
+                correct_roster_name = presa_players_map[key]
+                stats.append({"match_id": db_match_id, "player_name": correct_roster_name, "agent": p['character'], "kills": p['stats']['kills'], "deaths": p['stats']['deaths'], "assists": p['stats']['assists']})
         if stats: supabase.table('player_match_stats').insert(stats).execute()
         return jsonify({"success": True})
     except: return jsonify({"error": "Error processing match or already in DB."}), 400
