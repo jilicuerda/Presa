@@ -2,6 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0423QF45S7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-0423QF45S7');
+    </script>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Team Roster - Presa</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -22,13 +29,20 @@
             } 
         }
     </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0423QF45S7"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-0423QF45S7');
-    </script>
+    <style>
+        /* Accordion Hover Effect */
+        #roster-grid {
+            transition: all 0.4s ease;
+            display: flex;
+            justify-content: center;
+        }
+        #roster-grid:hover > div {
+            width: 15%; 
+        }
+        #roster-grid > div:hover {
+            width: 40% !important; 
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-navy-text font-display min-h-screen flex flex-col overflow-x-hidden relative">
 
@@ -86,7 +100,7 @@
             <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-navy-dark">
                 <span class="material-symbols-outlined text-primary">groups</span> Active Personnel
             </h3>
-            <div id="roster-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div id="roster-grid" class="flex flex-wrap gap-4">
                 </div>
         </div>
     </main>
@@ -97,7 +111,6 @@
         
         document.getElementById('page-title').innerText = `PRESA ${teamId.toUpperCase()}`;
         
-        // Highlight active nav item
         if(teamId === 'main') {
             document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
         } else if (teamId === 'academy') {
@@ -159,10 +172,11 @@
                     let roleColor = p.type === 'sub' ? 'bg-slate-200 text-slate-600' : (p.type === 'coach' ? 'bg-navy-dark text-white' : 'bg-primary text-white');
 
                     grid.innerHTML += `
-                    <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:border-primary transition-all duration-300 group cursor-pointer h-[400px] flex flex-col" onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
+                    <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[450px] flex flex-col group w-[20%]" 
+                         onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                         
                         <div class="absolute inset-0 z-0 bg-slate-100">
-                            <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500">
+                            <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500">
                             <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
                         </div>
 
@@ -177,9 +191,15 @@
                             <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
                             <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
                             
-                            <div class="mt-auto bg-slate-50 border border-slate-200 p-3 rounded flex justify-between items-center group-hover:border-primary/30 transition-colors">
-                                <p class="text-[10px] text-slate-500 uppercase font-bold">Current Rank</p>
-                                <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
+                            <div class="mt-auto group-hover:opacity-100 opacity-0 transition-opacity duration-500">
+                                <div class="bg-slate-50 border border-slate-200 p-3 rounded mb-3">
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Recent Clips</p>
+                                    <p class="text-xs text-slate-400 italic">Coming soon...</p>
+                                </div>
+                                <div class="bg-slate-50 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors">
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
+                                    <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
+                                </div>
                             </div>
                         </div>
                     </div>`;
