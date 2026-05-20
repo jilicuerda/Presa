@@ -42,13 +42,12 @@ ROSTERS = {
     "main": [
         {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra", "type": "player"},
         {"name": "Obito", "tag": "ASCK", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
-        {"name": "Mont3", "tag": "LFT", "role": "Initiator", "fixed_agent": "Skye", "type": "player"},
+        {"name": "CoRa", "tag": "FGR", "role": "Initiator", "fixed_agent": "Fade", "type": "player"},
         {"name": "Oby", "tag": "F4W", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
-        {"name": "CoRa", "tag": "FGR", "role": "Duelist", "fixed_agent": "Neon", "type": "sub"}
     ],
     "academy": [
-        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo", "type": "player"},
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade", "type": "player"},
         {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
