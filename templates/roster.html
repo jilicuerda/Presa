@@ -107,7 +107,9 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const teamId = urlParams.get('team') || 'main';
+        
         document.getElementById('page-title').innerText = `PRESA ${teamId.toUpperCase()}`;
+        
         if(teamId === 'main') document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
         else if (teamId === 'academy') document.getElementById('nav-academy').classList.add('text-primary', 'border-b-2', 'border-primary');
 
@@ -127,7 +129,7 @@
                 const tournaments = await tRes.json();
                 const data = await rRes.json();
 
-                // Trophy Cabinet Generation
+                // 1. Trophy Cabinet
                 const cabinet = document.getElementById('trophy-cabinet');
                 cabinet.innerHTML = tournaments.length ? "" : '<div class="text-slate-500 italic">No tournament records.</div>';
                 tournaments.forEach(t => {
@@ -140,7 +142,7 @@
                     </div>`;
                 });
 
-                // Roster Groups Generation
+                // 2. Roster Groups
                 const container = document.getElementById('roster-container');
                 const groups = { player: [], sub: [], coach: [] };
                 data.roster.forEach(p => { if (groups[p.type]) groups[p.type].push(p); });
@@ -162,8 +164,8 @@
                         
                         grid.innerHTML += `
                         <div class="roster-card relative rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[420px] shrink-0 group bg-slate-900" 
-                             style="width: calc(20% - 0.8rem)"
                              data-clip="${encodedName}"
+                             style="width: calc(20% - 0.8rem)"
                              onclick="window.location.href='/player?name=${encodedName}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
                             
                             <div class="intro-card flex flex-col">
@@ -180,7 +182,7 @@
                                     <div class="flex items-center gap-2 text-primary text-[10px] font-bold uppercase tracking-widest mb-1">
                                         <span class="material-symbols-outlined text-sm">${getRoleIcon(p.role)}</span>${p.role}
                                     </div>
-                                    <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
+                                    <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors truncate">${p.name}</h4>
                                     <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-3">#${p.tag}</span>
                                     
                                     <div class="mt-auto">
@@ -191,60 +193,55 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>`;
                     });
                     section.appendChild(grid);
                     container.appendChild(section);
                 }
 
-                // Attach videos silently in the background
-// 3. Attach videos silently in the background
+                // 3. Attach videos using "First Word" logic
                 document.querySelectorAll('.roster-card').forEach(card => {
                     const fullName = card.getAttribute('data-clip');
                     if (!fullName) return;
 
-    // --- NEW LOGIC: Take only the first word of the name ---
-    // decodeURIComponent turns "%20" back into a space, then we split by space
-                        const firstWord = decodeURIComponent(fullName).split(' ')[0];
-                        const clipFilename = `${firstWord}.mp4`;
+                    // Take only the first word for the filename
+                    const firstWord = decodeURIComponent(fullName).split(' ')[0];
+                    const clipFilename = `${firstWord}.mp4`;
 
-                        const vid = document.createElement('video');
-                        vid.muted = true;
-                        vid.loop = true;
-                        vid.playsInline = true;
-                        vid.className = "absolute inset-0 w-full h-full object-cover z-0";
-    
-    // Immediately attach to the DOM
-                        card.insertBefore(vid, card.firstChild);
+                    const vid = document.createElement('video');
+                    vid.muted = true;
+                    vid.loop = true;
+                    vid.playsInline = true;
+                    vid.className = "absolute inset-0 w-full h-full object-cover z-0";
                     
-                        // Unlock slide animation only if video loads
-                        vid.onloadeddata = () => {
-                            card.classList.add('clip-ready');
-                        };
-                        
-                        // Silently remove if file does not exist
-                        vid.onerror = () => {
-                            vid.remove();
-                        };
+                    // Attach to DOM
+                    card.insertBefore(vid, card.firstChild);
                     
-                        // Playback listeners
-                        card.addEventListener('mouseenter', () => {
-                            if (card.classList.contains('clip-ready')) {
-                                vid.play().catch(()=>{});
-                            }
-                        });
-                        
-                        card.addEventListener('mouseleave', () => {
-                            if (card.classList.contains('clip-ready')) {
-                                vid.pause();
-                                vid.currentTime = 0;
-                            }
-                        });
+                    // Unlock animation ONLY if video actually loads
+                    vid.onloadeddata = () => {
+                        card.classList.add('clip-ready');
+                    };
                     
-                        // Set the source using our simplified filename
-                        vid.src = `/static/clips/${clipFilename}`;
+                    vid.onerror = () => { vid.remove(); };
+                    vid.src = `/static/clips/${clipFilename}`;
+
+                    // Playback listeners
+                    card.addEventListener('mouseenter', () => {
+                        if (card.classList.contains('clip-ready')) vid.play().catch(()=>{});
                     });
+                    
+                    card.addEventListener('mouseleave', () => {
+                        if (card.classList.contains('clip-ready')) {
+                            vid.pause();
+                            vid.currentTime = 0;
+                        }
+                    });
+                });
+
+            } catch (e) { console.error(e); }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadData);
     </script>
 </body>
 </html>
