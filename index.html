@@ -1,21 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Roster</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Team Presa - Select Division</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { 
+            darkMode: "class", 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        "primary": "#0348a2", 
+                        "accent": "#f7b003", 
+                        "background-dark": "#0a172a", 
+                        "surface-dark": "#0c1f38", 
+                        "surface-card": "#0f2747" 
+                    }, 
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards'
+                    }
+                } 
+            } 
+        }
+    </script>
 </head>
-<body>
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col items-center justify-start p-6 relative overflow-x-hidden">
+    
+    <div class="absolute inset-0 z-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center fixed"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/90 to-background-dark z-0 fixed"></div>
 
-    <div class="team-header">
-        <h1>TEAM ROSTER</h1>
+    <div class="relative z-10 w-full max-w-6xl text-center flex flex-col items-center pt-8 md:pt-16">
+        <img src="/static/assets/LOGO_PRESA.png" alt="Team Presa" class="mx-auto h-24 w-24 md:h-32 md:w-32 object-contain mb-6 drop-shadow-[0_0_15px_rgba(3,72,162,0.5)]">
+        
+        <h1 class="text-4xl md:text-7xl font-bold uppercase tracking-tighter mb-2">TEAM PRESA</h1>
+        <p class="text-gray-400 text-sm md:text-base tracking-widest uppercase mb-12">Organization Dashboard</p>
+
+        <div id="newsletter-section" class="w-full text-left mb-16 hidden opacity-0 animate-fade-in-up">
+            <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-accent border-b border-accent/20 pb-3">
+                <span class="material-symbols-outlined">campaign</span> Organization News
+            </h3>
+            <div id="news-container" class="space-y-6 w-full">
+                </div>
+        </div>
+
+        <h3 class="text-xl font-bold uppercase tracking-wider text-left w-full mb-6 border-b border-[#0348a2]/20 pb-3">Divisions</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-12">
+            <a href="/roster?team=main" class="group relative overflow-hidden rounded-2xl border border-[#0348a2]/50 hover:border-primary transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-72">
+                <div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors z-0"></div>
+                <span class="material-symbols-outlined text-5xl text-gray-500 group-hover:text-primary transition-colors mb-4 relative z-10">workspace_premium</span>
+                <h2 class="text-3xl font-bold text-white uppercase tracking-wider relative z-10">Main Roster</h2>
+                <p class="text-gray-500 mt-2 font-mono uppercase relative z-10 group-hover:text-white transition-colors">View Tier 1 Stats</p>
+                <div class="absolute bottom-0 w-full h-1 bg-primary transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
+            </a>
+
+            <a href="/roster?team=academy" class="group relative overflow-hidden rounded-2xl border border-[#0348a2]/50 hover:border-accent transition-colors bg-surface-dark p-12 flex flex-col items-center justify-center h-72">
+                <div class="absolute inset-0 bg-accent/0 group-hover:bg-accent/5 transition-colors z-0"></div>
+                <span class="material-symbols-outlined text-5xl text-gray-500 group-hover:text-accent transition-colors mb-4 relative z-10">school</span>
+                <h2 class="text-3xl font-bold text-white uppercase tracking-wider relative z-10">Academy</h2>
+                <p class="text-gray-500 mt-2 font-mono uppercase relative z-10 group-hover:text-white transition-colors">View Prospects</p>
+                <div class="absolute bottom-0 w-full h-1 bg-accent transform translate-y-full group-hover:translate-y-0 transition-transform"></div>
+            </a>
+        </div>
+
+        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="mb-12 flex items-center gap-2 text-gray-500 hover:text-[#5865F2] transition-colors font-bold uppercase tracking-widest text-xs bg-surface-dark/50 border border-white/5 px-6 py-3 rounded-full hover:border-[#5865F2]/50 hover:bg-surface-dark">
+            <span class="material-symbols-outlined text-base">forum</span> Join the Community
+        </a>
     </div>
 
-    <div class="roster-container" id="roster-container">
-        <p class="loading-text">Loading Data...</p>
-    </div>
+    <script>
+        function getRoleIcon(role) {
+            const r = role ? role.toLowerCase() : "";
+            if (r.includes("duelist")) return "swords";
+            if (r.includes("sentinel")) return "security";
+            if (r.includes("controller") || r.includes("smoker")) return "smoke_free";
+            if (r.includes("initiator")) return "radar";
+            if (r.includes("igl")) return "psychology";
+            return "sports_esports";
+        }
 
-    <script src="script.js"></script>
+        async function loadNews() {
+            const section = document.getElementById('newsletter-section');
+            const container = document.getElementById('news-container');
+            
+            try {
+                const response = await fetch('/api/news');
+                const news = await response.json();
+                
+                if (!news || news.length === 0) return; // Hide section entirely if empty
+                
+                container.innerHTML = "";
+                
+                news.forEach((item, index) => {
+                    const delay = index * 150;
+                    let cardHTML = "";
+
+                    if (item.type === 'player_climb') {
+                        // Recreate the premium Roster Player card architecture 
+                        let agent = item.player.fixed_agent || "Jett";
+                        let safeAgent = agent.charAt(0).toUpperCase() + agent.slice(1).toLowerCase();
+                        const roleIcon = getRoleIcon(item.player.role);
+                        const profileLink = `/player?name=${encodeURIComponent(item.player.name)}&tag=${encodeURIComponent(item.player.tag)}&agent=${encodeURIComponent(safeAgent)}`;
+                        
+                        cardHTML = `
+                        <div class="w-full lg:w-80 h-[380px] shrink-0 relative bg-surface-dark border border-accent/30 rounded-lg overflow-hidden flex flex-col group">
+                            <div class="absolute inset-0 z-0">
+                                <img class="w-full h-full object-cover opacity-50 filter grayscale group-hover:grayscale-0 transition-all duration-500" src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/40 to-transparent"></div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 w-full p-5 z-10 group-hover:opacity-0 transition-opacity duration-300">
+                                <div class="flex items-center gap-2 text-accent text-xs font-bold uppercase mb-1">
+                                    <span class="material-symbols-outlined text-sm">${roleIcon}</span>${item.player.role}
+                                </div>
+                                <h4 class="text-2xl font-bold uppercase tracking-tighter truncate">${item.player.name}</h4>
+                            </div>
+                            <div class="relative z-20 flex flex-col h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-5 bg-background-dark/90 backdrop-blur-sm">
+                                <h4 class="text-2xl font-bold text-white uppercase tracking-tighter truncate leading-none mb-1">${item.player.name}</h4>
+                                <span class="text-accent text-xs font-mono tracking-widest uppercase">#${item.player.tag}</span>
+                                <div class="mt-4 bg-[#0f2747] border border-[#0348a2]/30 p-3 rounded">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Current Rank</p>
+                                    <p class="text-white text-base font-bold font-mono truncate">${item.player.rank}</p>
+                                </div>
+                                <a href="${profileLink}" class="w-full mt-auto bg-white hover:bg-gray-200 text-black font-bold py-2.5 px-4 rounded flex items-center justify-center gap-2 uppercase text-xs tracking-wide transition-colors">
+                                    <span class="material-symbols-outlined text-base">bar_chart</span>View Stats
+                                </a>
+                            </div>
+                        </div>`;
+
+                        container.innerHTML += `
+                        <div class="bg-surface-dark border border-[#0348a2]/30 rounded-xl p-6 flex flex-col lg:flex-row items-center justify-between gap-6 hover:border-[#0348a2] transition-colors opacity-0 animate-fade-in-up" style="animation-delay: ${delay}ms;">
+                            <div class="flex-1 space-y-2">
+                                <div class="flex items-center gap-2 text-accent text-xs tracking-widest font-bold font-mono uppercase">
+                                    <span class="material-symbols-outlined text-sm">trending_up</span> Rank Ladder Promotion
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight uppercase leading-snug">${item.message}</h2>
+                                <p class="text-gray-400 text-sm">Assigned Division: <span class="text-white font-bold uppercase">${item.division}</span></p>
+                            </div>
+                            ${cardHTML}
+                        </div>`;
+
+                    } else if (item.type === 'tournament') {
+                        // Create the Trophy Win layout card
+                        let iconHtml = `<span class="material-symbols-outlined text-5xl text-accent">workspace_premium</span>`;
+                        if (item.logo_url && item.logo_url.trim() !== "") {
+                            iconHtml = `<img src="${item.logo_url}" alt="Event Logo" class="h-16 w-16 object-contain rounded drop-shadow-[0_0_10px_rgba(247,176,3,0.3)]">`;
+                        }
+
+                        container.innerHTML += `
+                        <div class="bg-gradient-to-r from-surface-dark to-[#0f2747] border border-accent/40 rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 opacity-0 animate-fade-in-up" style="animation-delay: ${delay}ms;">
+                            <div class="bg-background-dark/50 p-4 rounded-xl border border-accent/20 flex items-center justify-center shrink-0 size-24">
+                                ${iconHtml}
+                            </div>
+                            <div class="space-y-1 text-center md:text-left">
+                                <div class="text-accent text-xs tracking-widest font-bold font-mono uppercase flex items-center justify-center md:justify-start gap-1">
+                                    <span class="material-symbols-outlined text-sm">emoji_events</span> Tournament Victory
+                                </div>
+                                <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight uppercase">
+                                    Presa ${item.division.toUpperCase()} secured <span class="text-accent">${item.placement}</span> in ${item.event_name}!
+                                </h2>
+                                <p class="text-gray-400 text-xs uppercase font-mono tracking-wider">Database validated record</p>
+                            </div>
+                        </div>`;
+                    }
+                });
+
+                // Display hidden panel once calculations complete
+                section.classList.remove('hidden');
+                setTimeout(() => section.classList.remove('opacity-0'), 10);
+
+            } catch (error) {
+                console.error("Error drawing newsletter system:", error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadNews);
+    </script>
 </body>
 </html>
