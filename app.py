@@ -42,13 +42,12 @@ ROSTERS = {
     "main": [
         {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra", "type": "player"},
         {"name": "Obito", "tag": "ASCK", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
-        {"name": "Mont3", "tag": "LFT", "role": "Initiator", "fixed_agent": "Skye", "type": "player"},
+        {"name": "CoRa", "tag": "FGR", "role": "Initiator", "fixed_agent": "Fade", "type": "player"},
         {"name": "Oby", "tag": "F4W", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
-        {"name": "CoRa", "tag": "FGR", "role": "Duelist", "fixed_agent": "Neon", "type": "sub"}
     ],
     "academy": [
-        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo", "type": "player"},
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade", "type": "player"},
         {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
@@ -68,21 +67,20 @@ cache = {
 
 def get_headers(): return {"Authorization": API_KEY}
 
-# --- NEW: SMART API FETCHER ---
+# --- CRASH-PROOF API FETCHER ---
 def fetch_with_retry(url):
-    """Hits the Riot API, but if it hits a Rate Limit (429), it waits and tries again."""
-    for attempt in range(3):
-        try:
-            r = requests.get(url, headers=get_headers(), timeout=10)
-            if r.status_code == 200:
-                return r.json()
-            elif r.status_code == 429: # Riot says "Too Fast!"
-                time.sleep(2) # Pause for 2 seconds to let the limit reset
-                continue
-            else:
-                return None # 404 Not Found, etc.
-        except Exception as e:
+    """Fails fast to prevent Render from crashing the app due to 30s timeout."""
+    try:
+        r = requests.get(url, headers=get_headers(), timeout=5)
+        if r.status_code == 200:
+            return r.json()
+        elif r.status_code == 429:
+            # Try exactly once more after 1 second, then give up
             time.sleep(1)
+            r2 = requests.get(url, headers=get_headers(), timeout=5)
+            if r2.status_code == 200:
+                return r2.json()
+    except: pass
     return None
 
 def update_roster_ranks(team_id):
@@ -101,7 +99,7 @@ def update_roster_ranks(team_id):
             rank = data_json.get('data', {}).get('current_data', {}).get('currenttierpatched')
             if rank: stats['rank'] = rank
             
-        time.sleep(0.5) 
+        time.sleep(0.3) 
         updated_roster.append(stats)
     return updated_roster
 
@@ -206,11 +204,26 @@ def player_page(): return render_template('player.html')
 def get_roster_history(team_id):
     if team_id not in ROSTERS: return jsonify({"error": "Invalid team"}), 400
     current_time = time.time()
-    if not cache["roster_data"][team_id] or (current_time - cache["last_updated"][team_id] > 1800):
-        new_data = update_roster_ranks(team_id)
-        if new_data:
-            cache["roster_data"][team_id] = new_data
-            cache["last_updated"][team_id] = current_time
+    
+    try:
+        if not cache["roster_data"][team_id] or (current_time - cache["last_updated"][team_id] > 1800):
+            new_data = update_roster_ranks(team_id)
+            if new_data:
+                cache["roster_data"][team_id] = new_data
+                cache["last_updated"][team_id] = current_time
+    except Exception as e:
+        print(f"Error fetching ranks: {e}")
+        
+    # Safe Fallback: If cache is completely empty, send a default structure so the page doesn't crash
+    if not cache["roster_data"][team_id]:
+        fallback = []
+        for p in ROSTERS[team_id]:
+            stat = p.copy()
+            stat['main_agent'] = p['fixed_agent']
+            stat['rank'] = "Unranked"
+            fallback.append(stat)
+        return jsonify({"roster": fallback})
+
     return jsonify({"roster": cache["roster_data"][team_id]})
 
 @app.route('/api/tournaments/<team_id>')
@@ -228,6 +241,8 @@ def get_news_feed():
         return jsonify(cache["news"]["data"])
 
     news_items = []
+    start_processing_time = time.time()
+    
     if supabase:
         try:
             res = supabase.table('tournaments').select('*').order('created_at', desc=True).limit(10).execute()
@@ -245,6 +260,10 @@ def get_news_feed():
 
     for div, players in ROSTERS.items():
         for p in players:
+            # STOPWATCH: Abort if approaching Render's 30s timeout
+            if time.time() - start_processing_time > 15:
+                break
+                
             if p.get('type') in ['player', 'sub']:
                 climb = check_player_climb(p['name'], p['tag'])
                 if climb["climbed"]:
