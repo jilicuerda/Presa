@@ -252,11 +252,12 @@
         // Toggle Buttons
         document.getElementById('btn-ranked').className = mode === 'ranked' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
         document.getElementById('btn-scrims').className = mode === 'scrims' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
+        document.getElementById('btn-tournaments').className = mode === 'tournaments' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
 
         if (!globalData) return;
         const stats = globalData[mode];
         
-        // 1. Basic Stats
+        // Basic Stats
         const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
         document.getElementById('stat-kd').innerText = kd;
         const wr = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
@@ -264,7 +265,7 @@
         document.getElementById('stat-matches').innerText = stats.total;
         document.getElementById('stat-best-map').innerText = stats.best_map || "N/A";
 
-        // 2. Map Breakdown
+        // Map Breakdown
         const mapContainer = document.getElementById('map-list');
         mapContainer.innerHTML = "";
         
@@ -276,7 +277,7 @@
 
                 const html = `
                 <div class="flex items-center gap-4 group">
-                    <div class="w-16 h-10 bg-gray-800 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-widest bg-cover bg-center grayscale group-hover:grayscale-0 transition-all" style="background-image: url('${bgImage}')">
+                    <div class="w-16 h-10 bg-gray-800 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-widest bg-cover bg-center grayscale group-hover:grayscale-0 transition-all border border-white/5" style="background-image: url('${bgImage}')">
                         <span class="bg-black/60 px-1 rounded backdrop-blur-sm">${map.name}</span>
                     </div>
                     <div class="flex-1">
@@ -284,33 +285,33 @@
                             <span class="font-bold ${percentColor}">${map.win_rate}% Win</span>
                             <span class="text-gray-400 font-mono">${map.kd} KD</span>
                         </div>
-                        <div class="h-2 w-full bg-[#180e0f] rounded-full overflow-hidden flex">
+                        <div class="h-2 w-full bg-[#0a172a] rounded-full overflow-hidden flex border border-white/5">
                             <div class="${barColor} h-full" style="width: ${map.win_rate}%"></div>
-                            <div class="bg-gray-800 h-full" style="width: ${100 - map.win_rate}%"></div>
+                            <div class="bg-transparent h-full" style="width: ${100 - map.win_rate}%"></div>
                         </div>
                     </div>
                 </div>`;
                 mapContainer.innerHTML += html;
             });
         } else {
-            mapContainer.innerHTML = `<div class="text-gray-500 text-xs">No map data found.</div>`;
+            mapContainer.innerHTML = `<div class="text-gray-500 text-xs italic">No map data found for this category.</div>`;
         }
 
-        // 3. Top Agents
+        // Top Agents
         const agentContainer = document.getElementById('agent-list');
         agentContainer.innerHTML = "";
         if (stats.top_agents && stats.top_agents.length > 0) {
             stats.top_agents.slice(0, 3).forEach(agent => {
                 const html = `
-                <div class="bg-surface-dark border border-[#482325] p-4 rounded-xl flex items-center gap-4 hover:bg-surface-card transition-colors">
-                    <div class="size-12 rounded-full bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center font-bold text-xl text-primary">
+                <div class="bg-[#0f2747] border border-[#0348a2]/30 p-4 rounded-xl flex items-center gap-4 hover:border-accent transition-colors">
+                    <div class="size-12 rounded-full bg-gradient-to-br from-gray-800 to-black border border-[#0348a2] flex items-center justify-center font-bold text-xl text-accent">
                         ${agent.name[0]}
                     </div>
                     <div>
-                        <h5 class="font-bold text-lg leading-none">${agent.name}</h5>
+                        <h5 class="font-bold text-lg leading-none text-white">${agent.name}</h5>
                         <div class="flex gap-3 mt-1 text-xs text-gray-400 font-mono">
                             <span>${agent.matches} Games</span>
-                            <span class="${agent.win_rate >= 50 ? 'text-primary' : 'text-gray-500'}">${agent.win_rate}% Win</span>
+                            <span class="${agent.win_rate >= 50 ? 'text-accent' : 'text-gray-500'}">${agent.win_rate}% Win</span>
                         </div>
                     </div>
                 </div>`;
@@ -318,26 +319,21 @@
             });
         }
 
-        // 4. RADAR CHART (Dynamic Points)
+        // RADAR CHART
         if (stats.roles && stats.roles.radar) {
             const r = stats.roles.radar;
-            // Order: Duelist (Top), Sentinel (RightTop), Controller (RightBot), Initiator (LeftBot), Slayer (LeftTop)
-            // Center is 50,50. Max Radius ~40.
-            // Function to map 0-100 score to coordinate distance
             const getCoord = (score, angle) => {
                 const rad = (angle * Math.PI) / 180;
-                const dist = (score / 100) * 35; // 35 is max radius
+                const dist = (score / 100) * 35; 
                 const x = 50 + dist * Math.cos(rad);
                 const y = 50 + dist * Math.sin(rad);
                 return `${x},${y}`;
             };
-
-            // SVG Rotation is -90 deg in HTML, so 0 is UP.
-            const p1 = getCoord(r.Duelist, 270);    // Top
-            const p2 = getCoord(r.Sentinel, 342);   // Right Top
-            const p3 = getCoord(r.Controller, 54);  // Right Bot
-            const p4 = getCoord(r.Initiator, 126);  // Left Bot
-            const p5 = getCoord(r.Slayer, 198);     // Left Top
+            const p1 = getCoord(r.Duelist, 270); 
+            const p2 = getCoord(r.Sentinel, 342);
+            const p3 = getCoord(r.Controller, 54);
+            const p4 = getCoord(r.Initiator, 126); 
+            const p5 = getCoord(r.Slayer, 198);    
 
             const polygon = document.querySelector('.radar-chart-polygon');
             if(polygon) polygon.setAttribute("points", `${p1} ${p2} ${p3} ${p4} ${p5}`);
