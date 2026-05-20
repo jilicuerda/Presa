@@ -47,8 +47,9 @@
             <a href="/" class="text-accent border-b-2 border-accent pb-1">Home</a>
             <a href="/roster?team=main" class="hover:text-primary transition-colors pb-1">Main Roster</a>
             <a href="/roster?team=academy" class="hover:text-primary transition-colors pb-1">Academy</a>
-            <a href="#" class="hover:text-primary transition-colors pb-1">Partners</a>
-            <a href="#" class="hover:text-primary transition-colors pb-1">Shop</a>
+            <a href="#" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">public</span> Gankster</a>
+            <a href="#" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">support_agent</span> Manager</a>
+            <a href="#" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">sports</span> Coach</a>
         </nav>
 
         <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="bg-accent hover:bg-yellow-500 text-white px-5 py-2 rounded shadow-sm font-bold uppercase tracking-wider text-xs transition-colors flex items-center gap-2">
@@ -127,7 +128,6 @@
                         const roleIcon = getRoleIcon(item.player.role);
                         const profileLink = `/player?name=${encodeURIComponent(item.player.name)}&tag=${encodeURIComponent(item.player.tag)}&agent=${encodeURIComponent(safeAgent)}`;
                         
-                        // UPDATED: Light Theme Card HTML
                         cardHTML = `
                         <div class="w-full lg:w-72 h-[380px] shrink-0 relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm group flex flex-col">
                             <div class="absolute inset-0 z-0 bg-slate-100">
