@@ -1,218 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0423QF45S7"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-0423QF45S7');
-    </script>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Team Roster - Presa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    colors: { 
-                        "primary": "#0348a2", 
-                        "accent": "#f7b003", 
-                        "navy-dark": "#0a172a", 
-                        "navy-text": "#0f2747" 
-                    }, 
-                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] }
-                } 
-            } 
-        }
-    </script>
-    <style>
-        /* Accordion Hover Effect */
-        #roster-grid {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-items: flex-start;
-            height: 450px;
-            transition: all 0.4s ease;
-        }
-        #roster-grid:hover > div {
-            width: 15%; 
-        }
-        #roster-grid > div:hover {
-            width: 45% !important; 
-        }
-    </style>
+    <meta charset="utf-8"/>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0423QF45S7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-0423QF45S7');
+    </script>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Team Roster - Presa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        "primary": "#0348a2", 
+                        "accent": "#f7b003", 
+                        "navy-dark": "#0a172a", 
+                        "navy-text": "#0f2747" 
+                    }, 
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] }
+                } 
+            } 
+        }
+    </script>
+    <style>
+        .roster-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.4s ease;
+        }
+        /* Accordion Effect - Only trigger on larger screens */
+        @media (min-width: 1024px) {
+            .roster-grid:hover > div { width: 15% !important; }
+            .roster-grid > div:hover { width: 35% !important; }
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-navy-text font-display min-h-screen flex flex-col overflow-x-hidden relative">
 
-    <div class="absolute inset-0 z-0 opacity-[0.03] bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center fixed pointer-events-none"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.03] bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center fixed pointer-events-none"></div>
 
-    <header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 py-4 shadow-sm w-full">
-        <div class="flex items-center gap-3">
-            <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-8 w-8 object-contain">
-            <h2 class="text-navy-dark text-lg font-extrabold uppercase tracking-tighter">TEAM PRESA</h2>
-        </div>
-        
-        <nav class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-500 absolute left-1/2 -translate-x-1/2">
-            <a href="/" class="hover:text-primary transition-colors pb-1">Home</a>
-            <a href="/roster?team=main" id="nav-main" class="hover:text-primary transition-colors pb-1">Main Roster</a>
-            <a href="/roster?team=academy" id="nav-academy" class="hover:text-primary transition-colors pb-1">Academy</a>
-            <a href="https://valorant.gankster.gg/teams/117773/presa" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">public</span> Gankster</a>
-            <a href="https://discordapp.com/users/286632547285467137" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">support_agent</span> Manager</a>
-            <a href="https://discordapp.com/users/371369284351557662" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">sports</span> Coach</a>
-        </nav>
+    <header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 py-4 shadow-sm w-full">
+        <div class="flex items-center gap-3">
+            <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-8 w-8 object-contain">
+            <h2 class="text-navy-dark text-lg font-extrabold uppercase tracking-tighter">TEAM PRESA</h2>
+        </div>
+        
+        <nav class="hidden lg:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-500 absolute left-1/2 -translate-x-1/2">
+            <a href="/" class="hover:text-primary transition-colors pb-1">Home</a>
+            <a href="/roster?team=main" id="nav-main" class="hover:text-primary transition-colors pb-1">Main Roster</a>
+            <a href="/roster?team=academy" id="nav-academy" class="hover:text-primary transition-colors pb-1">Academy</a>
+            <a href="https://valorant.gankster.gg/teams/117773/presa" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">public</span> Gankster</a>
+            <a href="https://discordapp.com/users/286632547285467137" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">support_agent</span> Manager</a>
+            <a href="https://discordapp.com/users/371369284351557662" target="_blank" class="hover:text-primary transition-colors pb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm">sports</span> Coach</a>
+        </nav>
 
-        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="bg-accent hover:bg-yellow-500 text-white px-5 py-2 rounded shadow-sm font-bold uppercase tracking-wider text-xs transition-colors flex items-center gap-2">
-            Join Community
-        </a>
-    </header>
+        <a href="https://discord.gg/7A4uM4hzSE" target="_blank" class="bg-accent hover:bg-yellow-500 text-white px-5 py-2 rounded shadow-sm font-bold uppercase tracking-wider text-xs transition-colors flex items-center gap-2">
+            Join Community
+        </a>
+    </header>
 
-    <main class="flex-1 p-6 lg:p-10 w-full max-w-[1920px] mx-auto relative z-10">
-        
-        <div class="mb-12 border-b border-slate-200 pb-6 flex flex-col md:flex-row justify-between items-end gap-4">
-            <div>
-                <h1 id="page-title" class="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-navy-dark">LOADING...</h1>
-                <p class="text-slate-500 font-mono tracking-widest uppercase text-sm mt-2">Active Roster & Event History</p>
-            </div>
-            <div class="flex gap-4">
-                <div class="text-right">
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Region</p>
-                    <p class="text-lg font-bold text-navy-dark">EMEA</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Status</p>
-                    <p class="text-lg font-bold text-primary flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE</p>
-                </div>
-            </div>
-        </div>
+    <main class="flex-1 p-6 lg:p-10 w-full max-w-[1920px] mx-auto relative z-10">
+        
+        <div class="mb-12 border-b border-slate-200 pb-6">
+            <h1 id="page-title" class="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-navy-dark">LOADING...</h1>
+        </div>
 
-        <div class="mb-16">
-            <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-navy-dark">
-                <span class="material-symbols-outlined text-accent">emoji_events</span> Trophy Cabinet
-            </h3>
-            <div id="trophy-cabinet" class="flex overflow-x-auto gap-6 pb-6 snap-x hide-scrollbar">
-                <div class="text-slate-400 italic text-sm">Loading tournament history...</div>
-            </div>
-        </div>
+        <div class="mb-16">
+            <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-navy-dark">
+                <span class="material-symbols-outlined text-accent">emoji_events</span> Trophy Cabinet
+            </h3>
+            <div id="trophy-cabinet" class="flex overflow-x-auto gap-6 pb-6 snap-x hide-scrollbar">
+                <div class="text-slate-400 italic text-sm">Loading tournament history...</div>
+            </div>
+        </div>
 
-        <div>
-            <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-navy-dark">
-                <span class="material-symbols-outlined text-primary">groups</span> Active Personnel
-            </h3>
-            <div id="roster-grid">
-                </div>
-        </div>
-    </main>
+        <div id="roster-container">
+            </div>
+    </main>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const teamId = urlParams.get('team') || 'main';
-        
-        document.getElementById('page-title').innerText = `PRESA ${teamId.toUpperCase()}`;
-        
-        if(teamId === 'main') {
-            document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
-        } else if (teamId === 'academy') {
-            document.getElementById('nav-academy').classList.add('text-primary', 'border-b-2', 'border-primary');
-        }
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const teamId = urlParams.get('team') || 'main';
+        document.getElementById('page-title').innerText = `PRESA ${teamId.toUpperCase()}`;
+        if(teamId === 'main') document.getElementById('nav-main').classList.add('text-primary', 'border-b-2', 'border-primary');
+        else if (teamId === 'academy') document.getElementById('nav-academy').classList.add('text-primary', 'border-b-2', 'border-primary');
 
-        function getRoleIcon(role) {
-            const r = role.toLowerCase();
-            if (r.includes("duelist")) return "swords";
-            if (r.includes("sentinel")) return "security";
-            if (r.includes("controller") || r.includes("smoker")) return "smoke_free";
-            if (r.includes("initiator")) return "radar";
-            if (r.includes("igl")) return "psychology";
-            return "sports_esports";
-        }
+        function getRoleIcon(role) {
+            const r = role.toLowerCase();
+            if (r.includes("duelist")) return "swords";
+            if (r.includes("sentinel")) return "security";
+            if (r.includes("controller") || r.includes("smoker")) return "smoke_free";
+            if (r.includes("initiator")) return "radar";
+            if (r.includes("igl")) return "psychology";
+            return "sports_esports";
+        }
 
-        async function loadData() {
-            try {
-                const tourneyRes = await fetch(`/api/tournaments/${teamId}`);
-                const tournaments = await tourneyRes.json();
-                const cabinet = document.getElementById('trophy-cabinet');
-                
-                if (tournaments.length === 0) {
-                    cabinet.innerHTML = `<div class="text-slate-500 bg-white border border-slate-200 px-6 py-4 rounded-lg w-full">No official tournament records found for this division.</div>`;
-                } else {
-                    cabinet.innerHTML = "";
-                    tournaments.forEach(t => {
-                        let isWin = t.placement.toLowerCase().includes('1st') || t.placement.toLowerCase().includes('champion');
-                        let borderClass = isWin ? 'border-accent shadow-md' : 'border-slate-200 shadow-sm hover:shadow-md';
-                        let iconHtml = `<span class="material-symbols-outlined text-5xl text-slate-300 mb-3 group-hover:scale-110 transition-transform">workspace_premium</span>`;
-                        
-                        if (t.logo_url) {
-                            iconHtml = `<img src="${t.logo_url}" alt="Event Logo" class="h-16 w-16 object-contain mb-3 group-hover:scale-110 transition-transform">`;
-                        }
+        async function loadData() {
+            try {
+                const [tRes, rRes] = await Promise.all([fetch(`/api/tournaments/${teamId}`), fetch(`/api/team-history/${teamId}`)]);
+                const tournaments = await tRes.json();
+                const data = await rRes.json();
 
-                        cabinet.innerHTML += `
-                        <div class="min-w-[280px] bg-white border ${borderClass} rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group snap-start transition-all cursor-default">
-                            ${isWin ? '<div class="absolute inset-0 bg-accent opacity-5"></div>' : ''}
-                            <div class="relative z-10 flex flex-col items-center">
-                                ${iconHtml}
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">${t.match_type === 'scrim' ? 'Showmatch' : 'Tournament'}</span>
-                                <h4 class="text-lg font-bold text-navy-dark uppercase tracking-tight text-center mb-1 leading-tight">${t.name}</h4>
-                                <span class="text-primary font-extrabold text-xl uppercase">${t.placement}</span>
-                            </div>
-                        </div>`;
-                    });
-                }
-            } catch (e) { console.error("Error loading trophies", e); }
+                // Trophy Cabinet
+                const cabinet = document.getElementById('trophy-cabinet');
+                cabinet.innerHTML = tournaments.length ? "" : '<div class="text-slate-500 italic">No tournament records.</div>';
+                tournaments.forEach(t => {
+                    let isWin = t.placement.toLowerCase().includes('1st') || t.placement.toLowerCase().includes('champion');
+                    cabinet.innerHTML += `
+                    <div class="min-w-[200px] bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center">
+                        <h4 class="text-sm font-bold text-navy-dark uppercase text-center">${t.name}</h4>
+                        <span class="text-primary font-bold text-lg">${t.placement}</span>
+                    </div>`;
+                });
 
-            try {
-                const rosterRes = await fetch(`/api/team-history/${teamId}`);
-                const data = await rosterRes.json();
-                const grid = document.getElementById('roster-grid');
-                grid.innerHTML = "";
+                // Group Roster by type
+                const container = document.getElementById('roster-container');
+                const groups = { player: [], sub: [], coach: [] };
+                data.roster.forEach(p => { if (groups[p.type]) groups[p.type].push(p); });
 
-                data.roster.forEach(p => {
-                    const icon = getRoleIcon(p.role);
-                    let safeAgent = p.main_agent.charAt(0).toUpperCase() + p.main_agent.slice(1).toLowerCase();
-                    let roleColor = p.type === 'sub' ? 'bg-slate-200 text-slate-600' : (p.type === 'coach' ? 'bg-navy-dark text-white' : 'bg-primary text-white');
+                container.innerHTML = "";
+                for (const [groupName, members] of Object.entries(groups)) {
+                    if (members.length === 0) continue;
 
-                    grid.innerHTML += `
-                    <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[450px] flex flex-col group shrink-0" 
-                         style="width: ${100/data.roster.length}%"
-                         onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
-                        
-                        <div class="absolute inset-0 z-0 bg-slate-100">
-                            <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500">
-                            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
-                        </div>
+                    const section = document.createElement('div');
+                    section.className = 'role-section';
+                    section.innerHTML = `<h3 class="text-sm font-bold uppercase tracking-wider mb-4 text-slate-400">${groupName}</h3>`;
+                    
+                    const grid = document.createElement('div');
+                    grid.className = 'roster-grid';
+                    
+                    members.forEach(p => {
+                        let safeAgent = p.main_agent.charAt(0).toUpperCase() + p.main_agent.slice(1).toLowerCase();
+                        grid.innerHTML += `
+                        <div class="relative bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-500 ease-out cursor-pointer h-[400px] flex flex-col group shrink-0" 
+                             style="width: 18.5%"
+                             onclick="window.location.href='/player?name=${encodeURIComponent(p.name)}&tag=${encodeURIComponent(p.tag)}&agent=${encodeURIComponent(p.main_agent)}'">
+                            
+                            <div class="absolute inset-0 z-0 bg-slate-100">
+                                <img src="/static/assets/agents/${safeAgent}_Artwork-large.webp" onerror="this.src='/static/assets/agents/Jett_Artwork-large.webp'" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
+                            </div>
 
-                        <div class="absolute top-4 right-4 z-20">
-                            <span class="${roleColor} text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-sm">${p.type}</span>
-                        </div>
-
-                        <div class="relative z-20 flex flex-col h-full p-6 mt-auto min-w-[200px]">
-                            <div class="flex items-center gap-2 text-primary text-xs font-bold uppercase mb-1">
-                                <span class="material-symbols-outlined text-sm">${icon}</span>${p.role}
-                            </div>
-                            <h4 class="text-3xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors">${p.name}</h4>
-                            <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
-                            
-                            <div class="mt-auto">
-                                <div class="bg-white/80 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors shadow-sm">
-                                    <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
-                                    <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-            } catch (e) {
-                document.getElementById('roster-grid').innerHTML = `<div class="text-red-500 col-span-full">Failed to load roster.</div>`;
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", loadData);
-    </script>
+                            <div class="relative z-20 flex flex-col h-full p-4 mt-auto">
+                                <h4 class="text-2xl font-extrabold text-navy-dark uppercase tracking-tighter leading-none mb-1">${p.name}</h4>
+                                <span class="text-slate-500 text-xs font-mono tracking-widest uppercase mb-4">#${p.tag}</span>
+                                
+                                <div class="mt-auto">
+                                    <div class="bg-white/90 border border-slate-200 p-3 rounded flex justify-between items-center transition-colors shadow-sm">
+                                        <p class="text-[10px] text-slate-500 uppercase font-bold">Rank</p>
+                                        <p class="text-navy-dark text-sm font-bold font-mono truncate">${p.rank}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    section.appendChild(grid);
+                    container.appendChild(section);
+                }
+            } catch (e) { console.error(e); }
+        }
+        document.addEventListener("DOMContentLoaded", loadData);
+    </script>
 </body>
 </html>
-
-
