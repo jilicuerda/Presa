@@ -58,6 +58,11 @@
                         <input type="text" id="t-placement" placeholder="e.g. 1st Place, Playoffs" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
                     </div>
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Event or Enemy Logo URL (Optional)</label>
+                    <input type="url" id="t-logo" placeholder="https://example.com/logo.png" class="w-full bg-background-dark border border-[#0348a2]/30 rounded p-3 text-white focus:outline-none focus:border-accent">
+                </div>
+                
                 <button type="submit" class="w-full bg-primary hover:bg-accent hover:text-background-dark text-white font-bold uppercase tracking-widest py-3 rounded mt-4 transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">add_circle</span> Save Event
                 </button>
@@ -105,7 +110,14 @@
                 <tbody class="divide-y divide-[#0348a2]/30">
                     {% for t in tournaments %}
                     <tr class="hover:bg-white/5 transition-colors">
-                        <td class="p-4 font-bold">{{ t.name }}</td>
+                        <td class="p-4 font-bold">
+                            <div class="flex items-center gap-3">
+                                {% if t.logo_url %}
+                                    <img src="{{ t.logo_url }}" class="h-6 w-6 object-contain rounded">
+                                {% endif %}
+                                {{ t.name }}
+                            </div>
+                        </td>
                         <td class="p-4 text-gray-400 uppercase text-xs tracking-widest">{{ t.match_type }}</td>
                         <td class="p-4 uppercase text-accent">{{ t.team_division }}</td>
                         <td class="p-4">{{ t.placement or 'N/A' }}</td>
@@ -124,11 +136,14 @@
             const status = document.getElementById('t-status');
             status.className = "mt-4 text-sm font-mono text-gray-400";
             status.innerText = "Saving to Database...";
+            
+            // Added logo_url to payload
             const payload = {
                 name: document.getElementById('t-name').value,
                 division: document.getElementById('t-division').value,
                 placement: document.getElementById('t-placement').value,
-                type: document.getElementById('t-type').value
+                type: document.getElementById('t-type').value,
+                logo_url: document.getElementById('t-logo').value
             };
             try {
                 const res = await fetch('/api/admin/add_tournament', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
