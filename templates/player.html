@@ -3,348 +3,379 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Player Stats</title>
+    <title>Player Profile - Team Presa</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { 
             darkMode: "class", 
             theme: { 
                 extend: { 
                     colors: { 
-                        "primary": "#0348a2",       // Presa Blue
-                        "accent": "#f7b003",        // Presa Gold
-                        "background-dark": "#0a172a", // Deep navy background
-                        "surface-dark": "#0c1f38",    // Slightly lighter blue for cards
-                        "surface-card": "#0f2747"     // Hover states for cards
+                        "primary": "#0348a2", 
+                        "accent": "#f7b003", 
+                        "background-dark": "#0a172a", 
+                        "surface-dark": "#0c1f38", 
+                        "surface-card": "#0f2747" 
                     }, 
-                    fontFamily: { 
-                        "display": ["Space Grotesk", "sans-serif"] 
-                    } 
+                    fontFamily: { "display": ["Space Grotesk", "sans-serif"] },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards'
+                    }
                 } 
             } 
         }
     </script>
-    <style>
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #180e0f; }
-        ::-webkit-scrollbar-thumb { background: #482325; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ec131e; }
-        .tech-border { position: relative; }
-        .tech-border::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid #ec131e; border-left: 2px solid #ec131e; }
-        .tech-border::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid #ec131e; border-right: 2px solid #ec131e; }
-        .agent-portrait { mask-image: linear-gradient(to bottom, black 60%, transparent 100%); }
-        .radar-chart-polygon { fill: rgba(236, 19, 30, 0.2); stroke: #ec131e; stroke-width: 2; }
-    </style>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-0423QF45S7"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-0423QF45S7');
-</script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0423QF45S7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-0423QF45S7');
+    </script>
 </head>
-<body class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-primary selection:text-white">
-<nav class="sticky top-0 z-50 flex items-center justify-between border-b border-[#482325] bg-background-dark/95 backdrop-blur-md px-6 lg:px-10 py-3">
-    <div class="flex items-center gap-6">
-        <a href="/" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-            <span class="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
-            <span class="text-sm font-bold uppercase tracking-wider">Back to Roster</span>
-        </a>
-        <div class="h-6 w-px bg-[#482325]"></div>
-        <div class="flex items-center gap-3">
-            <div class="size-8 text-primary flex items-center justify-center">
-                <img src="/static/assets/presa.png" alt="Logo" class="h-8 w-8 object-contain">
-            </div>
-            <h2 class="text-white text-lg font-bold uppercase tracking-tighter">TEAM PRESA</h2>
-        </div>
-    </div>
-</nav>
+<body class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden">
 
-<main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
-<div class="max-w-[1600px] mx-auto space-y-6">
-    <header class="relative rounded-xl overflow-hidden border border-[#482325] bg-surface-dark group h-[300px]">
-        <div class="absolute inset-0 z-0">
-            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/90 to-transparent"></div>
-            <img id="p-bg-img" alt="Agent" class="absolute right-0 top-0 h-full w-auto object-cover object-top opacity-80 agent-portrait transition-transform duration-700 group-hover:scale-105" src=""/>
+    <header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#0348a2]/30 bg-background-dark/95 backdrop-blur-md px-6 py-3">
+        <div class="flex items-center gap-4">
+            <a href="javascript:history.back()" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span class="text-sm font-bold uppercase tracking-wider hidden md:block">Back to Roster</span>
+            </a>
         </div>
-        <div class="relative z-10 h-full flex flex-col justify-between p-8">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Active Player</span>
-                    <span id="p-tag" class="text-gray-400 text-xs font-mono">#TAG</span>
-                </div>
-                <h1 id="p-name" class="text-6xl lg:text-7xl font-bold text-white uppercase tracking-tighter leading-none mb-1">LOADING...</h1>
-                <div class="flex items-center gap-6 mt-4 text-sm font-bold uppercase tracking-widest text-gray-400">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-600">Main Agent</span>
-                        <span id="p-agent" class="text-white">...</span>
-                    </div>
-                    <div class="w-1 h-1 bg-gray-600 rounded-full"></div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-600">Region</span>
-                        <span class="text-white">EU</span>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-end gap-1 mt-8">
-                <button class="px-6 py-3 bg-primary text-white font-bold uppercase text-sm tracking-wider rounded-t-lg border-t border-x border-primary relative top-[1px]">Overview</button>
-            </div>
+        <div class="flex items-center gap-3 absolute left-1/2 -translate-x-1/2">
+            <img src="/static/assets/LOGO_PRESA.png" alt="Logo" class="h-8 w-8 object-contain">
+            <h2 class="text-white text-lg md:text-xl font-bold uppercase tracking-tighter">TEAM PRESA</h2>
         </div>
     </header>
 
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
-            <section>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold uppercase tracking-tight flex items-center gap-2">
-                        <span class="w-1 h-5 bg-primary block"></span>
-                        Performance Stats
-                    </h3>
-                    <div class="flex gap-4 border-b border-[#0348a2]/30 pb-4 mb-6">
-                        <button id="btn-ranked" onclick="renderStats('ranked')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm">Ranked</button>
-                        <button id="btn-scrims" onclick="renderStats('scrims')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Scrims</button>
-                        <button id="btn-tournaments" onclick="renderStats('tournaments')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Tourneys</button>
+    <main class="flex-1 p-6 lg:p-10 w-full max-w-[1920px] mx-auto overflow-y-auto">
+        
+        <div class="relative w-full h-[300px] md:h-[400px] bg-surface-dark border border-[#0348a2]/50 rounded-2xl overflow-hidden mb-10 flex items-end">
+            <div class="absolute inset-0 z-0">
+                <img id="agent-image" src="" alt="Agent" class="w-full h-full object-cover opacity-30 filter grayscale">
+                <div class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/80 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-background-dark to-transparent"></div>
+            </div>
+            
+            <div class="relative z-10 p-8 md:p-12 w-full flex justify-between items-end">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded">Active Player</span>
+                        <span id="player-tag" class="text-accent text-sm font-mono tracking-widest uppercase">#TAG</span>
                     </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
-                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">K/D Ratio</div>
-                        <div id="stat-kd" class="text-4xl font-bold text-white mb-2">0.00</div>
-                    </div>
-                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
-                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Win Rate</div>
-                        <div id="stat-wr" class="text-4xl font-bold text-primary mb-2">0%</div>
-                    </div>
-                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
-                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Matches</div>
-                        <div id="stat-matches" class="text-4xl font-bold text-white mb-2">0</div>
-                    </div>
-                    <div class="bg-surface-dark border border-[#482325] rounded-xl p-5 tech-border">
-                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Best Map</div>
-                        <div id="stat-best-map" class="text-xl font-bold text-white mb-2 mt-2 truncate">...</div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="bg-surface-dark border border-[#482325] rounded-xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h4 class="text-white text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-500 text-lg">map</span>
-                        Map Breakdown
-                    </h4>
-                </div>
-                <div id="map-list" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div class="text-gray-500 text-sm">Loading map data...</div>
-                </div>
-            </section>
-
-            <section>
-                <h4 class="text-white text-sm font-bold uppercase tracking-wider mb-3 pl-1">Top Agents</h4>
-                <div id="agent-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    </div>
-            </section>
-        </div>
-
-        <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            <div class="bg-surface-dark border border-[#482325] rounded-xl p-6 h-full flex flex-col tech-border">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xl">dataset</span>
-                        Vs Enemy Comps
-                    </h3>
-                    <div class="px-2 py-0.5 rounded bg-primary/20 text-primary text-[10px] font-bold uppercase border border-primary/20">VS META</div>
-                </div>
-                
-                <div class="flex-1 flex flex-col items-center justify-center relative min-h-[250px]">
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <svg class="w-64 h-64" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" fill="none" r="45" stroke="#2d1517" stroke-width="1"></circle>
-                            <circle cx="50" cy="50" fill="none" r="30" stroke="#2d1517" stroke-width="1"></circle>
-                            <line stroke="#2d1517" stroke-width="1" x1="50" x2="50" y1="5" y2="95"></line>
-                            <line stroke="#2d1517" stroke-width="1" x1="5" x2="95" y1="50" y2="50"></line>
-                            <polygon class="radar-chart-polygon" points="50,15 80,40 70,80 30,80 20,40"></polygon>
-                        </svg>
-                    </div>
-                    <div class="absolute w-full h-full">
-                        <span class="absolute top-0 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">AGGRO</span>
-                        <span class="absolute top-1/3 right-2 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">SENTINEL</span>
-                        <span class="absolute bottom-1/4 right-4 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">DOUBLE SMOKE</span>
-                        <span class="absolute bottom-1/4 left-4 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">INFO</span>
-                        <span class="absolute top-1/3 left-2 text-[10px] text-gray-400 font-bold bg-surface-dark px-1">RUSH</span>
-                    </div>
-                </div>
-
-                <div class="space-y-3 mt-4">
-                    <div class="bg-background-dark p-3 rounded border border-white/5">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-gray-300 uppercase">Double Initiator</span>
-                            <span class="text-primary font-mono font-bold text-sm">1.52 KD</span>
-                        </div>
-                        <div class="flex gap-1 mb-1 opacity-80">
-                            <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
-                            <div class="h-1 flex-1 bg-green-500 rounded-sm"></div>
-                            <div class="h-1 flex-1 bg-gray-700 rounded-sm"></div>
-                        </div>
-                    </div>
-                    <div class="bg-background-dark p-3 rounded border border-white/5">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-gray-300 uppercase">Triple Duelist</span>
-                            <span class="text-white font-mono font-bold text-sm">1.10 KD</span>
-                        </div>
-                        <div class="flex gap-1 mb-1 opacity-80">
-                            <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
-                            <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
-                            <div class="h-1 flex-1 bg-yellow-500 rounded-sm"></div>
-                        </div>
+                    <h1 id="player-name" class="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-4 text-white drop-shadow-lg">LOADING...</h1>
+                    <div class="flex items-center gap-6 text-gray-400 text-sm font-bold uppercase tracking-widest">
+                        <p>Main Agent <span id="player-agent" class="text-white ml-2">...</span></p>
+                        <p>Region <span class="text-white ml-2">EU</span></p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-</main>
 
-<script>
-    // 1. MAP IMAGES DATABASE (Local Files)
-    const MAP_IMAGES = {
-        "Ascent": "/static/maps/valorant-ascent-map.webp",
-        "Split": "/static/maps/valorant-split-map.webp",
-        "Bind": "/static/maps/valorant-bind-map.webp",
-        "Haven": "/static/maps/valorant-haven-map.webp",
-        "Icebox": "/static/maps/valorant-icebox-map.webp",
-        "Breeze": "/static/maps/valorant-breeze-map.webp",
-        "Fracture": "/static/maps/valorant-fracture-map.webp",
-        "Pearl": "/static/maps/valorant-pearl-map.webp",
-        "Lotus": "/static/maps/valorant-lotus-map.webp",
-        "Sunset": "/static/maps/sunset-valorant-map.webp",
-        "Abyss": "/static/maps/abyss-valorant-map.webp",
-        "Default": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop"
-    };
-
-    // 2. GLOBAL MEMORY
-    let globalData = null;
-
-    // 3. THE ENGINE (Runs automatically when you open the page)
-    document.addEventListener("DOMContentLoaded", async () => {
-        const params = new URLSearchParams(window.location.search);
-        const name = params.get('name');
-        const tag = params.get('tag');
-
-        if (!name || !tag) {
-            console.error("Missing name or tag in URL");
-            return;
-        }
-
-        try {
-            // Ask your Python server for the stats
-            const response = await fetch(`/api/player/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`);
-            globalData = await response.json();
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
             
-            // Once the data arrives, draw the 'ranked' tab by default
-            renderStats('ranked');
+            <div class="lg:col-span-2 space-y-10">
+                
+                <div class="flex gap-4 border-b border-[#0348a2]/30 pb-4">
+                    <button id="btn-ranked" onclick="renderStats('ranked')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm transition-colors">Ranked</button>
+                    <button id="btn-scrims" onclick="renderStats('scrims')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Scrims</button>
+                    <button id="btn-tournaments" onclick="renderStats('tournaments')" class="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors">Tourneys</button>
+                </div>
 
-        } catch (error) {
-            console.error("Error fetching player stats:", error);
-        }
-    });
-
-    // 4. THE RENDERER (Draws the stats when a tab is clicked)
-    function renderStats(mode) {
-        // Toggle Buttons visually
-        document.getElementById('btn-ranked').className = mode === 'ranked' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
-        document.getElementById('btn-scrims').className = mode === 'scrims' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
-        document.getElementById('btn-tournaments').className = mode === 'tournaments' ? "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm" : "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors";
-
-        if (!globalData || !globalData[mode]) return;
-        const stats = globalData[mode];
-        
-        // Basic Stats
-        const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
-        document.getElementById('stat-kd').innerText = kd;
-        const wr = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
-        document.getElementById('stat-wr').innerText = wr;
-        document.getElementById('stat-matches').innerText = stats.total;
-        document.getElementById('stat-best-map').innerText = stats.best_map || "N/A";
-
-        // Map Breakdown
-        const mapContainer = document.getElementById('map-list');
-        mapContainer.innerHTML = "";
-        
-        if (stats.top_maps && stats.top_maps.length > 0) {
-            stats.top_maps.forEach(map => {
-                let barColor = map.win_rate >= 50 ? "bg-primary" : "bg-white";
-                let percentColor = map.win_rate >= 50 ? "text-primary" : "text-white";
-                let bgImage = MAP_IMAGES[map.name] || MAP_IMAGES["Default"];
-
-                const html = `
-                <div class="flex items-center gap-4 group">
-                    <div class="w-16 h-10 bg-gray-800 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-widest bg-cover bg-center grayscale group-hover:grayscale-0 transition-all border border-white/5" style="background-image: url('${bgImage}')">
-                        <span class="bg-black/60 px-1 rounded backdrop-blur-sm">${map.name}</span>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="font-bold ${percentColor}">${map.win_rate}% Win</span>
-                            <span class="text-gray-400 font-mono">${map.kd} KD</span>
+                <div>
+                    <h3 class="text-xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-white">
+                        <span class="material-symbols-outlined text-primary">bar_chart</span> Performance Stats
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-surface-dark border border-[#0348a2]/30 p-6 rounded-xl hover:border-accent transition-colors relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary"></div>
+                            <div class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary"></div>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">K/D Ratio</p>
+                            <p id="stat-kd" class="text-4xl font-bold text-white">0.00</p>
                         </div>
-                        <div class="h-2 w-full bg-[#0a172a] rounded-full overflow-hidden flex border border-white/5">
-                            <div class="${barColor} h-full" style="width: ${map.win_rate}%"></div>
-                            <div class="bg-transparent h-full" style="width: ${100 - map.win_rate}%"></div>
+                        <div class="bg-surface-dark border border-[#0348a2]/30 p-6 rounded-xl hover:border-accent transition-colors relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary"></div>
+                            <div class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary"></div>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Win Rate</p>
+                            <p id="stat-wr" class="text-4xl font-bold text-primary">0%</p>
+                        </div>
+                        <div class="bg-surface-dark border border-[#0348a2]/30 p-6 rounded-xl hover:border-accent transition-colors relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary"></div>
+                            <div class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary"></div>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Matches</p>
+                            <p id="stat-matches" class="text-4xl font-bold text-white">0</p>
+                        </div>
+                        <div class="bg-surface-dark border border-[#0348a2]/30 p-6 rounded-xl hover:border-accent transition-colors relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary"></div>
+                            <div class="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary"></div>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Best Map</p>
+                            <p id="stat-best-map" class="text-2xl font-bold text-white truncate mt-2">N/A</p>
                         </div>
                     </div>
-                </div>`;
-                mapContainer.innerHTML += html;
-            });
-        } else {
-            mapContainer.innerHTML = `<div class="text-gray-500 text-xs italic">No map data found for this category.</div>`;
-        }
+                </div>
 
-        // Top Agents
-        const agentContainer = document.getElementById('agent-list');
-        agentContainer.innerHTML = "";
-        if (stats.top_agents && stats.top_agents.length > 0) {
-            stats.top_agents.slice(0, 3).forEach(agent => {
-                const html = `
-                <div class="bg-[#0f2747] border border-[#0348a2]/30 p-4 rounded-xl flex items-center gap-4 hover:border-accent transition-colors">
-                    <div class="size-12 rounded-full bg-gradient-to-br from-gray-800 to-black border border-[#0348a2] flex items-center justify-center font-bold text-xl text-accent">
-                        ${agent.name[0]}
-                    </div>
-                    <div>
-                        <h5 class="font-bold text-lg leading-none text-white">${agent.name}</h5>
-                        <div class="flex gap-3 mt-1 text-xs text-gray-400 font-mono">
-                            <span>${agent.matches} Games</span>
-                            <span class="${agent.win_rate >= 50 ? 'text-accent' : 'text-gray-500'}">${agent.win_rate}% Win</span>
+                <div class="bg-surface-dark border border-[#0348a2]/30 rounded-xl p-8">
+                    <h3 class="text-lg font-bold uppercase tracking-wider mb-6 flex items-center gap-2 text-white">
+                        <span class="material-symbols-outlined text-gray-400">map</span> Map Breakdown
+                    </h3>
+                    <div id="map-list" class="space-y-4">
+                        <div class="text-gray-500 text-sm italic flex items-center gap-2">
+                            <span class="material-symbols-outlined animate-spin">refresh</span> Fetching map data...
                         </div>
                     </div>
-                </div>`;
-                agentContainer.innerHTML += html;
-            });
-        }
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold uppercase tracking-wider mb-6 text-white">Top Agents</h3>
+                    <div id="agent-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-gray-500 text-sm italic">Loading agents...</div>
+                    </div>
+                </div>
+            </div>
 
-        // RADAR CHART
-        if (stats.roles && stats.roles.radar) {
-            const r = stats.roles.radar;
-            const getCoord = (score, angle) => {
-                const rad = (angle * Math.PI) / 180;
-                const dist = (score / 100) * 35; 
-                const x = 50 + dist * Math.cos(rad);
-                const y = 50 + dist * Math.sin(rad);
-                return `${x},${y}`;
-            };
-            const p1 = getCoord(r.Duelist, 270); 
-            const p2 = getCoord(r.Sentinel, 342);
-            const p3 = getCoord(r.Controller, 54);
-            const p4 = getCoord(r.Initiator, 126); 
-            const p5 = getCoord(r.Slayer, 198);    
+            <div class="space-y-6">
+                <div class="bg-surface-dark border border-[#0348a2]/30 rounded-xl p-8 relative overflow-hidden h-[500px] flex flex-col">
+                    <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-accent m-4"></div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-accent m-4"></div>
+                    
+                    <div class="flex justify-between items-center mb-10 relative z-10">
+                        <h3 class="text-lg font-bold uppercase tracking-wider flex items-center gap-2 text-white">
+                            <span class="material-symbols-outlined text-primary">grid_view</span> Role Mastery
+                        </h3>
+                        <span class="text-[10px] font-mono tracking-widest text-[#0348a2] border border-[#0348a2] px-2 py-1 rounded uppercase">Live Data</span>
+                    </div>
 
-            const polygon = document.querySelector('.radar-chart-polygon');
-            if(polygon) polygon.setAttribute("points", `${p1} ${p2} ${p3} ${p4} ${p5}`);
+                    <div class="flex-1 relative w-full flex items-center justify-center">
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <svg viewBox="0 0 100 100" class="w-full h-full max-w-[300px] opacity-20">
+                                <circle cx="50" cy="50" r="35" fill="none" stroke="#0348a2" stroke-width="0.5"/>
+                                <circle cx="50" cy="50" r="23" fill="none" stroke="#0348a2" stroke-width="0.5"/>
+                                <circle cx="50" cy="50" r="11" fill="none" stroke="#0348a2" stroke-width="0.5"/>
+                                <line x1="50" y1="50" x2="50" y2="15" stroke="#0348a2" stroke-width="0.5"/>
+                                <line x1="50" y1="50" x2="83" y2="60" stroke="#0348a2" stroke-width="0.5"/>
+                                <line x1="50" y1="50" x2="60" y2="83" stroke="#0348a2" stroke-width="0.5"/>
+                                <line x1="50" y1="50" x2="20" y2="70" stroke="#0348a2" stroke-width="0.5"/>
+                                <line x1="50" y1="50" x2="20" y2="30" stroke="#0348a2" stroke-width="0.5"/>
+                            </svg>
+                        </div>
+                        <svg viewBox="0 0 100 100" class="w-full h-full max-w-[300px] relative z-10">
+                            <polygon class="radar-chart-polygon transition-all duration-1000 ease-out" points="50,50 50,50 50,50 50,50 50,50" fill="rgba(247, 176, 3, 0.2)" stroke="#f7b003" stroke-width="1.5"/>
+                        </svg>
+                        <div class="absolute top-[5%] left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-400 tracking-widest uppercase">Duelist</div>
+                        <div class="absolute top-[40%] right-[0%] text-[9px] font-bold text-gray-400 tracking-widest uppercase">Sentinel</div>
+                        <div class="absolute bottom-[5%] right-[20%] text-[9px] font-bold text-gray-400 tracking-widest uppercase">Controller</div>
+                        <div class="absolute bottom-[5%] left-[20%] text-[9px] font-bold text-gray-400 tracking-widest uppercase">Initiator</div>
+                        <div class="absolute top-[40%] left-[5%] text-[9px] font-bold text-gray-400 tracking-widest uppercase">Slayer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        console.log("🚀 Player page JS initialized.");
+
+        // --- MAP IMAGES DATABASE ---
+        const MAP_IMAGES = {
+            "Ascent": "/static/maps/valorant-ascent-map.webp",
+            "Split": "/static/maps/valorant-split-map.webp",
+            "Bind": "/static/maps/valorant-bind-map.webp",
+            "Haven": "/static/maps/valorant-haven-map.webp",
+            "Icebox": "/static/maps/valorant-icebox-map.webp",
+            "Breeze": "/static/maps/valorant-breeze-map.webp",
+            "Fracture": "/static/maps/valorant-fracture-map.webp",
+            "Pearl": "/static/maps/valorant-pearl-map.webp",
+            "Lotus": "/static/maps/valorant-lotus-map.webp",
+            "Sunset": "/static/maps/sunset-valorant-map.webp",
+            "Abyss": "/static/maps/abyss-valorant-map.webp",
+            "Default": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop"
+        };
+
+        let globalData = null;
+
+        // --- THE ENGINE ---
+        document.addEventListener("DOMContentLoaded", async () => {
+            console.log("⚙️ DOM Loaded. Running engine...");
+            
+            const params = new URLSearchParams(window.location.search);
+            const name = params.get('name');
+            const tag = params.get('tag');
+            const agent = params.get('agent') || 'Jett';
+
+            console.log("🔍 URL Parameters parsed:", { name, tag, agent });
+
+            if (!name || !tag) {
+                console.error("❌ Missing name or tag in URL parameters.");
+                document.getElementById('player-name').innerText = "PLAYER NOT FOUND";
+                return;
+            }
+
+            // Update Header UI immediately
+            try {
+                document.getElementById('player-name').innerText = name.toUpperCase();
+                document.getElementById('player-tag').innerText = "#" + tag;
+                document.getElementById('player-agent').innerText = agent.toUpperCase();
+                
+                const agentImg = document.getElementById('agent-image');
+                if (agentImg) {
+                    agentImg.src = `/static/assets/agents/${agent}_Artwork-large.webp`;
+                    console.log("✅ Header UI updated successfully.");
+                }
+            } catch (e) {
+                console.warn("⚠️ Could not update some header IDs:", e);
+            }
+
+            // Fetch Data
+            const apiUrl = `/api/player/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`;
+            console.log("📡 Fetching player data from:", apiUrl);
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                globalData = await response.json();
+                console.log("📦 Data received successfully:", globalData);
+                
+                console.log("▶️ Triggering initial render for 'ranked' mode.");
+                renderStats('ranked');
+
+            } catch (error) {
+                console.error("❌ Fatal Error fetching player stats:", error);
+                document.getElementById('map-list').innerHTML = `<div class="text-red-500 text-sm">Failed to load API data. Check console.</div>`;
+            }
+        });
+
+        // --- THE RENDERER ---
+        function renderStats(mode) {
+            console.log(`🔄 Switching render mode to: [${mode}]`);
+
+            // Toggle Buttons
+            const activeClass = "px-4 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-white rounded shadow-sm transition-colors";
+            const inactiveClass = "px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors bg-surface-dark border border-[#0348a2]/30 rounded";
+            
+            document.getElementById('btn-ranked').className = mode === 'ranked' ? activeClass : inactiveClass;
+            document.getElementById('btn-scrims').className = mode === 'scrims' ? activeClass : inactiveClass;
+            document.getElementById('btn-tournaments').className = mode === 'tournaments' ? activeClass : inactiveClass;
+
+            if (!globalData) {
+                console.warn("⚠️ globalData is null. Cannot render.");
+                return;
+            }
+
+            const stats = globalData[mode];
+            if (!stats) {
+                console.warn(`⚠️ No data found in globalData for mode: ${mode}`);
+                return;
+            }
+
+            console.log(`📊 Rendering stats payload for ${mode}:`, stats);
+
+            // Basic Stats
+            const kd = stats.deaths > 0 ? (stats.kills / stats.deaths).toFixed(2) : "0.00";
+            document.getElementById('stat-kd').innerText = kd;
+            const wr = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(0) + "%" : "0%";
+            document.getElementById('stat-wr').innerText = wr;
+            document.getElementById('stat-matches').innerText = stats.total;
+            document.getElementById('stat-best-map').innerText = stats.best_map || "N/A";
+
+            // Map Breakdown
+            const mapContainer = document.getElementById('map-list');
+            mapContainer.innerHTML = "";
+            
+            if (stats.top_maps && stats.top_maps.length > 0) {
+                stats.top_maps.forEach(map => {
+                    let barColor = map.win_rate >= 50 ? "bg-primary" : "bg-white";
+                    let percentColor = map.win_rate >= 50 ? "text-primary" : "text-white";
+                    let bgImage = MAP_IMAGES[map.name] || MAP_IMAGES["Default"];
+
+                    const html = `
+                    <div class="flex items-center gap-4 group animate-fade-in-up">
+                        <div class="w-16 h-10 bg-gray-800 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-widest bg-cover bg-center grayscale group-hover:grayscale-0 transition-all border border-white/5" style="background-image: url('${bgImage}')">
+                            <span class="bg-black/60 px-1 rounded backdrop-blur-sm">${map.name}</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-bold ${percentColor}">${map.win_rate}% Win</span>
+                                <span class="text-gray-400 font-mono">${map.kd} KD</span>
+                            </div>
+                            <div class="h-2 w-full bg-[#0a172a] rounded-full overflow-hidden flex border border-white/5">
+                                <div class="${barColor} h-full transition-all duration-1000" style="width: ${map.win_rate}%"></div>
+                                <div class="bg-transparent h-full" style="width: ${100 - map.win_rate}%"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                    mapContainer.innerHTML += html;
+                });
+            } else {
+                mapContainer.innerHTML = `<div class="text-gray-500 text-sm italic py-4">No map data found for this category yet.</div>`;
+                console.log(`ℹ️ No map data available for ${mode}.`);
+            }
+
+            // Top Agents
+            const agentContainer = document.getElementById('agent-list');
+            agentContainer.innerHTML = "";
+            if (stats.top_agents && stats.top_agents.length > 0) {
+                stats.top_agents.slice(0, 3).forEach(agent => {
+                    const html = `
+                    <div class="bg-[#0f2747] border border-[#0348a2]/30 p-4 rounded-xl flex items-center gap-4 hover:border-accent transition-colors animate-fade-in-up">
+                        <div class="size-12 rounded-full bg-gradient-to-br from-surface-dark to-black border border-[#0348a2] flex items-center justify-center font-bold text-xl text-accent">
+                            ${agent.name[0]}
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg leading-none text-white">${agent.name}</h5>
+                            <div class="flex gap-3 mt-1 text-xs text-gray-400 font-mono">
+                                <span>${agent.matches} Games</span>
+                                <span class="${agent.win_rate >= 50 ? 'text-accent' : 'text-gray-500'}">${agent.win_rate}% Win</span>
+                            </div>
+                        </div>
+                    </div>`;
+                    agentContainer.innerHTML += html;
+                });
+            } else {
+                agentContainer.innerHTML = `<div class="text-gray-500 text-sm italic col-span-3">No agent data found.</div>`;
+            }
+
+            // Radar Chart Logic
+            if (stats.roles && stats.roles.radar) {
+                const r = stats.roles.radar;
+                console.log("🕸️ Drawing Radar Chart with scores:", r);
+                
+                const getCoord = (score, angle) => {
+                    const rad = (angle * Math.PI) / 180;
+                    const dist = (score / 100) * 35; // 35 is max radius
+                    const x = 50 + dist * Math.cos(rad);
+                    const y = 50 + dist * Math.sin(rad);
+                    return `${x},${y}`;
+                };
+                
+                // standard angles mapping
+                const p1 = getCoord(r.Duelist, 270); 
+                const p2 = getCoord(r.Sentinel, 342);
+                const p3 = getCoord(r.Controller, 54);
+                const p4 = getCoord(r.Initiator, 126); 
+                const p5 = getCoord(r.Slayer, 198);    
+
+                const polygon = document.querySelector('.radar-chart-polygon');
+                if(polygon) {
+                    polygon.setAttribute("points", `${p1} ${p2} ${p3} ${p4} ${p5}`);
+                } else {
+                    console.error("❌ Could not find .radar-chart-polygon in DOM.");
+                }
+            } else {
+                console.log("ℹ️ No radar data available to draw.");
+                const polygon = document.querySelector('.radar-chart-polygon');
+                if(polygon) polygon.setAttribute("points", "50,50 50,50 50,50 50,50 50,50");
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
