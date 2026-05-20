@@ -98,17 +98,23 @@ function renderTournaments(tournaments) {
 
     tournaments.forEach((t, index) => {
         const delay = index * 100;
-        // Determine icon color based on placement word
-        let iconColor = "text-gray-400"; // default
+        
         let p = (t.placement || "").toLowerCase();
-        if(p.includes("1st") || p.includes("champion")) iconColor = "text-[#FFD700]"; // Gold
-        else if(p.includes("2nd") || p.includes("runner")) iconColor = "text-[#C0C0C0]"; // Silver
-        else if(p.includes("3rd")) iconColor = "text-[#CD7F32]"; // Bronze
-        else if(p.includes("playoff")) iconColor = "text-primary"; // Blue
+        let iconColor = "text-gray-400"; 
+        if(p.includes("1st") || p.includes("champion")) iconColor = "text-[#FFD700]"; 
+        else if(p.includes("2nd") || p.includes("runner")) iconColor = "text-[#C0C0C0]"; 
+        else if(p.includes("3rd")) iconColor = "text-[#CD7F32]"; 
+        else if(p.includes("playoff")) iconColor = "text-primary"; 
+
+        // Check if there is a custom logo
+        let iconHtml = `<span class="material-symbols-outlined text-4xl mb-3 ${iconColor}">workspace_premium</span>`;
+        if (t.logo_url && t.logo_url.trim() !== "") {
+            iconHtml = `<img src="${t.logo_url}" alt="${t.name} Logo" class="h-12 w-12 object-contain mb-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)] rounded">`;
+        }
 
         html += `
         <div class="bg-surface-dark border border-[#0348a2]/30 rounded-lg p-5 flex flex-col items-center text-center hover:border-accent transition-colors opacity-0 animate-fade-in-up" style="animation-delay: ${delay}ms;">
-            <span class="material-symbols-outlined text-4xl mb-3 ${iconColor}">workspace_premium</span>
+            ${iconHtml}
             <h4 class="text-white font-bold text-sm uppercase tracking-wider leading-tight mb-1">${t.name}</h4>
             <span class="text-xs text-gray-400 font-mono uppercase">${t.placement || 'Participant'}</span>
         </div>`;
@@ -118,7 +124,6 @@ function renderTournaments(tournaments) {
     cabinet.innerHTML = html;
     cabinet.classList.remove('hidden');
 }
-
 function getRoleIcon(role) {
     const r = role ? role.toLowerCase() : "";
     if (r.includes("duelist")) return "swords";
