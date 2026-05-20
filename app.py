@@ -42,12 +42,13 @@ ROSTERS = {
     "main": [
         {"name": "POGOツ", "tag": "OMEGA", "role": "Controller", "fixed_agent": "Astra", "type": "player"},
         {"name": "Obito", "tag": "ASCK", "role": "Sentinel", "fixed_agent": "Cypher", "type": "player"},
-        {"name": "CoRa", "tag": "FGR", "role": "Initiator", "fixed_agent": "Fade", "type": "player"},
+        {"name": "Mont3", "tag": "LFT", "role": "Initiator", "fixed_agent": "Skye", "type": "player"},
         {"name": "Oby", "tag": "F4W", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "21 Swiss", "tag": "EMEA", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
+        {"name": "CoRa", "tag": "FGR", "role": "Duelist", "fixed_agent": "Neon", "type": "sub"}
     ],
     "academy": [
-        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Fade", "type": "player"},
+        {"name": "Magic Tostada", "tag": "MCY", "role": "IGL", "fixed_agent": "Kayo", "type": "player"},
         {"name": "Cleezzy", "tag": "Reina", "role": "Duelist", "fixed_agent": "Jett", "type": "player"},
         {"name": "PRESA MKultra", "tag": "mykei", "role": "Initiator", "fixed_agent": "Breach", "type": "player"},
         {"name": "H0KAGE", "tag": "Nyx", "role": "Smoker", "fixed_agent": "Omen", "type": "player"},
@@ -62,7 +63,7 @@ cache = {
     "last_updated": {"main": 0, "academy": 0},
     "roster_data": {"main": [], "academy": []},
     "player_details": {},
-    "news": {"last_updated": 0, "data": []} # Added global news cache
+    "news": {"last_updated": 0, "data": []}
 }
 
 def get_headers(): return {"Authorization": API_KEY}
@@ -210,8 +211,6 @@ def get_news_feed():
         return jsonify(cache["news"]["data"])
 
     news_items = []
-    
-    # 1. Look for Tournament Podiums (1st, 2nd, 3rd)
     if supabase:
         try:
             res = supabase.table('tournaments').select('*').order('created_at', desc=True).limit(10).execute()
@@ -227,13 +226,11 @@ def get_news_feed():
                     })
         except: pass
 
-    # 2. Look for Player Climbs
     for div, players in ROSTERS.items():
         for p in players:
             if p.get('type') in ['player', 'sub']:
                 climb = check_player_climb(p['name'], p['tag'])
                 if climb["climbed"]:
-                    # Create variable text formats based on the climb
                     old_r, curr_r = climb["old_rank"], climb["current_rank"]
                     msg = f"Congratulations to {p['name']} for getting out of {old_r}!"
                     if "1" in curr_r and "3" in old_r:
@@ -250,7 +247,7 @@ def get_news_feed():
                             "fixed_agent": p['fixed_agent'], "rank": curr_r
                         }
                     })
-                time.sleep(0.2) # Avoid aggressive API hits during calculation loop
+                time.sleep(0.2) 
 
     cache["news"]["data"] = news_items
     cache["news"]["last_updated"] = current_time
@@ -335,29 +332,41 @@ def ingest_match():
     match_data = r.json().get('data')
     try:
         t_res = supabase.table('tournaments').select('team_division').eq('id', tourney_id).execute()
-        division = t_res.data[0]['team_division']
-        presa_players = [(p['name'].lower(), p['tag'].lower()) for p in ROSTERS.get(division, [])]
+        if not t_res.data: return jsonify({"error": "Tournament missing"}), 404
+        
+        # NEW FIX: Build a massive list of EVERY player in the entire organization
+        presa_players = []
+        for roster_list in ROSTERS.values():
+            for p in roster_list:
+                presa_players.append((p['name'].lower(), p['tag'].lower()))
+                
         meta = match_data.get('metadata', {})
         map_name = meta.get('map', 'Unknown')
         teams = match_data.get('teams', {})
         players = match_data.get('players', {}).get('all_players', [])
+        
+        # Find which color the organization played on
         presa_color = None
         for p in players:
             if (p['name'].lower(), p['tag'].lower()) in presa_players:
                 presa_color = p['team'].lower()
                 break
-        if not presa_color: return jsonify({"error": f"No players found"}), 400
+                
+        if not presa_color: return jsonify({"error": f"No Presa organization players found in this match."}), 400
+        
         our_score = teams.get(presa_color, {}).get('rounds_won', 0)
         enemy_score = teams.get('red' if presa_color=='blue' else 'blue', {}).get('rounds_won', 0)
         match_insert = supabase.table('custom_matches').insert({"tournament_id": tourney_id, "riot_match_id": match_id, "map_name": map_name, "team_won": teams.get(presa_color, {}).get('has_won', False), "team_score": our_score, "enemy_score": enemy_score}).execute()
         db_match_id = match_insert.data[0]['id']
+        
+        # Save stats for ANY organization player in the lobby
         stats = []
         for p in players:
             if (p['name'].lower(), p['tag'].lower()) in presa_players:
                 stats.append({"match_id": db_match_id, "player_name": p['name'], "agent": p['character'], "kills": p['stats']['kills'], "deaths": p['stats']['deaths'], "assists": p['stats']['assists']})
         if stats: supabase.table('player_match_stats').insert(stats).execute()
         return jsonify({"success": True})
-    except: return jsonify({"error": "Error processing match"}), 400
+    except: return jsonify({"error": "Error processing match or already in DB."}), 400
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
