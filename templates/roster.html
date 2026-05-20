@@ -200,51 +200,51 @@
 
                 // Attach videos silently in the background
 // 3. Attach videos silently in the background
-document.querySelectorAll('.roster-card').forEach(card => {
-    const fullName = card.getAttribute('data-clip');
-    if (!fullName) return;
+                document.querySelectorAll('.roster-card').forEach(card => {
+                    const fullName = card.getAttribute('data-clip');
+                    if (!fullName) return;
 
     // --- NEW LOGIC: Take only the first word of the name ---
     // decodeURIComponent turns "%20" back into a space, then we split by space
-    const firstWord = decodeURIComponent(fullName).split(' ')[0];
-    const clipFilename = `${firstWord}.mp4`;
+                        const firstWord = decodeURIComponent(fullName).split(' ')[0];
+                        const clipFilename = `${firstWord}.mp4`;
 
-    const vid = document.createElement('video');
-    vid.muted = true;
-    vid.loop = true;
-    vid.playsInline = true;
-    vid.className = "absolute inset-0 w-full h-full object-cover z-0";
+                        const vid = document.createElement('video');
+                        vid.muted = true;
+                        vid.loop = true;
+                        vid.playsInline = true;
+                        vid.className = "absolute inset-0 w-full h-full object-cover z-0";
     
     // Immediately attach to the DOM
-    card.insertBefore(vid, card.firstChild);
-
-    // Unlock slide animation only if video loads
-    vid.onloadeddata = () => {
-        card.classList.add('clip-ready');
-    };
-    
-    // Silently remove if file does not exist
-    vid.onerror = () => {
-        vid.remove();
-    };
-
-    // Playback listeners
-    card.addEventListener('mouseenter', () => {
-        if (card.classList.contains('clip-ready')) {
-            vid.play().catch(()=>{});
-        }
-    });
-    
-    card.addEventListener('mouseleave', () => {
-        if (card.classList.contains('clip-ready')) {
-            vid.pause();
-            vid.currentTime = 0;
-        }
-    });
-
-    // Set the source using our simplified filename
-    vid.src = `/static/clips/${clipFilename}`;
-});
+                        card.insertBefore(vid, card.firstChild);
+                    
+                        // Unlock slide animation only if video loads
+                        vid.onloadeddata = () => {
+                            card.classList.add('clip-ready');
+                        };
+                        
+                        // Silently remove if file does not exist
+                        vid.onerror = () => {
+                            vid.remove();
+                        };
+                    
+                        // Playback listeners
+                        card.addEventListener('mouseenter', () => {
+                            if (card.classList.contains('clip-ready')) {
+                                vid.play().catch(()=>{});
+                            }
+                        });
+                        
+                        card.addEventListener('mouseleave', () => {
+                            if (card.classList.contains('clip-ready')) {
+                                vid.pause();
+                                vid.currentTime = 0;
+                            }
+                        });
+                    
+                        // Set the source using our simplified filename
+                        vid.src = `/static/clips/${clipFilename}`;
+                    });
     </script>
 </body>
 </html>
