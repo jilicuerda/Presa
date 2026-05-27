@@ -29,6 +29,47 @@ if SUPABASE_URL and SUPABASE_KEY:
     except Exception as e:
         print(f"❌ Supabase init error: {e}")
 
+# Global variable to hold the AI Brain in the server's memory
+spider_brain = None
+
+def wake_up_the_brain():
+    global spider_brain
+    print("\n[SYSTEM] Waking up the Spider Brain...")
+    try:
+        # 1. Download the massive global dataset from Supabase
+        res = supabase.table('ml_spider_matches').select('*').execute()
+        if not res.data:
+            print("❌ No spider data found yet. The Brain is sleeping.")
+            return
+
+        df = pd.DataFrame(res.data)
+
+        # 2. Clean the Data (Remove Unranked players)
+        df = df[df['rank'] != 'Unknown']
+
+        # 3. Map Roles to Numbers
+        ROLE_MAP = {'Duelist': 0, 'Initiator': 1, 'Controller': 2, 'Sentinel': 3, 'Flex': 4}
+        df['role_encoded'] = df['role'].map(ROLE_MAP).fillna(4)
+
+        # 4. Set up the Features
+        features = ['kills', 'deaths', 'kda', 'acs', 'win', 'kast', 'adr', 'hs_percent', 'fb', 'fd', 'role_encoded']
+        X = df[features]
+        y = df['rank']
+
+        # 5. Train the AI in RAM (This takes less than 1 second)
+        print(f"[SYSTEM] Training AI on {len(df)} global matches...")
+        model = RandomForestClassifier(n_estimators=200, random_state=42)
+        model.fit(X, y)
+        
+        spider_brain = model
+        print("✅ Spider Brain is fully online and ready to predict!")
+
+    except Exception as e:
+        print(f"❌ Critical Error waking up the brain: {e}")
+
+# Trigger the brain to wake up immediately when the server starts
+wake_up_the_brain()
+
 # --- ADMIN AUTHENTICATION ---
 def check_auth(username, password): return username == 'admin' and password == 'presa'
 def authenticate(): return Response('Access Denied.', 401, {'WWW-Authenticate': 'Basic realm="Presa Command Center"'})
