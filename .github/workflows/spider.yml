@@ -1,0 +1,24 @@
+name: 5AM Global Spider Harvester
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # Runs every day at 5:00 AM UTC
+  workflow_dispatch: # Gives you a manual 'Play' button on GitHub
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install requests pandas supabase
+      - name: Run Spider
+        env:
+          HENRIK_KEY: ${{ secrets.HENRIK_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python cloud_spider.py
