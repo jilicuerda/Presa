@@ -6,6 +6,9 @@ from functools import wraps
 from flask import Flask, jsonify, render_template, request, Response
 from flask_cors import CORS
 from supabase import create_client, Client
+from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
+import threading
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
