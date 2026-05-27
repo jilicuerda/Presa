@@ -456,6 +456,17 @@ def ingest_match():
         if stats: supabase.table('player_match_stats').insert(stats).execute()
         return jsonify({"success": True})
     except: return jsonify({"error": "Error processing match or already in DB."}), 400
+    @app.route('/secret_spider_lab')
+def secret_spider_lab():
+    # You can reuse your simulator.html, or create a specific spider_test.html later
+    return render_template('simulator.html', players=[p['name'] for p in ROSTERS['main'] + ROSTERS['academy']])
+
+@app.route('/api/admin/retrain')
+def force_retrain():
+    # A secret button you can hit to force the server to learn new data
+    # without having to restart the whole website!
+    wake_up_the_brain()
+    return jsonify({"status": "Brain updated with latest Supabase data!"})
 
 
 
