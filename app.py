@@ -119,7 +119,6 @@ def fetch_with_retry(url):
         if r.status_code == 200:
             return r.json()
         elif r.status_code == 429:
-            # Try exactly once more after 1 second, then give up
             time.sleep(1)
             r2 = requests.get(url, headers=get_headers(), timeout=5)
             if r2.status_code == 200:
@@ -240,7 +239,6 @@ def analyze_matches(matches, is_db=False):
 def about():
     return render_template('about.html')
 
-    
 @app.route('/')
 def home(): return render_template('index.html')
 
@@ -264,7 +262,6 @@ def get_roster_history(team_id):
     except Exception as e:
         print(f"Error fetching ranks: {e}")
         
-    # Safe Fallback: If cache is completely empty, send a default structure so the page doesn't crash
     if not cache["roster_data"][team_id]:
         fallback = []
         for p in ROSTERS[team_id]:
@@ -310,7 +307,6 @@ def get_news_feed():
 
     for div, players in ROSTERS.items():
         for p in players:
-            # STOPWATCH: Abort if approaching Render's 30s timeout
             if time.time() - start_processing_time > 15:
                 break
                 
@@ -456,19 +452,106 @@ def ingest_match():
         if stats: supabase.table('player_match_stats').insert(stats).execute()
         return jsonify({"success": True})
     except: return jsonify({"error": "Error processing match or already in DB."}), 400
-    @app.route('/secret_spider_lab')
+
+
+# --- SECRET AI ROUTES ---
+@app.route('/secret_spider_lab')
 def secret_spider_lab():
-    # You can reuse your simulator.html, or create a specific spider_test.html later
+    # Make sure simulator.html exists in your templates folder!
     return render_template('simulator.html', players=[p['name'] for p in ROSTERS['main'] + ROSTERS['academy']])
+
+@app.route('/api/predict/<player_name>/<int:games>')
+def api_predict(player_name, games):
+    global spider_brain
+    if not spider_brain:
+        return jsonify({"error": "Brain is offline. Run /api/admin/retrain to wake it up."}), 500
+
+    try:
+        # Fetch player data from ml_spider_matches
+        res = supabase.table('ml_spider_matches').select('*').ilike('player_name', player_name).execute()
+        if not res.data:
+            return jsonify({"error": "Player not found in global database"}), 404
+
+        df_player = pd.DataFrame(res.data)
+
+        # Calculate Standard Averages
+        avg_kills = df_player['kills'].mean()
+        avg_deaths = df_player['deaths'].mean()
+        avg_kda = df_player['kda'].mean()
+        avg_acs = df_player['acs'].mean()
+        win_rate = df_player['win'].mean()
+        current_rank = df_player.iloc[-1]['rank']
+
+        # Calculate Advanced Averages
+        avg_kast = df_player['kast'].mean()
+        avg_adr = df_player['adr'].mean()
+        avg_hs = df_player['hs_percent'].mean()
+        avg_fb = df_player['fb'].mean()
+        avg_fd = df_player['fd'].mean()
+
+        # Determine primary role
+        primary_role = df_player['role'].mode()[0]
+        ROLE_MAP = {'Duelist': 0, 'Initiator': 1, 'Controller': 2, 'Sentinel': 3, 'Flex': 4}
+        role_encoded = ROLE_MAP.get(primary_role, 4)
+
+        # AI Prediction
+        features = [[avg_kills, avg_deaths, avg_kda, avg_acs, win_rate, avg_kast, avg_adr, avg_hs, avg_fb, avg_fd, role_encoded]]
+        skill_ceiling = spider_brain.predict(features)[0]
+
+        # Dynamic Lobby Resistance Math
+        sim_win_rate = win_rate
+        sim_rr = 0
+        trajectory_data = [0]
+
+        for game in range(1, games + 1):
+            expected_win_value = sim_win_rate * 20
+            expected_loss_value = (1 - sim_win_rate) * -17
+            rr_gained = expected_win_value + expected_loss_value
+            sim_rr += rr_gained
+            trajectory_data.append(int(sim_rr))
+
+            rank_delta = sim_rr / 50.0
+            sim_win_rate = win_rate - (rank_delta * 0.015)
+            sim_win_rate = max(0.35, min(0.65, sim_win_rate))
+
+        net_rr = int(sim_rr)
+
+        RANK_LADDER = [
+            "Iron 1", "Iron 2", "Iron 3", "Bronze 1", "Bronze 2", "Bronze 3",
+            "Silver 1", "Silver 2", "Silver 3", "Gold 1", "Gold 2", "Gold 3",
+            "Platinum 1", "Platinum 2", "Platinum 3", "Diamond 1", "Diamond 2", "Diamond 3",
+            "Ascendant 1", "Ascendant 2", "Ascendant 3", "Immortal 1", "Immortal 2", "Immortal 3", "Radiant"
+        ]
+
+        try:
+            current_idx = RANK_LADDER.index(current_rank)
+            ranks_gained = net_rr // 100
+            final_idx = max(0, min(len(RANK_LADDER) - 1, current_idx + ranks_gained))
+            projected_rank = RANK_LADDER[final_idx]
+        except ValueError:
+            projected_rank = skill_ceiling
+
+        return jsonify({
+            "current_rank": current_rank,
+            "skill_ceiling": skill_ceiling,
+            "win_rate": round(win_rate * 100, 1),
+            "net_rr": net_rr,
+            "projected_rank": projected_rank,
+            "primary_role": primary_role,
+            "trajectory": trajectory_data,
+            "stats": {
+                "kda": round(avg_kda, 2), "acs": int(avg_acs),
+                "kast": round(avg_kast, 1), "adr": int(avg_adr),
+                "hs": int(avg_hs), "fb": round(avg_fb, 1), "fd": round(avg_fd, 1)
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/admin/retrain')
 def force_retrain():
-    # A secret button you can hit to force the server to learn new data
-    # without having to restart the whole website!
     wake_up_the_brain()
     return jsonify({"status": "Brain updated with latest Supabase data!"})
-
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
