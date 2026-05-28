@@ -9,6 +9,7 @@ from supabase import create_client, Client
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import threading
+import numpy as np 
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -47,18 +48,43 @@ def wake_up_the_brain():
         # 2. Clean the Data (Remove Unranked players)
         df = df[df['rank'] != 'Unknown']
 
+        # --- FEATURE ENGINEERING LAYER ---
+        
+        # A. Calculate Match-Level Baselines to capture "Rank Bias"
+        match_avg_acs = df.groupby('match_id')['acs'].transform('mean')
+        match_avg_adr = df.groupby('match_id')['adr'].transform('mean')
+        
+        df['lobby_relative_acs'] = df['acs'] - match_avg_acs
+        df['lobby_relative_adr'] = df['adr'] - match_avg_adr
+        
+        # B. Inject your exact written role-adjusted tactical rules
+        df['duelist_entry_score'] = np.where(df['role'] == 'Duelist', (df['fb'] * 2) - df['fd'] + df['lobby_relative_adr'], 0)
+        df['initiator_setup_score'] = np.where(df['role'] == 'Initiator', (df['kast'] * 1.5) - (df['hs_percent'] * 0.1), 0)
+        df['controller_anchor_score'] = np.where(df['role'] == 'Controller', df['kast'] / (df['fd'] + 1), 0)
+        df['sentinel_defense_score'] = np.where(df['role'] == 'Sentinel', df['kda'] * (df['kast'] / 100), 0)
+
         # 3. Map Roles to Numbers
         ROLE_MAP = {'Duelist': 0, 'Initiator': 1, 'Controller': 2, 'Sentinel': 3, 'Flex': 4}
         df['role_encoded'] = df['role'].map(ROLE_MAP).fillna(4)
 
         # 4. Set up the Features
-        features = ['kills', 'deaths', 'kda', 'acs', 'win', 'kast', 'adr', 'hs_percent', 'fb', 'fd', 'role_encoded']
+        features = [
+            'kills', 'deaths', 'acs', 'kast', 'adr', 'hs_percent', 'fb', 'fd',
+            'lobby_relative_acs', 'lobby_relative_adr',
+            'duelist_entry_score', 'initiator_setup_score', 'controller_anchor_score', 'sentinel_defense_score',
+            'role_encoded'
+        ]
         X = df[features]
         y = df['rank']
 
-        # 5. Train the AI in RAM (This takes less than 1 second)
-        print(f"[SYSTEM] Training AI on {len(df)} global matches...")
-        model = RandomForestClassifier(n_estimators=200, random_state=42)
+        # 5. Train the AI in RAM with fine-tuned hyperparameters
+        print(f"[SYSTEM] Training AI on {len(df)} global matches with Tactical Tier Framework...")
+        model = RandomForestClassifier(
+            n_estimators=250, 
+            max_depth=14, 
+            min_samples_split=4, 
+            random_state=42
+        )
         model.fit(X, y)
         
         spider_brain = model
@@ -453,11 +479,9 @@ def ingest_match():
         return jsonify({"success": True})
     except: return jsonify({"error": "Error processing match or already in DB."}), 400
 
-
 # --- SECRET AI ROUTES ---
 @app.route('/secret_spider_lab')
 def secret_spider_lab():
-    # Make sure simulator.html exists in your templates folder!
     return render_template('simulator.html', players=[p['name'] for p in ROSTERS['main'] + ROSTERS['academy']])
 
 @app.route('/api/predict/<player_name>/<int:games>')
@@ -473,29 +497,59 @@ def api_predict(player_name, games):
             return jsonify({"error": "Player not found in global database"}), 404
 
         df_player = pd.DataFrame(res.data)
+        
+        # Pull global lobby data to calculate Rank Bias (Relative stats) for this specific player
+        match_ids = df_player['match_id'].tolist()
+        lobby_res = supabase.table('ml_spider_matches').select('match_id, acs, adr').in_('match_id', match_ids).execute()
+        if lobby_res.data:
+            df_lobbies = pd.DataFrame(lobby_res.data)
+            match_avg_acs = df_lobbies.groupby('match_id')['acs'].mean().to_dict()
+            match_avg_adr = df_lobbies.groupby('match_id')['adr'].mean().to_dict()
+        else:
+            match_avg_acs, match_avg_adr = {}, {}
 
-        # Calculate Standard Averages
+        # Re-apply the Feature Engineering layer so the inputs match the Brain perfectly
+        df_player['lobby_relative_acs'] = df_player.apply(lambda row: row['acs'] - match_avg_acs.get(row['match_id'], row['acs']), axis=1)
+        df_player['lobby_relative_adr'] = df_player.apply(lambda row: row['adr'] - match_avg_adr.get(row['match_id'], row['adr']), axis=1)
+        
+        df_player['duelist_entry_score'] = np.where(df_player['role'] == 'Duelist', (df_player['fb'] * 2) - df_player['fd'] + df_player['lobby_relative_adr'], 0)
+        df_player['initiator_setup_score'] = np.where(df_player['role'] == 'Initiator', (df_player['kast'] * 1.5) - (df_player['hs_percent'] * 0.1), 0)
+        df_player['controller_anchor_score'] = np.where(df_player['role'] == 'Controller', df_player['kast'] / (df_player['fd'] + 1), 0)
+        df_player['sentinel_defense_score'] = np.where(df_player['role'] == 'Sentinel', df_player['kda'] * (df_player['kast'] / 100), 0)
+
+        # Calculate Averages (Now includes tactical features)
         avg_kills = df_player['kills'].mean()
         avg_deaths = df_player['deaths'].mean()
-        avg_kda = df_player['kda'].mean()
         avg_acs = df_player['acs'].mean()
         win_rate = df_player['win'].mean()
         current_rank = df_player.iloc[-1]['rank']
 
-        # Calculate Advanced Averages
         avg_kast = df_player['kast'].mean()
         avg_adr = df_player['adr'].mean()
         avg_hs = df_player['hs_percent'].mean()
         avg_fb = df_player['fb'].mean()
         avg_fd = df_player['fd'].mean()
+        
+        avg_rel_acs = df_player['lobby_relative_acs'].mean()
+        avg_rel_adr = df_player['lobby_relative_adr'].mean()
+        avg_duelist = df_player['duelist_entry_score'].mean()
+        avg_initiator = df_player['initiator_setup_score'].mean()
+        avg_controller = df_player['controller_anchor_score'].mean()
+        avg_sentinel = df_player['sentinel_defense_score'].mean()
 
         # Determine primary role
         primary_role = df_player['role'].mode()[0]
         ROLE_MAP = {'Duelist': 0, 'Initiator': 1, 'Controller': 2, 'Sentinel': 3, 'Flex': 4}
         role_encoded = ROLE_MAP.get(primary_role, 4)
 
-        # AI Prediction
-        features = [[avg_kills, avg_deaths, avg_kda, avg_acs, win_rate, avg_kast, avg_adr, avg_hs, avg_fb, avg_fd, role_encoded]]
+        # AI Prediction (Matches the 15 features used in training exactly)
+        features = [[
+            avg_kills, avg_deaths, avg_acs, avg_kast, avg_adr, avg_hs, avg_fb, avg_fd,
+            avg_rel_acs, avg_rel_adr,
+            avg_duelist, avg_initiator, avg_controller, avg_sentinel,
+            role_encoded
+        ]]
+        
         skill_ceiling = spider_brain.predict(features)[0]
 
         # Dynamic Lobby Resistance Math
@@ -540,7 +594,7 @@ def api_predict(player_name, games):
             "primary_role": primary_role,
             "trajectory": trajectory_data,
             "stats": {
-                "kda": round(avg_kda, 2), "acs": int(avg_acs),
+                "kills": round(avg_kills, 1), "deaths": round(avg_deaths, 1), "acs": int(avg_acs),
                 "kast": round(avg_kast, 1), "adr": int(avg_adr),
                 "hs": int(avg_hs), "fb": round(avg_fb, 1), "fd": round(avg_fd, 1)
             }
@@ -551,7 +605,7 @@ def api_predict(player_name, games):
 @app.route('/api/admin/retrain')
 def force_retrain():
     wake_up_the_brain()
-    return jsonify({"status": "Brain updated with latest Supabase data!"})
+    return jsonify({"status": "Brain updated with latest Tactical Tier Framework!"})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
