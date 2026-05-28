@@ -1,171 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <title>Advanced AI Simulator | Presa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presa - Secret AI Spider Lab</title>
+    <!-- Chart.js for the Trajectory Graph -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> body { font-family: 'Space Grotesk', sans-serif; } </style>
-</head>
-<body class="bg-slate-100 text-slate-900 min-h-screen p-8">
+    <style>
+        :root {
+            --bg-color: #0f1923;
+            --panel-bg: #1f2d3a;
+            --accent: #ff4655;
+            --text-main: #ece8e1;
+            --text-muted: #8b97a3;
+            --success: #00ffaa;
+        }
 
-    <div class="max-w-7xl mx-auto space-y-8">
+        body {
+            margin: 0;
+            padding: 2rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .controls {
+            background-color: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        select, input, button {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--text-muted);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        button {
+            background-color: var(--accent);
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: #e03e4d;
+        }
+
+        button:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .dashboard {
+            display: none; /* Hidden until simulation runs */
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .positive { color: var(--success); }
+        .negative { color: var(--accent); }
+
+        .insights-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .insights-list li {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #00ffaa;
+            line-height: 1.5;
+        }
+
+        /* Loading spinner */
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Spider Lab Simulator</h1>
+        <p>Run advanced predictive models based on global Random Forest data.</p>
+    </div>
+
+    <div class="controls">
+        <div>
+            <label for="playerSelect" style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">Select Player</label>
+            <select id="playerSelect">
+                <!-- Jinja injects the player roster here from app.py -->
+                {% for player in players %}
+                    <option value="{{ player }}">{{ player }}</option>
+                {% endfor %}
+            </select>
+        </div>
         
-        <div class="text-center">
-            <h1 class="text-4xl font-extrabold uppercase tracking-tighter text-blue-600">Presa Advanced Engine</h1>
-            <p class="text-slate-500 font-bold tracking-widest uppercase text-sm">Now powered by Roles, KAST & First Bloods</p>
+        <div>
+            <label for="gamesInput" style="display:block; margin-bottom:0.5rem; color:var(--text-muted);">Games to Simulate</label>
+            <input type="number" id="gamesInput" value="50" min="1" max="500">
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-8">
-            
-            <div class="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
-                <h2 class="text-xl font-bold uppercase tracking-tighter mb-6 text-slate-800">Parameters</h2>
-                
-                <label class="block text-sm font-bold uppercase text-slate-500 mb-2">Select Player</label>
-                <select id="playerInput" class="w-full bg-slate-50 border border-slate-300 p-3 rounded-lg mb-6 font-bold text-lg focus:outline-blue-500">
-                    {% for player in players %}
-                        <option value="{{ player }}">{{ player }}</option>
-                    {% endfor %}
-                </select>
+        <div style="margin-top: 1.5rem;">
+            <button id="runSimBtn" onclick="runSimulation()">Run Simulation</button>
+        </div>
+    </div>
 
-                <label class="block text-sm font-bold uppercase text-slate-500 mb-2">
-                    Forecast Timeline: <span id="gameVal" class="text-blue-600">50 Games</span>
-                </label>
-                <input type="range" id="gameSlider" min="10" max="100" value="50" step="10" class="w-full mb-8 accent-blue-600">
+    <div class="loader" id="loader">🧠 The AI is analyzing the data...</div>
+
+    <div class="dashboard" id="dashboard">
+        
+        <!-- Left Column: Stats & Insights -->
+        <div class="left-col">
+            <div class="panel">
+                <h2 style="margin-top:0; color:var(--accent);">Prediction Summary</h2>
                 
-                <button onclick="runAI()" id="runBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-widest py-4 rounded-xl transition-all shadow-md active:scale-95">
-                    Generate Trajectory
-                </button>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Current Rank</h3>
+                        <div class="value" id="resCurrentRank">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Skill Ceiling</h3>
+                        <div class="value" id="resCeiling">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Projected Rank</h3>
+                        <div class="value" id="resProjected">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Net RR</h3>
+                        <div class="value" id="resRR">-</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top:2rem; border-bottom:1px solid var(--text-muted); padding-bottom:0.5rem;">AI Coaching Insights</h3>
+                <ul class="insights-list" id="insightsContainer">
+                    <!-- Javascript will inject the personalized AI sentences here -->
+                </ul>
             </div>
+        </div>
 
-            <div class="w-full lg:w-2/3 bg-slate-900 rounded-2xl shadow-xl overflow-hidden flex flex-col relative">
-                
-                <div id="loading" class="hidden absolute inset-0 bg-slate-900/95 flex items-center justify-center z-50">
-                    <p class="animate-pulse font-bold tracking-widest text-blue-400 text-2xl">ANALYZING BIOMETRICS...</p>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-slate-800 border-b border-slate-700">
-                    <div>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Skill Ceiling</p>
-                        <h3 id="resCeiling" class="text-xl font-bold text-white">--</h3>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Primary Role</p>
-                        <h3 id="resRole" class="text-xl font-bold text-blue-400">--</h3>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Win Rate</p>
-                        <h3 id="resWin" class="text-xl font-bold text-white">--</h3>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Projected Rank</p>
-                        <h3 id="resFinal" class="text-xl font-bold text-green-400">--</h3>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 md:grid-cols-6 gap-4 p-6 border-b border-slate-800 bg-slate-900">
-                    <div class="text-center"><p class="text-[10px] text-slate-500 uppercase">KDA</p><p id="resKda" class="font-bold text-white">0.0</p></div>
-                    <div class="text-center"><p class="text-[10px] text-slate-500 uppercase">ACS</p><p id="resAcs" class="font-bold text-white">0</p></div>
-                    <div class="text-center"><p class="text-[10px] text-slate-500 uppercase">KAST</p><p id="resKast" class="font-bold text-white">0%</p></div>
-                    <div class="text-center"><p class="text-[10px] text-slate-500 uppercase">ADR</p><p id="resAdr" class="font-bold text-white">0</p></div>
-                    <div class="text-center"><p class="text-[10px] text-slate-500 uppercase">HS%</p><p id="resHs" class="font-bold text-white">0%</p></div>
-                    <div class="text-center"><p class="text-[10px] text-slate-500 uppercase">FB / FD</p><p id="resEntry" class="font-bold text-white">0 / 0</p></div>
-                </div>
-
-                <div class="p-6 flex-grow h-64 relative">
-                    <h4 class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-4 absolute top-6 left-6">Predicted RR Trajectory</h4>
-                    <canvas id="trajectoryChart"></canvas>
+        <!-- Right Column: Graph -->
+        <div class="right-col">
+            <div class="panel">
+                <h2 style="margin-top:0; color:var(--accent);">RR Trajectory Forecast</h2>
+                <canvas id="trajectoryChart"></canvas>
+            </div>
+            
+            <div class="panel" style="margin-top: 2rem;">
+                <h3 style="margin-top:0;">Raw Averages</h3>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;" id="rawStatsContainer">
+                    <!-- Populated by JS -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const slider = document.getElementById('gameSlider');
-        slider.oninput = function() { document.getElementById('gameVal').innerText = this.value + ' Games'; }
+        let currentChart = null;
 
-        let chartInstance = null;
-        const ctx = document.getElementById('trajectoryChart').getContext('2d');
+        async function runSimulation() {
+            const player = document.getElementById('playerSelect').value;
+            const games = document.getElementById('gamesInput').value;
+            const btn = document.getElementById('runSimBtn');
+            const loader = document.getElementById('loader');
+            const dashboard = document.getElementById('dashboard');
 
-        function initChart(dataArray, games) {
-            if (chartInstance) chartInstance.destroy();
-            
-            const labels = Array.from({length: parseInt(games) + 1}, (_, i) => i);
-            const isClimbing = dataArray[dataArray.length - 1] >= 0;
-            const lineColor = isClimbing ? '#4ade80' : '#f87171';
-            const bgColor = isClimbing ? 'rgba(74, 222, 128, 0.1)' : 'rgba(248, 113, 113, 0.1)';
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Net RR Change',
-                        data: dataArray,
-                        borderColor: lineColor,
-                        backgroundColor: bgColor,
-                        borderWidth: 3,
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } },
-                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
-                    }
-                }
-            });
-        }
-
-        async function runAI() {
-            const player = document.getElementById('playerInput').value;
-            const games = slider.value;
-            const loading = document.getElementById('loading');
-            
-            loading.classList.remove('hidden');
+            // Reset UI
+            btn.disabled = true;
+            dashboard.style.display = 'none';
+            loader.style.display = 'block';
 
             try {
-                // Uses the relative path to automatically hit your Render backend
+                // Fetch the prediction from our Flask API
                 const response = await fetch(`/api/predict/${encodeURIComponent(player)}/${games}`);
                 const data = await response.json();
 
                 if (data.error) {
-                    alert("API Error: " + data.error);
-                    loading.classList.add('hidden');
+                    alert('Error: ' + data.error);
                     return;
                 }
 
-                setTimeout(() => {
-                    document.getElementById('resCeiling').innerText = data.skill_ceiling;
-                    document.getElementById('resRole').innerText = data.primary_role;
-                    document.getElementById('resWin').innerText = data.win_rate + '%';
-                    
-                    const finalEl = document.getElementById('resFinal');
-                    finalEl.innerText = data.projected_rank;
-                    finalEl.className = data.net_rr >= 0 ? "text-xl font-bold text-green-400" : "text-xl font-bold text-red-400";
+                // 1. Update Top Stats
+                document.getElementById('resCurrentRank').innerText = data.current_rank;
+                document.getElementById('resCeiling').innerText = data.skill_ceiling;
+                document.getElementById('resProjected').innerText = data.projected_rank;
+                
+                const rrElement = document.getElementById('resRR');
+                rrElement.innerText = (data.net_rr > 0 ? '+' : '') + data.net_rr;
+                rrElement.className = 'value ' + (data.net_rr >= 0 ? 'positive' : 'negative');
 
-                    document.getElementById('resKda').innerText = data.stats.kda;
-                    document.getElementById('resAcs').innerText = data.stats.acs;
-                    document.getElementById('resKast').innerText = data.stats.kast + '%';
-                    document.getElementById('resAdr').innerText = data.stats.adr;
-                    document.getElementById('resHs').innerText = data.stats.hs + '%';
-                    document.getElementById('resEntry').innerText = `${data.stats.fb} / ${data.stats.fd}`;
+                // 2. Update AI Insights
+                const insightsContainer = document.getElementById('insightsContainer');
+                insightsContainer.innerHTML = ''; // clear old insights
+                data.insights.forEach(insight => {
+                    const li = document.createElement('li');
+                    li.innerText = insight;
+                    // Make negative insights look red
+                    if (insight.includes('Red Flag') || insight.includes('Major weakness') || insight.includes('penalize')) {
+                        li.style.borderLeftColor = 'var(--accent)';
+                    }
+                    insightsContainer.appendChild(li);
+                });
 
-                    initChart(data.trajectory, games);
-                    loading.classList.add('hidden');
-                }, 600);
+                // 3. Update Raw Stats
+                const rawStats = document.getElementById('rawStatsContainer');
+                rawStats.innerHTML = `
+                    <div style="background:var(--bg-color); padding:0.5rem 1rem; border-radius:4px;">K/D: ${data.stats.kills} / ${data.stats.deaths}</div>
+                    <div style="background:var(--bg-color); padding:0.5rem 1rem; border-radius:4px;">ACS: ${data.stats.acs}</div>
+                    <div style="background:var(--bg-color); padding:0.5rem 1rem; border-radius:4px;">ADR: ${data.stats.adr}</div>
+                    <div style="background:var(--bg-color); padding:0.5rem 1rem; border-radius:4px;">KAST: ${data.stats.kast}%</div>
+                    <div style="background:var(--bg-color); padding:0.5rem 1rem; border-radius:4px;">Win Rate: ${data.win_rate}%</div>
+                `;
+
+                // 4. Draw Chart
+                renderChart(data.trajectory, games);
+
+                // Show dashboard
+                dashboard.style.display = 'grid';
 
             } catch (err) {
-                alert("Network error fetching AI Prediction.");
-                loading.classList.add('hidden');
+                console.error(err);
+                alert("Failed to connect to the Spider Brain API.");
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
             }
+        }
+
+        function renderChart(trajectoryData, totalGames) {
+            const ctx = document.getElementById('trajectoryChart').getContext('2d');
+            
+            // Destroy old chart if it exists so we don't overlap
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // Create Labels [0, 1, 2, ... games]
+            const labels = Array.from({length: trajectoryData.length}, (_, i) => i);
+
+            // Determine line color based on ending RR
+            const endRR = trajectoryData[trajectoryData.length - 1];
+            const lineColor = endRR >= 0 ? '#00ffaa' : '#ff4655';
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net RR',
+                        data: trajectoryData,
+                        borderColor: lineColor,
+                        backgroundColor: 'rgba(0, 0, 0, 0)',
+                        borderWidth: 3,
+                        pointRadius: 0, // hide dots for a cleaner line
+                        tension: 0.2 // slight curve
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#8b97a3' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#8b97a3' },
+                            title: {
+                                display: true,
+                                text: 'Games Played',
+                                color: '#8b97a3'
+                            }
+                        }
+                    }
+                }
+            });
         }
     </script>
 </body>
