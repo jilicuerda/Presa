@@ -5,7 +5,7 @@ import time
 import random
 from supabase import create_client, Client
 
-# These will be securely injected by GitHub Actions
+# Securely injected by GitHub Actions
 API_KEY = os.environ.get("HENRIK_KEY")
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
@@ -13,6 +13,7 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 REGION = "eu"
 
+# 1. YOUR ACTUAL TEAM (Will show up on your website frontend)
 team_roster = [
     {"name": "PRESA MKULTRA", "tag": "MYKEI"}, {"name": "POGOツ", "tag": "OMEGA"},
     {"name": "Cleezzy", "tag": "Reina"}, {"name": "H0KAGE", "tag": "Nyx"},
@@ -23,8 +24,28 @@ team_roster = [
     {"name": "zaka", "tag": "1734"}
 ]
 
-# Create a fast lookup list of just the names
+# 2. HIGH ELO DATA SEEDS (Purely used for AI training data background, won't show on frontend)
+# Put any Radiant / Immortal / Ascendant players you want to harvest here!
+high_elo_seeds = [
+    {"name": "Boaster", "tag": "FNC"},
+    {"name": "ScreaM", "tag": "KCORP"},
+    {"name": "VASQUEZ", "tag": "0000"},
+    {"name": "sunfloweR", "tag": "047"},
+    {"name": "CB10", "tag": "Aegon"},
+    {"name": "Donatell0", "tag": "GOAT"},
+    {"name": "danifluchi", "tag": "dani2"},
+    {"name": "XLG Merced", "tag": "0000"},
+    {"name": "Buk Hy 蘭", "tag": "gift"},
+    {"name": "尺ezzy", "tag": "0811"},
+    {"name": "el wiki coino", "tag": "GDN"},
+    {"name": "Borryng", "tag": "SPAIN"},
+    {"name": "karizma", "tag": "kariz"},
+    
+    # Add more high-elo tracker names/tags here as you find them
+]
+
 roster_names = [p['name'].lower() for p in team_roster]
+seed_names = [p['name'].lower() for p in high_elo_seeds]
 
 agent_roles = {
     'Jett': 'Duelist', 'Reyna': 'Duelist', 'Raze': 'Duelist', 'Phoenix': 'Duelist', 'Neon': 'Duelist', 'Yoru': 'Duelist', 'Iso': 'Duelist',
@@ -33,19 +54,21 @@ agent_roles = {
     'Killjoy': 'Sentinel', 'Cypher': 'Sentinel', 'Sage': 'Sentinel', 'Chamber': 'Sentinel', 'Deadlock': 'Sentinel', 'Vyse': 'Sentinel'
 }
 
-print("🕷️ Starting Autonomous FULL Deep Spider...")
+print("🕷️ Starting Full Deep Spider with High-Elo Engine...")
 
-# Fetch existing IDs to prevent duplicates
 res = supabase.table('ml_spider_matches').select('db_id').execute()
 saved_db_ids = {row['db_id'] for row in res.data} if res.data else set()
 
 total_uploaded = 0
 strangers_found = set()
 
-# --- PHASE 1: The Anchor Scan (Your Team) ---
-print("-> PHASE 1: Scanning Presa Roster Matches...")
-for anchor_player in team_roster:
-    p_name, p_tag = anchor_player['name'], anchor_player['tag']
+# Combine both groups for the match discovery layer
+all_anchors = team_roster + high_elo_seeds
+
+# --- PHASE 1: Scan Anchors (Team + High Elo Seeds) ---
+print("-> PHASE 1: Scanning Anchors for Match Discovery...")
+for anchor in all_anchors:
+    p_name, p_tag = anchor['name'], anchor['tag']
     url = f"https://api.henrikdev.xyz/valorant/v3/matches/{REGION}/{urllib.parse.quote(p_name)}/{urllib.parse.quote(p_tag)}?mode=competitive&size=10"
     
     try:
@@ -70,8 +93,8 @@ for anchor_player in team_roster:
                     player_tag = p['tag']
                     db_id = f"{match_id}_{player_name}" 
                     
-                    # Store strangers for Phase 2!
-                    if player_name.lower() not in roster_names and player_name.lower() != "unknown":
+                    # Gather strangers for Phase 2 deep scanning
+                    if player_name.lower() not in roster_names and player_name.lower() not in seed_names and player_name.lower() != "unknown":
                         strangers_found.add((player_name, player_tag))
 
                     if db_id in saved_db_ids or player_name.lower() == "unknown":
@@ -85,13 +108,10 @@ for anchor_player in team_roster:
                     kda_ratio = (stats['kills'] + stats['assists']) / max(1, stats['deaths'])
                     acs = stats['score'] / rounds_played
                     adr = p.get('damage_made', 0) / rounds_played
-                    
                     hs, bs, ls = stats.get('headshots', 0), stats.get('bodyshots', 0), stats.get('legshots', 0)
                     hs_percent = (hs / (hs + bs + ls) * 100) if (hs + bs + ls) > 0 else 0
-                    
                     fb = sum(1 for fk in first_kills_by_round.values() if fk.get('killer_puuid') == p['puuid'])
                     fd = sum(1 for fk in first_kills_by_round.values() if fk.get('victim_puuid') == p['puuid'])
-                    
                     rounds_survived = rounds_played - stats['deaths']
                     kast = (min(rounds_played, stats['kills'] + stats['assists'] + rounds_survived) / rounds_played) * 100
                     
@@ -114,25 +134,17 @@ for anchor_player in team_roster:
         
     time.sleep(5)
 
-print(f"-> Phase 1 Complete. {total_uploaded} rows added.")
+print(f"-> Phase 1 Complete. Baseline rows synced.")
 
-
-# --- PHASE 2: The UNRESTRICTED Deep Scan ---
+# --- PHASE 2: Deep Scan Every Rival ---
 strangers_list = list(strangers_found)
 total_strangers = len(strangers_list)
-estimated_time = (total_strangers * 7) / 60
-
-print(f"\n-> PHASE 2: Initiating Full Deep Scan on {total_strangers} strangers.")
-print(f"-> Estimated runtime: {estimated_time:.1f} minutes. Relax and let it work.")
+print(f"\n-> PHASE 2: Scanning {total_strangers} unique rivals found across all skill brackets.")
 
 deep_rows_added = 0
 
-# Loop through EVERY stranger found
 for index, (s_name, s_tag) in enumerate(strangers_list, 1):
-    
-    # Very safe 7-second timer to bypass API bans
-    time.sleep(7) 
-    
+    time.sleep(7) # Safe execution gap
     url = f"https://api.henrikdev.xyz/valorant/v3/matches/{REGION}/{urllib.parse.quote(s_name)}/{urllib.parse.quote(s_tag)}?mode=competitive&size=10"
     
     try:
@@ -187,15 +199,8 @@ for index, (s_name, s_tag) in enumerate(strangers_list, 1):
             if records_to_upload:
                 supabase.table("ml_spider_matches").upsert(records_to_upload).execute()
                 deep_rows_added += len(records_to_upload)
-                
-            # Log progress so you know it hasn't crashed
-            print(f"   [{index}/{total_strangers}] Extracted data for {s_name}")
-                
+            print(f"   [{index}/{total_strangers}] Processed rival: {s_name}")
     except Exception as e:
-        # If one stranger fails, silently skip them so the 40-minute loop doesn't break
-        print(f"   [{index}/{total_strangers}] Skipped {s_name} (Private Profile / Error)")
+        print(f"   [{index}/{total_strangers}] Skipped profile: {s_name}")
 
-print(f"\n✅ FULL Spider Run Complete.")
-print(f"Total Anchor rows: {total_uploaded}")
-print(f"Total Stranger rows: {deep_rows_added}")
-print(f"GRAND TOTAL ADDED: {total_uploaded + deep_rows_added}")
+print(f"\n✅ Pipeline Complete. Collected {total_uploaded + deep_rows_added} clean data tracks.")
