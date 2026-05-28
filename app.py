@@ -8,7 +8,6 @@ from flask_cors import CORS
 from supabase import create_client, Client
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
-import threading
 import numpy as np 
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -585,6 +584,48 @@ def api_predict(player_name, games):
         except ValueError:
             projected_rank = skill_ceiling
 
+        # --- THE INSIGHTS ENGINE (AI Explains "Why") ---
+        insights = []
+        
+        # Macro Lobby Insight
+        if avg_rel_acs > 25:
+            insights.append(f"Smurf Alert: You are heavily out-fragging the average player in your current lobbies with a relative ACS of +{int(avg_rel_acs)}. The AI expects a rapid climb.")
+        elif avg_rel_acs < -15:
+            insights.append(f"Statistically, you are underperforming your current rank lobby average by {abs(int(avg_rel_acs))} ACS. Unless you focus heavily on utility and KAST, climbing will be difficult.")
+        else:
+            insights.append("You are blending into your current lobbies statistically, meaning your rank movement will rely entirely on your ability to secure round wins.")
+
+        # Role-Specific Insights
+        if primary_role == 'Duelist':
+            if avg_fb >= 2.0:
+                insights.append(f"Excellent entry value. You average {round(avg_fb, 1)} First Bloods per match, successfully creating space for your team.")
+            elif avg_fb < 1.0:
+                insights.append(f"Red Flag: As a Duelist, your First Blood rate ({round(avg_fb, 1)}) is critically low. The AI penalizes you for not taking enough opening engagements.")
+                
+            if avg_duelist > 0:
+                insights.append("Your calculated Duelist Entry Score is positive, meaning the risks you take usually result in a net advantage for your team.")
+
+        elif primary_role == 'Initiator':
+            if avg_kast >= 70:
+                insights.append(f"Elite consistency. A KAST% of {round(avg_kast, 1)}% means you are trading efficiently and using utility to guarantee round impact.")
+            else:
+                insights.append(f"Your KAST% ({round(avg_kast, 1)}%) is too low for an Initiator. The AI is penalizing you for dying without trades or assists.")
+            
+            if avg_hs < 20:
+                insights.append("The AI noticed your HS% is low, but as an Initiator, it did not penalize you heavily for this as long as your KAST remains high.")
+
+        elif primary_role == 'Controller':
+            if avg_fd >= 2.0:
+                insights.append(f"Major weakness detected: You average {round(avg_fd, 1)} First Deaths per match. As a Controller, dying first is heavily penalized by the AI because your team loses their smokes.")
+            else:
+                insights.append("Great survival discipline. You rarely die first, ensuring your team always has the map control utility needed for executions.")
+
+        elif primary_role == 'Sentinel':
+            if avg_deaths > 16:
+                insights.append(f"You average {round(avg_deaths, 1)} deaths per game. The AI expects Sentinels to anchor and survive longer; this high death rate is dragging down your ceiling.")
+            if avg_kast >= 70:
+                insights.append("Strong defensive anchoring. Your high KAST% indicates you are successfully stalling pushes and getting value even when the enemy avoids your site.")
+
         return jsonify({
             "current_rank": current_rank,
             "skill_ceiling": skill_ceiling,
@@ -593,6 +634,7 @@ def api_predict(player_name, games):
             "projected_rank": projected_rank,
             "primary_role": primary_role,
             "trajectory": trajectory_data,
+            "insights": insights,
             "stats": {
                 "kills": round(avg_kills, 1), "deaths": round(avg_deaths, 1), "acs": int(avg_acs),
                 "kast": round(avg_kast, 1), "adr": int(avg_adr),
